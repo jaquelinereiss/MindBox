@@ -1,13 +1,18 @@
 import React from "react";
 import { View, Text, StyleSheet } from "react-native";
+import { ScreenName } from "../App";
 
-export default function AddScreen() {
-  return ( 
-      <View style={styles.container}>
-        <Text style={styles.title}>Adicionar</Text>
-        <Text style={styles.subtitle}>Organize essa cabecinha agitada.</Text>
-        <Text style={styles.paragraph}>Escolha uma opção para começar:</Text>
-      </View>
+interface AddScreenProps {
+  onNavigate?: (screen: ScreenName) => void;
+}
+
+export default function AddScreen({ onNavigate }: AddScreenProps) {
+  return (
+    <View style={styles.container}>
+      <Text style={styles.title}>Adicionar</Text>
+      <Text style={styles.subtitle}>Organize essa cabecinha agitada.</Text>
+      <Text style={styles.paragraph}>Escolha uma opção para começar:</Text>
+    </View>
   );
 }
 

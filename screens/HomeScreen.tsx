@@ -3,11 +3,23 @@ import { SafeAreaView, FlatList, StyleSheet } from "react-native";
 import Header from "../components/Header";
 import BoxCard from "../components/BoxCard";
 import boxes from "../src/data/boxes.json";
+import { ScreenName } from "../App";
 
-export default function HomeScreen({ onNavigate }) {
-  const [search, setSearch] = useState("");
+interface Box {
+  id: string;
+  title: string;
+  subtitle: string;
+  color: string;
+}
 
-  const filteredBoxes = boxes.filter((box) =>
+interface HomeScreenProps {
+  onNavigate?: (screen: ScreenName) => void;
+}
+
+export default function HomeScreen({ onNavigate }: HomeScreenProps) {
+  const [search, setSearch] = useState<string>("");
+
+  const filteredBoxes = (boxes as Box[]).filter((box) =>
     box.title.toLowerCase().includes(search.toLowerCase())
   );
 
