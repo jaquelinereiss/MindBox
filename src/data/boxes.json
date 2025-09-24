@@ -1,0 +1,13 @@
+[
+  { "id": "1", "title": "Trabalho", "subtitle": "Itens: 5", "color": "#13315c" },
+  { "id": "2", "title": "Organização Geral", "subtitle": "Itens: 8", "color": "#0b2545" },
+  { "id": "3", "title": "Estudos", "subtitle": "Itens: 10", "color": "#134074" },
+  { "id": "4", "title": "Ideias", "subtitle": "Itens: 16", "color": "#134074" },
+  { "id": "5", "title": "Saúde", "subtitle": "Itens: 7", "color": "#134074" },
+  { "id": "6", "title": "Diversos", "subtitle": "Itens: 12", "color": "#134074" },
+  { "id": "7", "title": "Projetos", "subtitle": "Itens: 15", "color": "#13315c" },
+  { "id": "8", "title": "MindBox", "subtitle": "Itens: 6", "color": "#0b2545" },
+  { "id": "9", "title": "Projeto 123", "subtitle": "Itens: 26", "color": "#13315c" },
+  { "id": "10", "title": "Lista de Compras", "subtitle": "Itens: 9", "color": "#0b2545" },
+  { "id": "11", "title": "Estudar React", "subtitle": "Itens: 2", "color": "#134074" }
+]
