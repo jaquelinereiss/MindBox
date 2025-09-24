@@ -2,7 +2,13 @@ import React from "react";
 import { View, Text, TextInput, StyleSheet, TouchableOpacity } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 
-export default function Header({ search, setSearch, onAdd }) {
+type HeaderProps = {
+  search: string;
+  setSearch: (text: string) => void;
+  onAdd: () => void;
+};
+
+export default function Header({ search, setSearch, onAdd }: HeaderProps) {
   return (
     <View style={styles.container}>
       <Text style={styles.title}>MindBox</Text>

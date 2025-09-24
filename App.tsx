@@ -6,8 +6,10 @@ import BoxesScreen from "./screens/BoxesScreen";
 import SettingsScreen from "./screens/SettingsScreen";
 import Menu from "./components/Menu";
 
+export type ScreenName = "Home" | "Add" | "Boxes" | "Settings";
+
 export default function App() {
-  const [currentScreen, setCurrentScreen] = useState("Home");
+  const [currentScreen, setCurrentScreen] = useState<ScreenName>("Home");
 
   const renderScreen = () => {
     switch (currentScreen) {

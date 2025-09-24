@@ -1,11 +1,16 @@
 import React from "react";
 import { View, Text, StyleSheet } from "react-native";
+import { ScreenName } from "../App";
 
-export default function SettingsScreen() {
+interface BoxesScreenProps {
+  onNavigate?: (screen: ScreenName) => void;
+}
+
+export default function BoxesScreen({ onNavigate }: BoxesScreenProps) {
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Configurações</Text>
-      <Text style={styles.subtitle}>Gerencie as preferências do seu MindBox.</Text>
+      <Text style={styles.title}>Boxes</Text>
+      <Text style={styles.subtitle}>Aqui ficam todos os seus itens organizados.</Text>
     </View>
   );
 }

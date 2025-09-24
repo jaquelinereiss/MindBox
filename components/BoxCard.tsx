@@ -2,7 +2,13 @@ import { View, Text, StyleSheet } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import React from "react";
 
-export default function BoxCard({ title, subtitle, color }) {
+type BoxCardProps = {
+  title: string;
+  subtitle: string;
+  color: string;
+};
+
+export default function BoxCard({ title, subtitle, color }: BoxCardProps) {
   return (
     <View style={[styles.card, { backgroundColor: color }]}>
       <Ionicons name="albums-outline" size={20} color="#eef4ed" />

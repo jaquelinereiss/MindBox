@@ -1,9 +1,15 @@
 import React from "react";
 import { View, TouchableOpacity, StyleSheet } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import { ScreenName } from "../App";
 
-export default function Menu({ currentScreen, setCurrentScreen }) {
-  const menuItems = [
+interface MenuProps {
+  currentScreen: ScreenName;
+  setCurrentScreen: (screen: ScreenName) => void;
+}
+
+export default function Menu({ currentScreen, setCurrentScreen }: MenuProps) {
+  const menuItems: { screen: ScreenName; icon: string }[] = [
     { screen: "Home", icon: "home" },
     { screen: "Add", icon: "add-circle" },
     { screen: "Boxes", icon: "albums" },
@@ -19,7 +25,7 @@ export default function Menu({ currentScreen, setCurrentScreen }) {
           onPress={() => setCurrentScreen(item.screen)}
         >
           <Ionicons
-            name={item.icon}
+            name={item.icon as any}
             size={30}
             color={currentScreen === item.screen ? "#134074" : "#aaa"}
             style={styles.icon}
