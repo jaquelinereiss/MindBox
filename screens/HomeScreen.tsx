@@ -1,48 +1,72 @@
-import React, { useState } from "react";
-import { SafeAreaView, FlatList, StyleSheet } from "react-native";
+import React from "react";
+import { SafeAreaView, ScrollView, View, Text, StyleSheet } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
 import Header from "../components/Header";
-import BoxCard from "../components/BoxCard";
-import boxes from "../src/data/boxes.json";
 import { ScreenName } from "../App";
-
-interface Box {
-  id: string;
-  title: string;
-  subtitle: string;
-  color: string;
-}
 
 interface HomeScreenProps {
   onNavigate?: (screen: ScreenName) => void;
 }
 
 export default function HomeScreen({ onNavigate }: HomeScreenProps) {
-  const [search, setSearch] = useState<string>("");
-
-  const filteredBoxes = (boxes as Box[]).filter((box) =>
-    box.title.toLowerCase().includes(search.toLowerCase())
-  );
-
   const handleAdd = () => {
     if (onNavigate) onNavigate("Add");
   };
 
   return (
     <SafeAreaView style={styles.container}>
-      <Header search={search} setSearch={setSearch} onAdd={handleAdd} />
+      <Header onAdd={handleAdd} />
 
-      <FlatList
-        data={filteredBoxes}
-        keyExtractor={(item) => item.id}
-        renderItem={({ item }) => <BoxCard {...item} />}
-        numColumns={2}
-        columnWrapperStyle={{ justifyContent: "space-between", marginBottom: 15 }}
-        contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: 90, paddingTop: 10 }}
-      />
+      <ScrollView contentContainerStyle={{ flexGrow: 1, paddingBottom: 100 }}>
+        <View style={styles.card}>
+          <Ionicons name="trending-up-sharp" size={30} color="#eef4ed" />
+          <Text style={styles.cardTitle}>Dashboard</Text>
+          <Text style={styles.cardSubtitle}>O resumo do caos diário.</Text>
+        </View>
+
+        <View style={styles.styleSubCard}>
+          <View style={styles.subCard}>
+            <Ionicons name="calendar-sharp" size={30} color="#034078" />
+            <Text style={styles.subCardTitle}>Calendário</Text>
+            <Text style={styles.subCardSubtitle}>Tudo sob controle… ou quase.</Text>
+          </View>
+          <View style={styles.subCard}>
+            <Ionicons name="information-circle-sharp" size={30} color="#034078" />
+            <Text style={styles.subCardTitle}>Ajuda</Text>
+            <Text style={styles.subCardSubtitle}>Apoio? Eu te ajudo docinho.</Text>
+          </View>
+        </View>
+      </ScrollView>
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#eef4ed" },
+  card: {
+    borderRadius: 10,
+    padding: 15,
+    justifyContent: "center",
+    margin: 20,
+    height: 150,
+    backgroundColor: "#034078",
+  },
+  cardTitle: { fontSize: 26, fontWeight: "bold", color: "#eef4ed", marginTop: 5 },
+  cardSubtitle: { fontSize: 15, color: "#eef4ed", marginTop: 5 },
+  styleSubCard: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginHorizontal: 15,
+  },
+  subCard: {
+    flex: 1,
+    borderRadius: 10,
+    padding: 15,
+    justifyContent: "center",
+    backgroundColor: "#8da9c4",
+    marginHorizontal: 5,
+    height: 150,
+  },
+  subCardTitle: { fontSize: 26, fontWeight: "bold", color: "#034078", marginTop: 5 },
+  subCardSubtitle: { fontSize: 15, color: "#034078", marginTop: 5 },
 });
