@@ -10,6 +10,8 @@ interface Box {
   title: string;
   subtitle: string;
   color: string;
+  area: string;
+  icon: keyof typeof Ionicons.glyphMap;
 }
 
 interface BoxesScreenProps {
@@ -46,7 +48,14 @@ export default function BoxesScreen({ onNavigate }: BoxesScreenProps) {
       <FlatList
         data={filteredBoxes}
         keyExtractor={(item) => item.id}
-        renderItem={({ item }) => <BoxCard {...item} />}
+        renderItem={({ item }) => (
+          <BoxCard
+            title={item.title}
+            subtitle={item.subtitle}
+            color={item.color}
+            icon={item.icon}
+          />
+        )}
         numColumns={2}
         columnWrapperStyle={{ justifyContent: "space-between", marginBottom: 5 }}
         contentContainerStyle={{
@@ -63,7 +72,6 @@ const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#eef4ed", padding: 20, marginTop: 30 },
   title: { fontSize: 25, fontWeight: "bold", marginBottom: 10 },
   subtitle: { fontSize: 15, color: "gray", textAlign: "left", paddingHorizontal: 2 },
-  paragraph: { fontSize: 18, color: "gray", textAlign: "center", paddingHorizontal: 2, fontWeight: "bold", marginTop: 15 },
   searchContainer: {
     flexDirection: "row",
     alignItems: "center",
