@@ -1,25 +1,34 @@
+import React from "react";
 import { View, Text, StyleSheet } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import React from "react";
 
-type BoxCardProps = {
+interface BoxCardProps {
   title: string;
   subtitle: string;
   color: string;
-};
+  icon: keyof typeof Ionicons.glyphMap;
+}
 
-export default function BoxCard({ title, subtitle, color }: BoxCardProps) {
+export default function BoxCard({ title, subtitle, color, icon }: BoxCardProps) {
   return (
     <View style={[styles.card, { backgroundColor: color }]}>
-      <Ionicons name="albums-outline" size={20} color="#eef4ed" />
-      <Text style={styles.cardTitle}>{title}</Text>
-      <Text style={styles.cardSubtitle}>{subtitle}</Text>
+      <Ionicons name={icon} size={40} color="#fff" style={styles.icon} />
+      <Text style={styles.title}>{title}</Text>
+      <Text style={styles.subtitle}>{subtitle}</Text>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  card: { flex: 1, height: 100, borderRadius: 8, padding: 15, justifyContent: "center", margin: 5 },
-  cardTitle: { fontSize: 14, fontWeight: "bold", color: "#eef4ed", marginTop: 5 },
-  cardSubtitle: { fontSize: 12, color: "#eef4ed", marginTop: 5 },
+  card: {
+    flex: 1,
+    borderRadius: 10,
+    padding: 15,
+    marginHorizontal: 5,
+    marginBottom: 10,
+    alignItems: "center",
+  },
+  icon: { marginBottom: 10 },
+  title: { fontSize: 16, fontWeight: "bold", color: "#fff", textAlign: "center" },
+  subtitle: { fontSize: 12, color: "#fff", textAlign: "center", marginTop: 5 },
 });
