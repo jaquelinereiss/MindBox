@@ -3,6 +3,7 @@ import { SafeAreaView, View, Text, TextInput, TouchableOpacity, StyleSheet, Scro
 import { Ionicons } from "@expo/vector-icons";
 import { ScreenName } from "../App";
 import boxes from "../src/data/boxes.json";
+import insertBox from "../src/services/insertBox"
 
 interface AddScreenProps {
   onNavigate?: (screen: ScreenName) => void;
@@ -147,6 +148,7 @@ export default function AddScreen({ onNavigate }: AddScreenProps) {
     setBoxDescription("");
     setBoxDeadline("");
     setBoxArea(null);
+    insertBox(boxTitle, boxDescription, (boxArea || 'default'))
 
     if (onNavigate) onNavigate("Boxes");
   };
@@ -244,21 +246,21 @@ export default function AddScreen({ onNavigate }: AddScreenProps) {
             <>
               <TextInput
                 style={styles.input}
-                placeholder="Título"
+                placeholder="Coloque um título na sua box"
                 value={boxTitle}
                 onChangeText={setBoxTitle}
                 placeholderTextColor="#bfcad5"
               />
               <TextInput
                 style={styles.input}
-                placeholder="Descrição"
+                placeholder="Escreva uma breve descrição"
                 value={boxDescription}
                 onChangeText={setBoxDescription}
                 placeholderTextColor="#bfcad5"
               />
               <TextInput
                 style={styles.input}
-                placeholder="Data prazo (opcional)"
+                placeholder="Estipule uma data de prazo (opcional)"
                 value={boxDeadline}
                 onChangeText={setBoxDeadline}
                 placeholderTextColor="#bfcad5"
@@ -279,24 +281,31 @@ export default function AddScreen({ onNavigate }: AddScreenProps) {
                 <>
                   <TextInput
                     style={styles.input}
-                    placeholder="Título"
+                    placeholder="Coloque um título no seu item"
                     value={itemTitle}
                     onChangeText={setItemTitle}
                     placeholderTextColor="#bfcad5"
                   />
                   <TextInput
                     style={styles.input}
-                    placeholder="Descrição"
+                    placeholder="Escreva uma breve descrição"
                     value={itemDescription}
                     onChangeText={setItemDescription}
                     placeholderTextColor="#bfcad5"
                   />
                   <TextInput
                     style={styles.input}
-                    placeholder="Nº prioridade: 1 a 4 (opcional)"
+                    placeholder="Defina uma prioridade: 1 a 4 (opcional)"
                     value={itemPriority}
                     onChangeText={setItemPriority}
                     keyboardType="numeric"
+                    placeholderTextColor="#bfcad5"
+                  />
+                  <TextInput
+                    style={styles.input}
+                    placeholder="Informe uma data de realização"
+                    value={boxDeadline}
+                    onChangeText={setBoxDeadline}
                     placeholderTextColor="#bfcad5"
                   />
 
