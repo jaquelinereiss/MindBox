@@ -33,7 +33,7 @@ export default function BoxesScreen({ onNavigate }: BoxesScreenProps) {
         <Text style={styles.subtitle}>Tudo que você guardou, bonitinho no lugar certo.</Text>
       </View>
 
-      {/* Campo de busca com o mesmo estilo do Header */}
+      {/* Campo de busca */}
       <View style={styles.searchContainer}>
         <Ionicons name="search-sharp" size={20} color="#134074" style={{ marginRight: 8 }} />
         <TextInput

@@ -233,97 +233,100 @@ export default function AddScreen({ onNavigate }: AddScreenProps) {
         </View>
 
         {tab && (
-          <KeyboardAvoidingView
-            behavior={Platform.OS === "ios" ? "padding" : "height"}
-            style={{ flex: 1 }}
-          >
-            <View style={styles.formPanel}>
-              <ScrollView>
-                {tab === "Box" ? (
-                  <>
-                    <TextInput
-                      style={styles.input}
-                      placeholder="Título"
-                      value={boxTitle}
-                      onChangeText={setBoxTitle}
-                      placeholderTextColor="#bfcad5"
-                    />
-                    <TextInput
-                      style={styles.input}
-                      placeholder="Descrição"
-                      value={boxDescription}
-                      onChangeText={setBoxDescription}
-                      placeholderTextColor="#bfcad5"
-                    />
-                    <TextInput
-                      style={styles.input}
-                      placeholder="Data prazo (opcional)"
-                      value={boxDeadline}
-                      onChangeText={setBoxDeadline}
-                      placeholderTextColor="#bfcad5"
-                    />
-                    <TouchableOpacity style={styles.pickerBtn} onPress={openAreaPicker}>
+  <KeyboardAvoidingView
+    behavior={Platform.OS === "ios" ? "padding" : "height"}
+    style={{ flex: 1 }}
+  >
+    <View style={{ flex: 1 }}>
+      <View style={styles.formPanel}>
+        <ScrollView contentContainerStyle={{ paddingBottom: 4 }}>
+          {tab === "Box" ? (
+            <>
+              <TextInput
+                style={styles.input}
+                placeholder="Título"
+                value={boxTitle}
+                onChangeText={setBoxTitle}
+                placeholderTextColor="#bfcad5"
+              />
+              <TextInput
+                style={styles.input}
+                placeholder="Descrição"
+                value={boxDescription}
+                onChangeText={setBoxDescription}
+                placeholderTextColor="#bfcad5"
+              />
+              <TextInput
+                style={styles.input}
+                placeholder="Data prazo (opcional)"
+                value={boxDeadline}
+                onChangeText={setBoxDeadline}
+                placeholderTextColor="#bfcad5"
+              />
+
+              <TouchableOpacity style={styles.pickerBtn} onPress={openAreaPicker}>
+                <Text style={styles.pickerBtnText}>
+                  {boxArea ? boxArea : "Área (escolha uma opção da lista)"}
+                </Text>
+                <Ionicons name="chevron-down" size={18} color="#0b2545" />
+              </TouchableOpacity>
+
+              <TouchableOpacity style={styles.submitButton} onPress={handleCreateBox}>
+                <Text style={styles.submitButtonText}>Cadastrar box</Text>
+              </TouchableOpacity>
+            </>
+            ) : (
+                <>
+                  <TextInput
+                    style={styles.input}
+                    placeholder="Título"
+                    value={itemTitle}
+                    onChangeText={setItemTitle}
+                    placeholderTextColor="#bfcad5"
+                  />
+                  <TextInput
+                    style={styles.input}
+                    placeholder="Descrição"
+                    value={itemDescription}
+                    onChangeText={setItemDescription}
+                    placeholderTextColor="#bfcad5"
+                  />
+                  <TextInput
+                    style={styles.input}
+                    placeholder="Nº prioridade: 1 a 4 (opcional)"
+                    value={itemPriority}
+                    onChangeText={setItemPriority}
+                    keyboardType="numeric"
+                    placeholderTextColor="#bfcad5"
+                  />
+
+                  <TouchableOpacity style={styles.pickerBtn} onPress={openBoxPickerForItem}>
+                    <Text style={styles.pickerBtnText}>
+                      {itemBox ? itemBox : "Box (escolha uma opção da lista)"}
+                    </Text>
+                    <Ionicons name="chevron-down" size={18} color="#0b2545" />
+                  </TouchableOpacity>
+
+                  {subitemOptions.length > 0 && (
+                    <TouchableOpacity style={styles.pickerBtn} onPress={openSubitemPicker}>
                       <Text style={styles.pickerBtnText}>
-                        {boxArea ? boxArea : "Área (escolha uma opção da lista)"}
+                        {itemSubitem ? itemSubitem : "Subárea (escolha uma opção)"}
                       </Text>
                       <Ionicons name="chevron-down" size={18} color="#0b2545" />
                     </TouchableOpacity>
+                  )}
 
-                    <TouchableOpacity style={styles.submitButton} onPress={handleCreateBox}>
-                      <Text style={styles.submitButtonText}>Cadastrar box</Text>
-                    </TouchableOpacity>
-                  </>
-                ) : (
-                  <>
-                    <TextInput
-                      style={styles.input}
-                      placeholder="Título"
-                      value={itemTitle}
-                      onChangeText={setItemTitle}
-                      placeholderTextColor="#bfcad5"
-                    />
-                    <TextInput
-                      style={styles.input}
-                      placeholder="Descrição"
-                      value={itemDescription}
-                      onChangeText={setItemDescription}
-                      placeholderTextColor="#bfcad5"
-                    />
-                    <TextInput
-                      style={styles.input}
-                      placeholder="Nº prioridade: 1 a 4 (opcional)"
-                      value={itemPriority}
-                      onChangeText={setItemPriority}
-                      keyboardType="numeric"
-                      placeholderTextColor="#bfcad5"
-                    />
-
-                    <TouchableOpacity style={styles.pickerBtn} onPress={openBoxPickerForItem}>
-                      <Text style={styles.pickerBtnText}>
-                        {itemBox ? itemBox : "Box (escolha uma opção da lista)"}
-                      </Text>
-                      <Ionicons name="chevron-down" size={18} color="#0b2545" />
-                    </TouchableOpacity>
-
-                    {subitemOptions.length > 0 && (
-                      <TouchableOpacity style={styles.pickerBtn} onPress={openSubitemPicker}>
-                        <Text style={styles.pickerBtnText}>
-                          {itemSubitem ? itemSubitem : "Subitem (escolha uma opção)"}
-                        </Text>
-                        <Ionicons name="chevron-down" size={18} color="#0b2545" />
-                      </TouchableOpacity>
-                    )}
-
-                    <TouchableOpacity style={styles.submitButton} onPress={handleAddItem}>
-                      <Text style={styles.submitButtonText}>Adicionar item</Text>
-                    </TouchableOpacity>
-                  </>
-                )}
-              </ScrollView>
-            </View>
-          </KeyboardAvoidingView>
-        )}
-      </ScrollView>
+                  <TouchableOpacity style={styles.submitButton} onPress={handleAddItem}>
+                    <Text style={styles.submitButtonText}>Adicionar item</Text>
+                  </TouchableOpacity>
+                </>
+              )}
+            </ScrollView>
+          </View>
+        </View>
+      </KeyboardAvoidingView>
+    )}
+    </ScrollView>
 
       {PickerModal()}
     </SafeAreaView>
@@ -351,7 +354,7 @@ const styles = StyleSheet.create({
     fontSize: 15, 
     color: "gray", 
     textAlign: "center", 
-    marginBottom: 8 
+    marginBottom: 10 
   },
   section: { 
     paddingHorizontal: 20, 
@@ -360,7 +363,7 @@ const styles = StyleSheet.create({
   sectionLabel: { 
     fontSize: 15, 
     fontWeight: "bold", 
-    marginBottom: 10 
+    marginBottom: 35 
   },
   tabsRow: { 
     flexDirection: "row", 
@@ -368,7 +371,7 @@ const styles = StyleSheet.create({
   },
   tab: { 
     flex: 1, 
-    padding: 40, 
+    padding: 45, 
     borderRadius: 8, 
     alignItems: "center", 
     marginHorizontal: 15 
@@ -390,21 +393,25 @@ const styles = StyleSheet.create({
     fontSize: 20 
   },
   formPanel: { 
+    flex: 1,
     backgroundColor: "#0b2545", 
-    padding: 20, borderRadius: 10, 
-    marginHorizontal: 25 
+    padding: 40,
+    paddingHorizontal: 55,
+    height: 530,
+    margin: -20,
+
   },
   input: { 
     backgroundColor: "#fff", 
     borderRadius: 8, 
-    padding: 10, 
-    marginBottom: 12, 
-    fontSize: 15 
+    padding: 15,
+    marginBottom: 15, 
+    fontSize: 15
   },
   pickerBtn: { 
     backgroundColor: "#fff", 
     borderRadius: 8, 
-    padding: 12, 
+    padding: 15, 
     marginBottom: 12, 
     flexDirection: "row", 
     justifyContent: "space-between", 
@@ -415,14 +422,14 @@ const styles = StyleSheet.create({
     fontSize: 14 
   },
   submitButton: {
-    backgroundColor: "#134074",
+    backgroundColor: "#8da9c4",
     borderRadius: 80,
     paddingVertical: 12,
-    marginTop: 10,
+    marginTop: 30,
     alignItems: "center",
   },
   submitButtonText: { 
-    color: "#fff", 
+    color: "#0b2545", 
     fontWeight: "bold", 
     fontSize: 16 
   },
