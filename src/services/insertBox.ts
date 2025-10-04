@@ -1,6 +1,6 @@
 import { supabase } from '../lib/supabaseClient'
 
-export default async function insertBox(title: string, description: string, area: string) {
+export default async function insertBox(title: string, description: string, area: number | undefined, deadline?: string | null) {
   
     const { data, error } = await supabase
       .from('BOX')
@@ -8,7 +8,7 @@ export default async function insertBox(title: string, description: string, area
         {
           box_title: title, 
           box_description: description,
-          deadline_date: new Date(),
+          deadline_date: deadline ? deadline : null,
           box_area: area
         }
       ])

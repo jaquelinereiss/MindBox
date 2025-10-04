@@ -1,9 +1,10 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { SafeAreaView, View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, Modal, FlatList, KeyboardAvoidingView, Platform } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { ScreenName } from "../App";
 import boxes from "../src/data/boxes.json";
 import insertBox from "../src/services/insertBox"
+import getArea, { Area } from "../src/services/getArea";
 
 interface AddScreenProps {
   onNavigate?: (screen: ScreenName) => void;
@@ -48,34 +49,41 @@ export default function AddScreen({ onNavigate }: AddScreenProps) {
   const [pickerVisible, setPickerVisible] = useState(false);
   const [pickerOptions, setPickerOptions] = useState<string[]>([]);
   const [pickerOnSelect, setPickerOnSelect] = useState<(val: string) => void>(() => () => {});
+  
+  const [selectedId, setSelectedId] = useState<number>();
+  const [areas, setAreas] = useState<Area[]>([]);
 
-  const areas = [
-    "Carreira",
-    "Casa e Organização",
-    "Comunidade e Contribuição",
-    "Conhecimento e Cultura",
-    "Criatividade",
-    "Desenvolvimento Pessoal",
-    "Entretenimento",
-    "Estudos",
-    "Família",
-    "Finanças",
-    "Hobbies",
-    "Lazer",
-    "Outros",
-    "Pets",
-    "Relacionamentos",
-    "Saúde e Bem-Estar",
-    "Viagens"
-  ];
+  const getAreas = async () => {
+    try {
+      const area: Area[] = await getArea();
+      setAreas(area);
+    } catch (error) {
+      console.error('Erro ao abrir o modal de áreas:', error)
+    }
+  }
 
-  const openAreaPicker = () => {
-    setPickerOptions(areas);
-    setPickerOnSelect(() => (val: string) => {
-      setBoxArea(val);
+  useEffect(()=>{
+    getAreas();
+  },[])
+
+  const openAreaPicker = async () => {
+    try {
+      const areaNames = areas.map((a) => a.area_name);
+      setPickerOptions(areaNames);
+
+      setPickerOnSelect(() => (areaNames: string) => {
+      const selectedArea = areas.find(area => area.area_name === areaNames);
+      if (selectedArea) {
+        setBoxArea(selectedArea.area_name);
+        setSelectedId(selectedArea.id);
+      }
       setPickerVisible(false);
     });
+
     setPickerVisible(true);
+    } catch (error) {
+      console.error('Erro ao abrir o modal de áreas:', error)
+    }
   };
 
   const openBoxPickerForItem = () => {
@@ -97,23 +105,76 @@ export default function AddScreen({ onNavigate }: AddScreenProps) {
     setPickerVisible(true);
   };
 
-  const openSubitemPicker = () => {
-    if (!subitemOptions.length) return;
-    setPickerOptions(subitemOptions);
-    setPickerOnSelect(() => (val: string) => {
-      setItemSubitem(val);
-      setPickerVisible(false);
-    });
-    setPickerVisible(true);
+  const formatDeadlineToTimestamptz = (input: string) => {
+    if (!input) return null;
+
+    const numberOnly = input.replace(/\D/g, "");
+    if (numberOnly.length !==8) return null;
+
+    const day = numberOnly.substring(0,2);
+    const month = numberOnly.substring(2,4);
+    const year = numberOnly.substring(4,8);
+
+    const isoString = new Date(`${year}-${month}-${day}T00:00:00Z`).toISOString();
+    return isoString;
+  }
+
+  const formatDateInput = (value: string) => {
+
+    const numberOnly = value.replace(/\D/g, "");
+
+    const limited = numberOnly.substring(0, 8);
+
+    let formatted = "";
+
+    if (limited.length <= 2) {
+        formatted = limited; // apenas dia
+      }   else if (limited.length <= 4) {
+        formatted = `${limited.substring(0,2)}/${limited.substring(2,4)}`; // dd/mm
+      } else {
+        formatted = `${limited.substring(0,2)}/${limited.substring(2,4)}/${limited.substring(4,8)}`; // dd/mm/yyyy
+    }
+
+    return formatted;
+  };
+
+  const isValidDate = (dateStr: string) => {
+    const [dayStr, monthStr, yearStr] = dateStr.split("/");
+    if (!dayStr || !monthStr || !yearStr) return false;
+
+    const day = parseInt(dayStr, 10);
+    const month = parseInt(monthStr, 10);
+    const year = parseInt(yearStr, 10);
+
+    const date = new Date(year, month - 1, day);
+    return (
+      date.getFullYear() === year &&
+      date.getMonth() === month - 1 &&
+      date.getDate() === day
+    );
   };
 
   const handleCreateBox = () => {
-    if (!boxTitle || !boxArea) {
-      alert("Defina pelo menos título e área.");
+    if (!boxTitle || !boxArea || !boxDescription) {
+      alert("Defina pelo menos título, descrição e área.");
       return;
     }
 
-    const iconByArea: Record<string, string> = {
+    if (boxDeadline && !isValidDate(boxDeadline)) {
+      alert('Informe uma data válida.');
+      return;
+    }
+
+    const deadlineTimestamptz = boxDeadline ? formatDeadlineToTimestamptz(boxDeadline): null;
+    setBoxTitle("");
+    setBoxDescription("");
+    setBoxDeadline("");
+    setBoxArea(null);
+    insertBox(boxTitle, boxDescription, selectedId, deadlineTimestamptz);
+
+    if (onNavigate) onNavigate("Boxes");
+
+    /*const iconByArea: Record<string, string> = {
       "Carreira": "briefcase",
       "Casa e Organização": "home",
       "Comunidade e Contribuição": "earth",
@@ -132,25 +193,17 @@ export default function AddScreen({ onNavigate }: AddScreenProps) {
       "Saúde e Bem-Estar": "fitness",
       "Viagens": "airplane",
       Outro: "albums",
-    };
+    };*/
+  };
 
-    const payload = {
-      title: boxTitle,
-      description: boxDescription,
-      deadline: boxDeadline,
-      area: boxArea,
-      icon: boxArea ? iconByArea[boxArea] || "albums-outline" : "albums-outline",
-    };
-
-    console.log("Criar box:", payload);
-
-    setBoxTitle("");
-    setBoxDescription("");
-    setBoxDeadline("");
-    setBoxArea(null);
-    insertBox(boxTitle, boxDescription, (boxArea || 'default'))
-
-    if (onNavigate) onNavigate("Boxes");
+  const openSubitemPicker = () => {
+    if (!subitemOptions.length) return;
+    setPickerOptions(subitemOptions);
+    setPickerOnSelect(() => (val: string) => {
+      setItemSubitem(val);
+      setPickerVisible(false);
+    });
+    setPickerVisible(true);
   };
 
   const handleAddItem = () => {
@@ -262,7 +315,7 @@ export default function AddScreen({ onNavigate }: AddScreenProps) {
                 style={styles.input}
                 placeholder="Estipule uma data de prazo (opcional)"
                 value={boxDeadline}
-                onChangeText={setBoxDeadline}
+                onChangeText={(text) => setBoxDeadline(formatDateInput(text))}
                 placeholderTextColor="#bfcad5"
               />
 
