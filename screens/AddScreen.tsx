@@ -58,7 +58,7 @@ export default function AddScreen({ onNavigate }: AddScreenProps) {
       const area: Area[] = await getArea();
       setAreas(area);
     } catch (error) {
-      console.error('Erro ao abrir o modal de áreas:', error)
+      console.error('Ops! Erro ao abrir o modal de áreas:', error)
     }
   }
 
@@ -82,7 +82,7 @@ export default function AddScreen({ onNavigate }: AddScreenProps) {
 
     setPickerVisible(true);
     } catch (error) {
-      console.error('Erro ao abrir o modal de áreas:', error)
+      console.error('Ops! Erro ao abrir o modal de áreas:', error)
     }
   };
 
@@ -156,12 +156,12 @@ export default function AddScreen({ onNavigate }: AddScreenProps) {
 
   const handleCreateBox = () => {
     if (!boxTitle || !boxArea || !boxDescription) {
-      alert("Defina pelo menos título, descrição e área.");
+      alert("Informe título, descrição e área, meu anjo!");
       return;
     }
 
     if (boxDeadline && !isValidDate(boxDeadline)) {
-      alert('Informe uma data válida.');
+      alert('Informe uma data válida, meu anjo!');
       return;
     }
 
@@ -207,8 +207,8 @@ export default function AddScreen({ onNavigate }: AddScreenProps) {
   };
 
   const handleAddItem = () => {
-    if (!itemTitle || !itemBox) {
-      alert("Defina pelo menos título e box.");
+    if (!itemTitle || itemDescription || !itemBox) {
+      alert("Defina um título, descrição e box, meu anjo!");
       return;
     }
 
