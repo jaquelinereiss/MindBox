@@ -1,18 +1,9 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { SafeAreaView, FlatList, StyleSheet, TextInput, View, Text } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import BoxCard from "../components/BoxCard";
-import boxes from "../src/data/boxes.json";
 import { ScreenName } from "../App";
-
-interface Box {
-  id: string;
-  title: string;
-  subtitle: string;
-  color: string;
-  area: string;
-  icon: keyof typeof Ionicons.glyphMap;
-}
+import getBoxes, { Box } from "../src/services/getBoxes";
 
 interface BoxesScreenProps {
   onNavigate?: (screen: ScreenName) => void;
@@ -21,9 +12,106 @@ interface BoxesScreenProps {
 export default function BoxesScreen({ onNavigate }: BoxesScreenProps) {
   const [search, setSearch] = useState<string>("");
 
-  const filteredBoxes = (boxes as Box[]).filter((box) =>
-    box.title.toLowerCase().includes(search.toLowerCase())
+  const [box, setBox] = useState<Box[]>();
+
+  const filteredBoxes = (box ?? []).filter((b) =>
+    b.box_title.toLowerCase().includes(search.toLowerCase())
   );
+
+  const getBoxesScreen = async () => {
+      try {
+        const box: Box[] = await getBoxes();
+        setBox(box);
+      } catch (error) {
+        console.error('Ops! Erro ao carregar os boxes:', error)
+      }
+    }
+  
+    useEffect(()=>{
+      getBoxesScreen();
+    },[])
+
+    const getColor = (area: number) => {
+      switch (area) {
+        case 1:
+          return "#012a4a"
+        case 2:
+          return "#013a63"
+        case 3:
+          return "#01497c"
+        case 4:
+          return "#014f86"
+        case 5:
+          return "#2a6f97"
+        case 6:
+          return "#34699A"
+        case 7:
+          return "#154D71"
+        case 8:
+          return "#002855"
+        case 9:
+          return "#3e5c76"
+        case 10:
+          return "#3D74B6"
+        case 11:
+          return "#134074"
+        case 12:
+          return "#3E5879"
+        case 13:
+          return "#578FCA"
+        case 14:
+          return "#133E87"
+        case 15:
+          return "#023e7d"
+        case 16:
+          return "#23486A"
+        case 17:
+          return "#00296b"
+        default:
+          return "#13315c"
+      }
+    }
+
+    const getIcon = (area: number) => {
+      switch (area) {
+        case 1:
+          return "briefcase"
+        case 2:
+          return "home"
+        case 3:
+          return "earth"
+        case 4:
+          return "book"
+        case 5:
+          return "sparkles"
+        case 6:
+          return "flower"
+        case 7:
+          return "film"
+        case 8:
+          return "school"
+        case 9:
+          return "heart-half"
+        case 10:
+          return "cash"
+        case 11:
+          return "extension-puzzle"
+        case 12:
+          return "sunny"
+        case 13:
+          return "albums"
+        case 14:
+          return "paw"
+        case 15:
+          return "happy"
+        case 16:
+          return "fitness"
+        case 17:
+          return "airplane"
+        default:
+          return "flash-sharp"
+      }
+    }
 
   return (
     <SafeAreaView style={styles.container}>
@@ -47,13 +135,13 @@ export default function BoxesScreen({ onNavigate }: BoxesScreenProps) {
       {/* Lista de Boxes */}
       <FlatList
         data={filteredBoxes}
-        keyExtractor={(item) => item.id}
+        keyExtractor={(item) => item.box_title}
         renderItem={({ item }) => (
           <BoxCard
-            title={item.title}
-            subtitle={item.subtitle}
-            color={item.color}
-            icon={item.icon}
+            title={item.box_title}
+            subtitle="itens: 5"
+            color={getColor(item.box_area)}
+            icon={getIcon(item.box_area)}
           />
         )}
         numColumns={2}

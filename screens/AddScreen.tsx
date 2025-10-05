@@ -173,27 +173,6 @@ export default function AddScreen({ onNavigate }: AddScreenProps) {
     insertBox(boxTitle, boxDescription, selectedId, deadlineTimestamptz);
 
     if (onNavigate) onNavigate("Boxes");
-
-    /*const iconByArea: Record<string, string> = {
-      "Carreira": "briefcase",
-      "Casa e Organização": "home",
-      "Comunidade e Contribuição": "earth",
-      "Conhecimento e Cultura": "book",
-      "Criatividade": "sparkles",
-      "Desenvolvimento Pessoal": "flower",
-      "Entretenimento": "film",
-      "Estudos": "school",
-      "Família": "heart-half",
-      "Finanças": "cash",
-      "Hobbies": "extension-puzzle",
-      "Lazer": "sunny",
-      "Outros": "albums",
-      "Pets": "paw",
-      "Relacionamentos": "happy",
-      "Saúde e Bem-Estar": "fitness",
-      "Viagens": "airplane",
-      Outro: "albums",
-    };*/
   };
 
   const openSubitemPicker = () => {
