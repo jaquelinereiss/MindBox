@@ -459,7 +459,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#0b2545", 
     padding: 40,
     paddingHorizontal: 55,
-    height: 530,
+    height: 600,
     margin: -20,
 
   },
