@@ -2,34 +2,14 @@ import React, { useEffect, useState } from "react";
 import { SafeAreaView, View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, Modal, FlatList, KeyboardAvoidingView, Platform } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { ScreenName } from "../App";
-import boxes from "../src/data/boxes.json";
 import insertBox from "../src/services/insertBox"
 import getArea, { Area } from "../src/services/getArea";
+import getBoxes, { Box } from "../src/services/getBoxes";
+import getSubarea, { Subarea } from "../src/services/getSubarea";
 
 interface AddScreenProps {
   onNavigate?: (screen: ScreenName) => void;
 }
-
-const subitemsByArea: Record<string, string[]> = {
-  "Carreira": [ "Artigos", "Atividades", "Documentos", "Planejamento de carreira", "Projetos profissionais", "Relatórios", "Reuniões"],
-  "Casa e Organização": [ "Arrumação", "Compras", "Decoração", "Jardinagem", "Limpeza", "Manutenção", "Reforma", "Tarefas domésticas" ],
-  "Comunidade e Contribuição": [ "Doações", "Eventos comunitários", "Projetos sociais", "Reuniões", "Voluntariado" ],
-  "Conhecimento e Cultura": [ "Aprendizado online", "Cursos", "Eventos Sociais", "Leitura", "Pesquisas", "Projetos culturais" ],
-  "Criatividade": [ "Arte", "Design", "Escrita", "Ideias", "Inspirações", "Projetos" ],
-  "Desenvolvimento Pessoal": [ "Autoconhecimento", "Diário", "Metas pessoais", "Projetos pessoais" ],
-  "Entretenimento": [ "Animes", "Filmes", "Jogos", "Séries" ],
-  "Estudos": [ "Artigos", "Atividades", "Cursos", "Documentários", "Documentos", "Estudos", "Leitura", "Livros", "Simulados", "Video aula" ],
-  "Família": [ "Atividades", "Compromissos familiares", "Eventos familiares", "Rotina", "Visitas familiares" ],
-  "Finanças": [ "Economias", "Gastos", "Investimentos", "Orçamento", "Pagamentos", "Planejamento financeiro" ],
-  "Hobbies": [ "Dança", "Desenho", "Escrita", "Fotografia", "Jogos", "Leitura", "Música", "Pintura", "Artes Marciais", "Gastronomia", "Astronomia" ],
-  "Lazer": [ "Experiências", "Férias", "Passeios" ],
-  "Outros": [ "Diversos", "Lembretes", "Metas", "Planejamento", "Tarefas Aleatórias"],
-  "Pets": [ "Brincadeiras", "Cuidados", "Passeios", "Rotina", "Saúde" ],
-  "Relacionamentos": [ "Amigos", "Comunicação", "Eventos sociais", "Networking" ],
-  "Saúde e Bem-Estar": [ "Alimentação", "Check-up", "Descanso", "Exercícios", "Meditação", "Saúde física", "Saúde mental", "Sono", "Terapia" ],
-  "Viagens": [ "Destinos", "Hospedagem", "Passagens", "Preparativos", "Reservas", "Roteiros" ]
-};
-
 
 export default function AddScreen({ onNavigate }: AddScreenProps) {
   const [tab, setTab] = useState<"Box" | "Item" | null>(null);
@@ -52,6 +32,7 @@ export default function AddScreen({ onNavigate }: AddScreenProps) {
   
   const [selectedId, setSelectedId] = useState<number>();
   const [areas, setAreas] = useState<Area[]>([]);
+  const [box, setBox] = useState<Box[]>([]);
 
   const getAreas = async () => {
     try {
@@ -62,11 +43,30 @@ export default function AddScreen({ onNavigate }: AddScreenProps) {
     }
   }
 
+  const getBoxesScreen = async () => {
+        try {
+          const box: Box[] = await getBoxes();
+          setBox(box);
+        } catch (error) {
+          console.error('Ops! Erro ao carregar os boxes:', error)
+        }
+      }
+      
+    const getSubareaScreen = async (idArea: number) => {
+        try {
+          const subarea: Subarea[] = await getSubarea(idArea);
+          return subarea;
+        } catch (error) {
+          console.error('Ops! Erro ao carregar a subárea:', error)
+        }
+      }
+
   useEffect(()=>{
     getAreas();
+    getBoxesScreen();
   },[])
 
-  const openAreaPicker = async () => {
+  const openAreaPicker = () => {
     try {
       const areaNames = areas.map((a) => a.area_name);
       setPickerOptions(areaNames);
@@ -87,22 +87,44 @@ export default function AddScreen({ onNavigate }: AddScreenProps) {
   };
 
   const openBoxPickerForItem = () => {
-    const options = boxes.map((b) => b.title);
+    try {
+      const options = box.map((b) => b.box_title);
     setPickerOptions(options);
-    setPickerOnSelect(() => (val: string) => {
-      setItemBox(val);
+    setPickerOnSelect(() => async (boxTitle: string) => {
+      setItemBox(boxTitle);
       setPickerVisible(false);
-
-      const box = boxes.find((b) => b.title === val);
-      if (box && box.area && subitemsByArea[box.area]) {
-        setSubitemOptions(subitemsByArea[box.area]);
+      const selectedBox = box.find(b => b.box_title === boxTitle);
+      if (selectedBox){
+        const subareas = (await getSubareaScreen(selectedBox.box_area)) ?? [];
+        const subareaOptions = subareas.map((sa) => sa.subarea_name)
+        setSubitemOptions(subareaOptions);
         setItemSubitem(null);
-      } else {
-        setSubitemOptions([]);
-        setItemSubitem(null);
-      }
+      }else {
+         setSubitemOptions([]);
+         setItemSubitem(null);
+       }
+      setPickerVisible(false);
     });
+
     setPickerVisible(true);
+    } catch (error) {
+      console.error('Ops! Erro ao abrir o modal de áreas:', error)
+    }
+    
+    // setPickerOnSelect(() => (val: string) => {
+    //   setItemBox(val);
+    //   setPickerVisible(false);
+
+    //   const boxes = box.find((b) => b.title === val);
+    //   if (boxes && box. && subitemsByArea[box.area]) {
+    //     setSubitemOptions(subitemsByArea[box.area]);
+    //     setItemSubitem(null);
+    //   } else {
+    //     setSubitemOptions([]);
+    //     setItemSubitem(null);
+    //   }
+    // });
+    // setPickerVisible(true);
   };
 
   const formatDeadlineToTimestamptz = (input: string) => {

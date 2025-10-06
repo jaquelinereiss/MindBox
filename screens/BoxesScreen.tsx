@@ -29,7 +29,7 @@ export default function BoxesScreen({ onNavigate }: BoxesScreenProps) {
   
     useEffect(()=>{
       getBoxesScreen();
-    },[])
+    },[box])
 
     const getColor = (area: number) => {
       switch (area) {

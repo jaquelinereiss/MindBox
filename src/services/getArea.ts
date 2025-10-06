@@ -5,7 +5,6 @@ export interface Area {
   area_name: string
 }
 
-
 export default async function getArea(): Promise<Area[]> {
   
     const { data, error } = await supabase
@@ -15,7 +14,7 @@ export default async function getArea(): Promise<Area[]> {
     if (error) {
       console.error("Erro ao buscar dados:", error)
     } else {
-      console.log("Dados recebidos:", data)
+      console.log("Dados recebidos Area:", data)
     }
 
   return data as Area[]

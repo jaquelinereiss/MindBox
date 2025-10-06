@@ -6,7 +6,6 @@ export interface Box {
     box_title: string
     box_description: string
     box_area: number
-
 }
 
 export default async function getBoxes(): Promise<Box[]> {
@@ -18,7 +17,7 @@ export default async function getBoxes(): Promise<Box[]> {
     if (error) {
       console.error("Erro ao buscar dados:", error)
     } else {
-      console.log("Dados recebidos:", data)
+      console.log("Dados recebidos Box:", data)
     }
 
   return data as Box[]
