@@ -208,15 +208,20 @@ export default function AddScreen({ onNavigate }: AddScreenProps) {
   };
 
   const handleAddItem = () => {
-    if (!itemTitle || itemDescription || !itemBox) {
+    if (!itemTitle || !itemDescription || !itemBox) {
       alert("Defina um título, descrição e box, meu anjo!");
+      return;
+    }
+
+    if (itemPriority && !["1", "2", "3", "4"].includes(itemPriority)) {
+      alert("Informe uma prioridade válida, meu anjo!");
       return;
     }
 
     const payload = {
       title: itemTitle,
       description: itemDescription,
-      priority: itemPriority,
+      priority: itemPriority || null,
       box: itemBox,
       subitem: itemSubitem,
     };
@@ -351,7 +356,12 @@ export default function AddScreen({ onNavigate }: AddScreenProps) {
                     style={styles.input}
                     placeholder="Defina uma prioridade: 1 a 4 (opcional)"
                     value={itemPriority}
-                    onChangeText={setItemPriority}
+                    onChangeText={(text) => {
+                      const numeric = text.replace(/[^0-9]/g, '');
+                      if (numeric === '' || /^[1-4]$/.test(numeric)) {
+                        setItemPriority(numeric);
+                      }
+                    }}
                     keyboardType="numeric"
                     placeholderTextColor="#bfcad5"
                   />
@@ -359,7 +369,7 @@ export default function AddScreen({ onNavigate }: AddScreenProps) {
                     style={styles.input}
                     placeholder="Informe uma data de realização"
                     value={boxDeadline}
-                    onChangeText={setBoxDeadline}
+                    onChangeText={(text) => setBoxDeadline(formatDateInput(text))}
                     placeholderTextColor="#bfcad5"
                   />
 
