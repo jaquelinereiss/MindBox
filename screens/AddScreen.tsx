@@ -6,6 +6,7 @@ import insertBox from "../src/services/insertBox"
 import getArea, { Area } from "../src/services/getArea";
 import getBoxes, { Box } from "../src/services/getBoxes";
 import getSubarea, { Subarea } from "../src/services/getSubarea";
+import insertItem from "../src/services/insertItem";
 
 interface AddScreenProps {
   onNavigate?: (screen: ScreenName) => void;
@@ -110,21 +111,19 @@ export default function AddScreen({ onNavigate }: AddScreenProps) {
     } catch (error) {
       console.error('Ops! Erro ao abrir o modal de áreas:', error)
     }
-    
-    // setPickerOnSelect(() => (val: string) => {
-    //   setItemBox(val);
-    //   setPickerVisible(false);
+  };
 
-    //   const boxes = box.find((b) => b.title === val);
-    //   if (boxes && box. && subitemsByArea[box.area]) {
-    //     setSubitemOptions(subitemsByArea[box.area]);
-    //     setItemSubitem(null);
-    //   } else {
-    //     setSubitemOptions([]);
-    //     setItemSubitem(null);
-    //   }
-    // });
-    // setPickerVisible(true);
+  const openSubitemPicker = () => {
+    if (!subitemOptions.length) return;
+
+    setPickerOptions(subitemOptions);
+
+    setPickerOnSelect(() => (val: string) => {
+      setItemSubitem(val);
+      setPickerVisible(false);
+    });
+
+    setPickerVisible(true);
   };
 
   const formatDeadlineToTimestamptz = (input: string) => {
@@ -176,67 +175,92 @@ export default function AddScreen({ onNavigate }: AddScreenProps) {
     );
   };
 
-  const handleCreateBox = () => {
-    if (!boxTitle || !boxArea || !boxDescription) {
-      alert("Informe título, descrição e área, meu anjo!");
-      return;
-    }
+  const handleCreateBox = async () => {
+  if (!boxTitle || !boxArea || !boxDescription) {
+    alert("Informe título, descrição e área, meu anjo!");
+    return;
+  }
 
-    if (boxDeadline && !isValidDate(boxDeadline)) {
-      alert('Informe uma data válida, meu anjo!');
-      return;
-    }
+  if (boxDeadline && !isValidDate(boxDeadline)) {
+    alert('Informe uma data válida, meu anjo!');
+    return;
+  }
 
-    const deadlineTimestamptz = boxDeadline ? formatDeadlineToTimestamptz(boxDeadline): null;
+  const deadlineTimestamptz = boxDeadline ? formatDeadlineToTimestamptz(boxDeadline) : undefined;
+
+  try {
+    await insertBox(boxTitle, boxDescription, selectedId, deadlineTimestamptz);
     setBoxTitle("");
     setBoxDescription("");
     setBoxDeadline("");
     setBoxArea(null);
-    insertBox(boxTitle, boxDescription, selectedId, deadlineTimestamptz);
 
     if (onNavigate) onNavigate("Boxes");
-  };
+  } catch (err) {
+    console.error("Erro ao inserir box:", err);
+    alert("Erro ao adicionar a box. Tente novamente.");
+  }
+};
 
-  const openSubitemPicker = () => {
-    if (!subitemOptions.length) return;
-    setPickerOptions(subitemOptions);
-    setPickerOnSelect(() => (val: string) => {
-      setItemSubitem(val);
-      setPickerVisible(false);
-    });
-    setPickerVisible(true);
-  };
+const handleAddItem = async () => {
+  if (!itemTitle || !itemDescription || !itemBox) {
+    alert("Defina um título, descrição e box, meu anjo!");
+    return;
+  }
 
-  const handleAddItem = () => {
-    if (!itemTitle || !itemDescription || !itemBox) {
-      alert("Defina um título, descrição e box, meu anjo!");
+  if (itemPriority && !["1", "2", "3", "4"].includes(itemPriority)) {
+    alert("Informe uma prioridade válida, meu anjo!");
+    return;
+  }
+
+  const selectedBox = box.find(b => b.box_title === itemBox);
+  if (!selectedBox) {
+    alert("Box inválido, meu anjo!");
+    return;
+  }
+
+  let selectedSubareaId = 0;
+  if (itemSubitem && selectedBox.box_area) {
+    const subareas = await getSubareaScreen(selectedBox.box_area);
+    const selectedSub = subareas?.find(sa => sa.subarea_name === itemSubitem);
+    if (selectedSub) selectedSubareaId = selectedSub.id;
+  }
+
+  let realizationDate: string | undefined = undefined;
+  if (boxDeadline) {
+    if (!isValidDate(boxDeadline)) {
+      alert("Informe uma data de realização válida, meu anjo!");
       return;
     }
+    realizationDate = formatDeadlineToTimestamptz(boxDeadline) ?? undefined;
+  }
 
-    if (itemPriority && !["1", "2", "3", "4"].includes(itemPriority)) {
-      alert("Informe uma prioridade válida, meu anjo!");
-      return;
-    }
-
-    const payload = {
-      title: itemTitle,
-      description: itemDescription,
-      priority: itemPriority || null,
-      box: itemBox,
-      subitem: itemSubitem,
-    };
-
-    console.log("Adicionar item:", payload);
-
+  try {
+    const data = await insertItem(
+      itemTitle,
+      itemDescription,
+      itemPriority ? Number(itemPriority) : undefined,
+      realizationDate,
+      selectedBox.id,
+      selectedSubareaId ?? 0
+    );
+    
     setItemTitle("");
     setItemDescription("");
     setItemPriority("");
     setItemBox(null);
     setItemSubitem(null);
     setSubitemOptions([]);
+    setBoxDeadline("");
 
+    // Redirecionar para dentro do box (tela ainda será criada)
     if (onNavigate) onNavigate("Boxes");
-  };
+
+  } catch (err) {
+    console.error("Erro inesperado ao adicionar item:", err);
+    alert("Erro ao adicionar o item. Tente novamente.");
+  }
+};
 
   const PickerModal = () => (
     <Modal visible={pickerVisible} transparent animationType="slide">
