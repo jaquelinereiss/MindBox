@@ -1,28 +1,32 @@
 import React from "react";
 import { View, TouchableOpacity, StyleSheet } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { ScreenName } from "../App";
+import { RootStackParamList } from "../src/navigation/types";
 
 interface MenuProps {
-  currentScreen: ScreenName;
-  setCurrentScreen: (screen: ScreenName) => void;
+  currentScreen: keyof RootStackParamList;
+  setCurrentScreen: (screen: keyof RootStackParamList) => void;
+  navigate: (screen: keyof RootStackParamList) => void;
 }
 
-export default function Menu({ currentScreen, setCurrentScreen }: MenuProps) {
-  const menuItems: { screen: ScreenName; icon: string }[] = [
-    { screen: "Home", icon: "home" },
-    { screen: "Add", icon: "add-circle" },
-    { screen: "Boxes", icon: "albums" },
-    { screen: "Settings", icon: "settings" },
-  ];
+const menuItems = [
+  { screen: "Home", icon: "home" },
+  { screen: "Add", icon: "add-circle" },
+  { screen: "Boxes", icon: "albums" },
+  { screen: "Settings", icon: "settings" },
+] as const;
 
+export default function Menu({ currentScreen, setCurrentScreen, navigate }: MenuProps) {
   return (
     <View style={styles.container}>
       {menuItems.map((item) => (
         <TouchableOpacity
           key={item.screen}
           style={styles.button}
-          onPress={() => setCurrentScreen(item.screen)}
+          onPress={() => {
+            setCurrentScreen(item.screen);
+            navigate(item.screen);
+          }}
         >
           <Ionicons
             name={item.icon as any}
@@ -50,6 +54,13 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
   },
-  button: { alignItems: "center", flex: 1 },
-  icon: { margin: 10, marginBottom: 35, paddingBottom: 5 },
+  button: { 
+    alignItems: "center", 
+    flex: 1 
+  },
+  icon: { 
+    margin: 10, 
+    marginBottom: 35, 
+    paddingBottom: 5 
+  },
 });

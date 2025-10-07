@@ -1,12 +1,8 @@
 import React from "react";
 import { View, Text, StyleSheet } from "react-native";
-import { ScreenName } from "../App";
 
-interface SettingsScreenProps {
-  onNavigate?: (screen: ScreenName) => void;
-}
 
-export default function SettingsScreen({ onNavigate }: SettingsScreenProps) {
+export default function SettingsScreen() {
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Configurações</Text>

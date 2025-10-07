@@ -1,36 +1,33 @@
 import React, { useEffect, useState } from "react";
 import { SafeAreaView, View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, Modal, FlatList, KeyboardAvoidingView, Platform } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { ScreenName } from "../App";
 import insertBox from "../src/services/insertBox"
 import getArea, { Area } from "../src/services/getArea";
-import getBoxes, { Box } from "../src/services/getBoxes";
+import getBoxes from "../src/services/getBoxes";
+import { Box } from "../src/types";
 import getSubarea, { Subarea } from "../src/services/getSubarea";
 import insertItem from "../src/services/insertItem";
+import { RootStackParamList } from "../src/navigation/types";
 
 interface AddScreenProps {
-  onNavigate?: (screen: ScreenName) => void;
+  navigate: (screen: keyof RootStackParamList, params?: any) => void;
 }
 
-export default function AddScreen({ onNavigate }: AddScreenProps) {
+export default function AddScreen({ navigate }: AddScreenProps) {
   const [tab, setTab] = useState<"Box" | "Item" | null>(null);
-
   const [boxTitle, setBoxTitle] = useState("");
   const [boxDescription, setBoxDescription] = useState("");
   const [boxDeadline, setBoxDeadline] = useState("");
   const [boxArea, setBoxArea] = useState<string | null>(null);
-
   const [itemTitle, setItemTitle] = useState("");
   const [itemDescription, setItemDescription] = useState("");
   const [itemPriority, setItemPriority] = useState("");
   const [itemBox, setItemBox] = useState<string | null>(null);
   const [itemSubitem, setItemSubitem] = useState<string | null>(null);
   const [subitemOptions, setSubitemOptions] = useState<string[]>([]);
-
   const [pickerVisible, setPickerVisible] = useState(false);
   const [pickerOptions, setPickerOptions] = useState<string[]>([]);
   const [pickerOnSelect, setPickerOnSelect] = useState<(val: string) => void>(() => () => {});
-  
   const [selectedId, setSelectedId] = useState<number>();
   const [areas, setAreas] = useState<Area[]>([]);
   const [box, setBox] = useState<Box[]>([]);
@@ -40,227 +37,167 @@ export default function AddScreen({ onNavigate }: AddScreenProps) {
       const area: Area[] = await getArea();
       setAreas(area);
     } catch (error) {
-      console.error('Ops! Erro ao abrir o modal de áreas:', error)
+      console.error("Erro ao carregar áreas:", error);
     }
-  }
+  };
 
   const getBoxesScreen = async () => {
-        try {
-          const box: Box[] = await getBoxes();
-          setBox(box);
-        } catch (error) {
-          console.error('Ops! Erro ao carregar os boxes:', error)
-        }
-      }
-      
-    const getSubareaScreen = async (idArea: number) => {
-        try {
-          const subarea: Subarea[] = await getSubarea(idArea);
-          return subarea;
-        } catch (error) {
-          console.error('Ops! Erro ao carregar a subárea:', error)
-        }
-      }
+    try {
+      const box: Box[] = await getBoxes();
+      setBox(box);
+    } catch (error) {
+      console.error("Erro ao carregar boxes:", error);
+    }
+  };
 
-  useEffect(()=>{
+  const getSubareaScreen = async (idArea: number) => {
+    try {
+      const subarea: Subarea[] = await getSubarea(idArea);
+      return subarea;
+    } catch (error) {
+      console.error("Erro ao carregar subáreas:", error);
+    }
+  };
+
+  useEffect(() => {
     getAreas();
     getBoxesScreen();
-  },[])
+  }, []);
 
   const openAreaPicker = () => {
-    try {
-      const areaNames = areas.map((a) => a.area_name);
-      setPickerOptions(areaNames);
-
-      setPickerOnSelect(() => (areaNames: string) => {
-      const selectedArea = areas.find(area => area.area_name === areaNames);
+    const areaNames = areas.map((a) => a.area_name);
+    setPickerOptions(areaNames);
+    setPickerOnSelect(() => (areaName: string) => {
+      const selectedArea = areas.find((area) => area.area_name === areaName);
       if (selectedArea) {
         setBoxArea(selectedArea.area_name);
         setSelectedId(selectedArea.id);
       }
       setPickerVisible(false);
     });
-
     setPickerVisible(true);
-    } catch (error) {
-      console.error('Ops! Erro ao abrir o modal de áreas:', error)
-    }
   };
 
   const openBoxPickerForItem = () => {
-    try {
-      const options = box.map((b) => b.box_title);
+    const options = box.map((b) => b.box_title);
     setPickerOptions(options);
     setPickerOnSelect(() => async (boxTitle: string) => {
       setItemBox(boxTitle);
       setPickerVisible(false);
-      const selectedBox = box.find(b => b.box_title === boxTitle);
-      if (selectedBox){
+      const selectedBox = box.find((b) => b.box_title === boxTitle);
+      if (selectedBox) {
         const subareas = (await getSubareaScreen(selectedBox.box_area)) ?? [];
-        const subareaOptions = subareas.map((sa) => sa.subarea_name)
-        setSubitemOptions(subareaOptions);
+        setSubitemOptions(subareas.map((sa) => sa.subarea_name));
         setItemSubitem(null);
-      }else {
-         setSubitemOptions([]);
-         setItemSubitem(null);
-       }
-      setPickerVisible(false);
+      } else {
+        setSubitemOptions([]);
+        setItemSubitem(null);
+      }
     });
-
     setPickerVisible(true);
-    } catch (error) {
-      console.error('Ops! Erro ao abrir o modal de áreas:', error)
-    }
   };
 
   const openSubitemPicker = () => {
     if (!subitemOptions.length) return;
-
     setPickerOptions(subitemOptions);
-
     setPickerOnSelect(() => (val: string) => {
       setItemSubitem(val);
       setPickerVisible(false);
     });
-
     setPickerVisible(true);
   };
 
+  // Validação de datas
   const formatDeadlineToTimestamptz = (input: string) => {
     if (!input) return null;
-
     const numberOnly = input.replace(/\D/g, "");
-    if (numberOnly.length !==8) return null;
-
-    const day = numberOnly.substring(0,2);
-    const month = numberOnly.substring(2,4);
-    const year = numberOnly.substring(4,8);
-
-    const isoString = new Date(`${year}-${month}-${day}T00:00:00Z`).toISOString();
-    return isoString;
-  }
+    if (numberOnly.length !== 8) return null;
+    const day = numberOnly.substring(0, 2);
+    const month = numberOnly.substring(2, 4);
+    const year = numberOnly.substring(4, 8);
+    return new Date(`${year}-${month}-${day}T00:00:00Z`).toISOString();
+  };
 
   const formatDateInput = (value: string) => {
-
-    const numberOnly = value.replace(/\D/g, "");
-
-    const limited = numberOnly.substring(0, 8);
-
-    let formatted = "";
-
-    if (limited.length <= 2) {
-        formatted = limited; // apenas dia
-      }   else if (limited.length <= 4) {
-        formatted = `${limited.substring(0,2)}/${limited.substring(2,4)}`; // dd/mm
-      } else {
-        formatted = `${limited.substring(0,2)}/${limited.substring(2,4)}/${limited.substring(4,8)}`; // dd/mm/yyyy
-    }
-
-    return formatted;
+    const numberOnly = value.replace(/\D/g, "").substring(0, 8);
+    if (numberOnly.length <= 2) return numberOnly;
+    if (numberOnly.length <= 4) return `${numberOnly.substring(0, 2)}/${numberOnly.substring(2, 4)}`;
+    return `${numberOnly.substring(0, 2)}/${numberOnly.substring(2, 4)}/${numberOnly.substring(4, 8)}`;
   };
 
   const isValidDate = (dateStr: string) => {
     const [dayStr, monthStr, yearStr] = dateStr.split("/");
     if (!dayStr || !monthStr || !yearStr) return false;
-
-    const day = parseInt(dayStr, 10);
-    const month = parseInt(monthStr, 10);
-    const year = parseInt(yearStr, 10);
-
-    const date = new Date(year, month - 1, day);
-    return (
-      date.getFullYear() === year &&
-      date.getMonth() === month - 1 &&
-      date.getDate() === day
-    );
+    const date = new Date(+yearStr, +monthStr - 1, +dayStr);
+    return date.getFullYear() === +yearStr && date.getMonth() === +monthStr - 1 && date.getDate() === +dayStr;
   };
 
+  // Handlers
   const handleCreateBox = async () => {
-  if (!boxTitle || !boxArea || !boxDescription) {
-    alert("Informe título, descrição e área, meu anjo!");
-    return;
-  }
-
-  if (boxDeadline && !isValidDate(boxDeadline)) {
-    alert('Informe uma data válida, meu anjo!');
-    return;
-  }
-
-  const deadlineTimestamptz = boxDeadline ? formatDeadlineToTimestamptz(boxDeadline) : undefined;
-
-  try {
-    await insertBox(boxTitle, boxDescription, selectedId, deadlineTimestamptz);
-    setBoxTitle("");
-    setBoxDescription("");
-    setBoxDeadline("");
-    setBoxArea(null);
-
-    if (onNavigate) onNavigate("Boxes");
-  } catch (err) {
-    console.error("Erro ao inserir box:", err);
-    alert("Erro ao adicionar a box. Tente novamente.");
-  }
-};
-
-const handleAddItem = async () => {
-  if (!itemTitle || !itemDescription || !itemBox) {
-    alert("Defina um título, descrição e box, meu anjo!");
-    return;
-  }
-
-  if (itemPriority && !["1", "2", "3", "4"].includes(itemPriority)) {
-    alert("Informe uma prioridade válida, meu anjo!");
-    return;
-  }
-
-  const selectedBox = box.find(b => b.box_title === itemBox);
-  if (!selectedBox) {
-    alert("Box inválido, meu anjo!");
-    return;
-  }
-
-  let selectedSubareaId = 0;
-  if (itemSubitem && selectedBox.box_area) {
-    const subareas = await getSubareaScreen(selectedBox.box_area);
-    const selectedSub = subareas?.find(sa => sa.subarea_name === itemSubitem);
-    if (selectedSub) selectedSubareaId = selectedSub.id;
-  }
-
-  let realizationDate: string | undefined = undefined;
-  if (boxDeadline) {
-    if (!isValidDate(boxDeadline)) {
-      alert("Informe uma data de realização válida, meu anjo!");
+    if (!boxTitle || !boxArea || !boxDescription) {
+      alert("Informe título, descrição e área!");
       return;
     }
-    realizationDate = formatDeadlineToTimestamptz(boxDeadline) ?? undefined;
-  }
+    if (boxDeadline && !isValidDate(boxDeadline)) {
+      alert("Informe uma data válida!");
+      return;
+    }
+    const deadlineTimestamptz = boxDeadline ? formatDeadlineToTimestamptz(boxDeadline) : undefined;
+    try {
+      await insertBox(boxTitle, boxDescription, selectedId, deadlineTimestamptz);
+      setBoxTitle("");
+      setBoxDescription("");
+      setBoxDeadline("");
+      setBoxArea(null);
+      navigate("Boxes");
+    } catch (err) {
+      console.error("Erro ao inserir box:", err);
+      alert("Erro ao adicionar a box. Tente novamente.");
+    }
+  };
 
-  try {
-    const data = await insertItem(
-      itemTitle,
-      itemDescription,
-      itemPriority ? Number(itemPriority) : undefined,
-      realizationDate,
-      selectedBox.id,
-      selectedSubareaId ?? 0
-    );
-    
-    setItemTitle("");
-    setItemDescription("");
-    setItemPriority("");
-    setItemBox(null);
-    setItemSubitem(null);
-    setSubitemOptions([]);
-    setBoxDeadline("");
-
-    // Redirecionar para dentro do box (tela ainda será criada)
-    if (onNavigate) onNavigate("Boxes");
-
-  } catch (err) {
-    console.error("Erro inesperado ao adicionar item:", err);
-    alert("Erro ao adicionar o item. Tente novamente.");
-  }
-};
+  const handleAddItem = async () => {
+    if (!itemTitle || !itemDescription || !itemBox) {
+      alert("Defina um título, descrição e box!");
+      return;
+    }
+    const selectedBox = box.find((b) => b.box_title === itemBox);
+    if (!selectedBox) {
+      alert("Box inválido!");
+      return;
+    }
+    let selectedSubareaId = 0;
+    if (itemSubitem && selectedBox.box_area) {
+      const subareas = await getSubareaScreen(selectedBox.box_area);
+      const selectedSub = subareas?.find((sa) => sa.subarea_name === itemSubitem);
+      if (selectedSub) selectedSubareaId = selectedSub.id;
+    }
+    let realizationDate: string | undefined = undefined;
+    if (boxDeadline && isValidDate(boxDeadline)) {
+      realizationDate = formatDeadlineToTimestamptz(boxDeadline) ?? undefined;
+    }
+    try {
+      await insertItem(
+        itemTitle,
+        itemDescription,
+        itemPriority ? Number(itemPriority) : undefined,
+        realizationDate,
+        selectedBox.id,
+        selectedSubareaId
+      );
+      setItemTitle("");
+      setItemDescription("");
+      setItemPriority("");
+      setItemBox(null);
+      setItemSubitem(null);
+      setSubitemOptions([]);
+      setBoxDeadline("");
+      navigate("Boxes");
+    } catch (err) {
+      console.error("Erro inesperado ao adicionar item:", err);
+      alert("Erro ao adicionar o item. Tente novamente.");
+    }
+  };
 
   const PickerModal = () => (
     <Modal visible={pickerVisible} transparent animationType="slide">
@@ -270,10 +207,7 @@ const handleAddItem = async () => {
             data={pickerOptions}
             keyExtractor={(item, idx) => String(item) + idx}
             renderItem={({ item }) => (
-              <TouchableOpacity
-                style={styles.modalItem}
-                onPress={() => pickerOnSelect(item)}
-              >
+              <TouchableOpacity style={styles.modalItem} onPress={() => pickerOnSelect(item)}>
                 <Text style={styles.modalItemText}>{item}</Text>
               </TouchableOpacity>
             )}
@@ -464,17 +398,22 @@ const styles = StyleSheet.create({
   },
   tabsRow: { 
     flexDirection: "row", 
-    justifyContent: "center" 
+    justifyContent: "center"
   },
   tab: { 
     flex: 1, 
     padding: 45, 
     borderRadius: 8, 
     alignItems: "center", 
-    marginHorizontal: 15 
+    marginHorizontal: 15,
+    shadowColor: "#0b2545",
+    shadowOpacity: 0.5,
+    shadowOffset: { width: 0, height: 5 },
+    shadowRadius: 5,
+    elevation: 10,
   },
   tabActive: { 
-    backgroundColor: "#0b2545" 
+    backgroundColor: "#0b2545"
   },
   tabInactive: { 
     backgroundColor: "#8da9c4" 
@@ -482,7 +421,7 @@ const styles = StyleSheet.create({
   tabTextActive: { 
     color: "#fff", 
     fontWeight: "bold", 
-    fontSize: 20
+    fontSize: 20,
   },
   tabTextInactive: { 
     color: "#0b2545", 
