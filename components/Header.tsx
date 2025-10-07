@@ -22,9 +22,21 @@ export default function Header({ onAdd }: HeaderProps) {
 }
 
 const styles = StyleSheet.create({
-  container: { paddingVertical: 40, alignItems: "center", width: "100%" },
-  title: { fontSize: 32, fontWeight: "bold", color: "#134074" },
-  subtitle: { fontSize: 16, color: "#0b2545", marginBottom: 20 },
+  container: { 
+    paddingVertical: 40, 
+    alignItems: "center", 
+    width: "100%" 
+  },
+  title: { 
+    fontSize: 32, 
+    fontWeight: "bold", 
+    color: "#134074" 
+  },
+  subtitle: { 
+    fontSize: 16, 
+    color: "#0b2545", 
+    marginBottom: 20 
+  },
   button: {
     backgroundColor: "#8da9c4",
     paddingVertical: 12,

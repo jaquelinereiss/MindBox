@@ -1,24 +1,16 @@
 import { supabase } from '../lib/supabaseClient'
-
-export interface Box {
-    id: number
-    deadline_date: number
-    box_title: string
-    box_description: string
-    box_area: number
-}
+import { Box } from '../types'
 
 export default async function getBoxes(): Promise<Box[]> {
-  
-    const { data, error } = await supabase
-      .from('BOX')
-      .select('id, deadline_date, box_title, box_description, box_area')
+  const { data, error } = await supabase
+    .from('BOX')
+    .select('id, box_title, box_area, box_description')
 
-    if (error) {
-      console.error("Erro ao buscar dados:", error)
-    } else {
-      console.log("Dados recebidos Box:", data)
-    }
+  if (error) {
+    console.error("Erro ao buscar boxes:", error)
+    return []
+  }
 
+  console.log("Boxes recebidos:", data)
   return data as Box[]
 }

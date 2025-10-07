@@ -2,34 +2,34 @@ import React, { useEffect, useState } from "react";
 import { SafeAreaView, FlatList, StyleSheet, TextInput, View, Text } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import BoxCard from "../components/BoxCard";
-import { ScreenName } from "../App";
-import getBoxes, { Box } from "../src/services/getBoxes";
+import { Box } from "../src/types";
+import getBoxes from "../src/services/getBoxes";
+import { RootStackParamList } from "../src/navigation/types";
 
 interface BoxesScreenProps {
-  onNavigate?: (screen: ScreenName) => void;
+  navigate: (screen: keyof RootStackParamList, params?: any) => void;
 }
 
-export default function BoxesScreen({ onNavigate }: BoxesScreenProps) {
+export default function BoxesScreen({ navigate }: BoxesScreenProps) {
   const [search, setSearch] = useState<string>("");
+  const [boxes, setBoxes] = useState<Box[]>([]);
 
-  const [box, setBox] = useState<Box[]>();
-
-  const filteredBoxes = (box ?? []).filter((b) =>
+  const filteredBoxes = boxes.filter((b) =>
     b.box_title.toLowerCase().includes(search.toLowerCase())
   );
 
   const getBoxesScreen = async () => {
-      try {
-        const box: Box[] = await getBoxes();
-        setBox(box);
-      } catch (error) {
-        console.error('Ops! Erro ao carregar os boxes:', error)
-      }
+    try {
+      const boxList = await getBoxes();
+      setBoxes(boxList);
+    } catch (error) {
+      console.error("Erro ao carregar boxes:", error);
     }
-  
-    useEffect(()=>{
-      getBoxesScreen();
-    },[])
+  };
+
+  useEffect(() => {
+    getBoxesScreen();
+  }, []);
 
     const getColor = (area: number) => {
       switch (area) {
@@ -118,7 +118,9 @@ export default function BoxesScreen({ onNavigate }: BoxesScreenProps) {
       {/* Cabeçalho */}
       <View style={{ alignItems: "center", marginBottom: 20 }}>
         <Text style={styles.title}>Boxes</Text>
-        <Text style={styles.subtitle}>Tudo que você guardou, bonitinho no lugar certo.</Text>
+        <Text style={styles.subtitle}>
+          Tudo que você guardou, bonitinho no lugar certo.
+        </Text>
       </View>
 
       {/* Campo de busca */}
@@ -135,13 +137,14 @@ export default function BoxesScreen({ onNavigate }: BoxesScreenProps) {
       {/* Lista de Boxes */}
       <FlatList
         data={filteredBoxes}
-        keyExtractor={(item) => item.box_title}
+        keyExtractor={(item) => item.id.toString()}
         renderItem={({ item }) => (
           <BoxCard
             title={item.box_title}
-            subtitle="itens: 5"
+            subtitle="Itens: 5"
             color={getColor(item.box_area)}
             icon={getIcon(item.box_area)}
+            onPress={() => navigate("BoxDetailScreen", { box: item })}
           />
         )}
         numColumns={2}
@@ -157,9 +160,22 @@ export default function BoxesScreen({ onNavigate }: BoxesScreenProps) {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#eef4ed", padding: 20, marginTop: 30 },
-  title: { fontSize: 25, fontWeight: "bold", marginBottom: 10 },
-  subtitle: { fontSize: 15, color: "gray", textAlign: "left", paddingHorizontal: 2 },
+  container: { 
+    flex: 1, 
+    backgroundColor: "#eef4ed", 
+    padding: 20, 
+    marginTop: 30 
+  },
+  title: { 
+    fontSize: 25, 
+    fontWeight: "bold", 
+    marginBottom: 10 
+  },
+  subtitle: { 
+    fontSize: 15, 
+    color: "gray", 
+    textAlign: "left", 
+    paddingHorizontal: 2 },
   searchContainer: {
     flexDirection: "row",
     alignItems: "center",
@@ -175,5 +191,8 @@ const styles = StyleSheet.create({
     shadowRadius: 5,
     elevation: 3,
   },
-  input: { flex: 1, fontSize: 16 },
+  input: { 
+    flex: 1, 
+    fontSize: 16 
+  },
 });

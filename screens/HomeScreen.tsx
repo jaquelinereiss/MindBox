@@ -2,15 +2,15 @@ import React from "react";
 import { SafeAreaView, ScrollView, View, Text, StyleSheet } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import Header from "../components/Header";
-import { ScreenName } from "../App";
+import { RootStackParamList } from "../App";
 
 interface HomeScreenProps {
-  onNavigate?: (screen: ScreenName) => void;
+  navigate: (screen: keyof RootStackParamList, params?: any) => void;
 }
 
-export default function HomeScreen({ onNavigate }: HomeScreenProps) {
+export default function HomeScreen({ navigate }: HomeScreenProps) {
   const handleAdd = () => {
-    if (onNavigate) onNavigate("Add");
+    navigate("Add");
   };
 
   return (
@@ -51,8 +51,15 @@ const styles = StyleSheet.create({
     height: 150,
     backgroundColor: "#034078",
   },
-  cardTitle: { fontSize: 26, fontWeight: "bold", color: "#eef4ed", marginTop: 5 },
-  cardSubtitle: { fontSize: 15, color: "#eef4ed", marginTop: 5 },
+  cardTitle: { 
+    fontSize: 26, 
+    fontWeight: "bold", 
+    color: "#eef4ed", 
+    marginTop: 5 },
+  cardSubtitle: { 
+    fontSize: 15, 
+    color: "#eef4ed", 
+    marginTop: 5 },
   styleSubCard: {
     flexDirection: "row",
     justifyContent: "space-between",
@@ -67,6 +74,15 @@ const styles = StyleSheet.create({
     marginHorizontal: 5,
     height: 150,
   },
-  subCardTitle: { fontSize: 26, fontWeight: "bold", color: "#034078", marginTop: 5 },
-  subCardSubtitle: { fontSize: 15, color: "#034078", marginTop: 5 },
+  subCardTitle: { 
+    fontSize: 26, 
+    fontWeight: "bold", 
+    color: "#034078", 
+    marginTop: 5 
+  },
+  subCardSubtitle: { 
+    fontSize: 15, 
+    color: "#034078", 
+    marginTop: 5 
+  },
 });
