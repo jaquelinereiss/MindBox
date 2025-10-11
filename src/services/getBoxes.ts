@@ -4,13 +4,32 @@ import { Box } from '../types'
 export default async function getBoxes(): Promise<Box[]> {
   const { data, error } = await supabase
     .from('BOX')
-    .select('id, box_title, box_area, box_description')
+    .select(`
+      id,
+      box_title,
+      box_area,
+      box_description,
+      deadline_date,
+      AREA (
+        area_name
+      )
+    `)
 
   if (error) {
     console.error("Erro ao buscar boxes:", error)
     return []
   }
 
-  console.log("Boxes recebidos:", data)
-  return data as Box[]
+  // Mapeia o formato retornado (Supabase aninha o objeto AREA)
+  const boxes: Box[] = (data || []).map((b: any) => ({
+    id: b.id,
+    box_title: b.box_title,
+    box_area: b.box_area,
+    box_description: b.box_description,
+    area_name: b.AREA?.area_name || 'Área não informada',
+    deadline_date: b.deadline_date
+  }))
+
+  console.log("Boxes recebidos:", boxes)
+  return boxes
 }
