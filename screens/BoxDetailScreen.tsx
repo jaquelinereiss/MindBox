@@ -12,19 +12,22 @@ type Props = NativeStackScreenProps<RootStackParamList, "BoxDetailScreen">;
 export default function BoxDetailScreen({ route, navigation }: Props) {
   const { box } = route.params;
   const [items, setItems] = useState<Item[]>([]);
+  const [fdata, setFData] = useState<string>();
 
   useEffect(() => {
     const fetchItems = async () => {
       try {
         const data = await getItems(box.id.toString());
         setItems(
-          data.map((d) => ({
-            id: d.id,
-            title: d.item_title,
-            description: d.item_description,
-            priority: d.priority_number.toString(),
-            date: d.realization_date,
-            completed: d.completed || false
+                  data.map((d) => ({
+                  id: d.id,
+                  item_title: d.item_title,
+                  item_description: d.item_description,
+                  priority_number: Number(d.priority_number) || 0, // converte pra number
+                  box_related: d.box_related ?? 0,                 // fallback pra 0 se vier null
+                  subarea_box: d.subarea_box ?? 0,                 // idem
+                  realization_date: d.realization_date ?? "",
+                  completed: false
           }))
         );
       } catch (error) {
@@ -32,6 +35,12 @@ export default function BoxDetailScreen({ route, navigation }: Props) {
       }
     };
     fetchItems();
+    if(box.deadline_date){
+      const rData = new Date(box.deadline_date)
+      setFData(rData.toLocaleDateString("pt-BR"))
+    } else {
+      setFData("Voce não informou uma data bb...")
+    }
   }, [box.id]);
 
   return (
@@ -45,7 +54,9 @@ export default function BoxDetailScreen({ route, navigation }: Props) {
         </View>
 
         <Text style={styles.title}>{box.box_title}</Text>
-        {box.description && <Text style={styles.description}>{box.description}</Text>}
+        {box.box_description && <Text style={styles.description}>{box.box_description}</Text>}
+        {box.area_name && <Text style={styles.description}>{box.area_name}</Text>}
+        {fdata && <Text style={styles.description}>{fdata}</Text>}
       </View>
 
       {/* Lista de itens do box */}

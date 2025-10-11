@@ -6,11 +6,14 @@ export interface Item {
   box_related: number;
   subarea_box: number
   realization_date: string;
+  completed: boolean
 }
 
 export interface Box {
   id: number;
   box_title: string;
   box_area: number;
-  description?: string;
+  box_description?: string;
+  area_name: string;
+  deadline_date: string
 }

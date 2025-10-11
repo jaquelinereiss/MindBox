@@ -1,15 +1,7 @@
 import React, { useState } from "react";
 import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-
-export interface Item {
-  id: number;
-  title: string;
-  description: string;
-  priority: string;
-  date: string;
-  completed?: boolean;
-}
+import { Item } from "../src/types";
 
 interface ItemCardProps {
   item: Item;
@@ -17,6 +9,11 @@ interface ItemCardProps {
 
 export default function ItemCard({ item }: ItemCardProps) {
   const [completed, setCompleted] = useState(item.completed || false);
+  const formatDate = (isoDate: string) => {
+    if (!isoDate) return "";
+    const date = new Date(isoDate);
+    return date.toLocaleDateString("pt-BR"); 
+  };
 
   return (
     <View style={styles.card}>
@@ -31,12 +28,12 @@ export default function ItemCard({ item }: ItemCardProps) {
       </View>
       <View style={styles.right}>
         <Text style={[styles.title, completed && { textDecorationLine: "line-through" }]}>
-          {item.title}
+          {item.item_title}
         </Text>
-        <Text style={styles.description}>{item.description}</Text>
+        <Text style={styles.description}>{item.item_description}</Text>
         <View style={styles.meta}>
-          <Text style={styles.metaText}>Prioridade: {item.priority}</Text>
-          <Text style={styles.metaText}>Data: {item.date}</Text>
+          <Text style={styles.metaText}>Prioridade: {item.priority_number}</Text>
+          <Text style={styles.metaText}>Data: {formatDate(item.realization_date)}</Text>
         </View>
       </View>
     </View>
