@@ -22,7 +22,7 @@ export default function ItemCard({ item }: ItemCardProps) {
           <Ionicons
             name={completed ? "checkbox" : "square-outline"}
             size={30}
-            color={completed ? "#2a6f97" : "#134074"}
+            color={completed ? "#134074" : "#134074"}
           />
         </TouchableOpacity>
       </View>

@@ -39,7 +39,7 @@ export default function BoxDetailScreen({ route, navigation }: Props) {
       const rData = new Date(box.deadline_date)
       setFData(rData.toLocaleDateString("pt-BR"))
     } else {
-      setFData("Voce não informou uma data bb...")
+      setFData("Data não informada :)")
     }
   }, [box.id]);
 
@@ -47,24 +47,37 @@ export default function BoxDetailScreen({ route, navigation }: Props) {
     <SafeAreaView style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
-        <View style={styles.headerIcons}>
-          <TouchableOpacity onPress={() => navigation.navigate("Boxes")}>
-            <Ionicons name="arrow-back" size={30} color="#eef4ed" />
-          </TouchableOpacity>
-        </View>
+        <TouchableOpacity style={styles.backButton} onPress={() => navigation.navigate("Boxes")}>
+          <Ionicons name="arrow-back" size={28} color="#eef4ed"/>
+        </TouchableOpacity>
 
         <Text style={styles.title}>{box.box_title}</Text>
-        {box.box_description && <Text style={styles.description}>{box.box_description}</Text>}
-        {box.area_name && <Text style={styles.description}>{box.area_name}</Text>}
-        {fdata && <Text style={styles.description}>{fdata}</Text>}
+
+        {box.box_description ? (
+          <Text style={styles.description}>{box.box_description}</Text>
+        ) : null}
+
+        <View style={styles.infoContainer}>
+          {box.area_name && (
+            <Text style={styles.infoText}>
+              <Ionicons name="reader" size={16} color="#eef4ed"/> Área: {box.area_name}
+            </Text>
+          )}
+          {fdata && (
+            <Text style={styles.infoText}>
+              <Ionicons name="calendar" size={16} color="#eef4ed"/> Prazo: {fdata}
+            </Text>
+          )}
+        </View>
       </View>
 
-      {/* Lista de itens do box */}
+      {/* Lista de itens */}
       <FlatList
         data={items}
         keyExtractor={(item) => item.id.toString()}
-        renderItem={({ item }) => <ItemCard item={item} />}
+        renderItem={({ item }) => <ItemCard item={item}/>}
         contentContainerStyle={styles.listContent}
+        showsVerticalScrollIndicator={false}
       />
     </SafeAreaView>
   );
@@ -77,31 +90,56 @@ const styles = StyleSheet.create({
   },
   header: {
     backgroundColor: "#034078",
-    paddingVertical: 30,
+    paddingTop: 80,
+    paddingBottom: 30,
     paddingHorizontal: 20,
+    borderBottomLeftRadius: 25,
+    borderBottomRightRadius: 25,
     alignItems: "center",
+    shadowColor: "#000",
+    shadowOpacity: 0.15,
+    shadowOffset: { width: 0, height: 4 },
+    shadowRadius: 5,
+    elevation: 4,
   },
-  headerIcons: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    width: "100%",
-    marginTop: 15,
-    marginBottom: 15,
+  backButton: {
+    position: "absolute",
+    left: 20,
+    top: 25,
+    borderRadius: 8,
+    padding: 5,
+    marginTop: 25,
+    marginBottom: 25
   },
   title: {
-    fontSize: 22,
+    fontSize: 24,
     fontWeight: "bold",
     color: "#fff",
     textAlign: "center",
-    marginBottom: 10,
+    marginBottom: 8,
+    marginTop: 10,
   },
   description: { 
-    fontSize: 16, 
+    fontSize: 15, 
     color: "#eef4ed",
-    textAlign: "center"
+    textAlign: "center",
+    marginBottom: 15,
+    paddingHorizontal: 10,
+  },
+  infoContainer: {
+    width: "100%",
+    alignItems: "flex-start",
+    paddingHorizontal: 5,
+  },
+  infoText: { 
+    fontSize: 13, 
+    color: "#eef4ed",
+    marginBottom: 5,
+    flexDirection: "row",
   },
   listContent: {
-    padding: 20,
-    paddingBottom: 30
-  }
+    paddingHorizontal: 20,
+    paddingTop: 20,
+    paddingBottom: 40,
+  },
 });
