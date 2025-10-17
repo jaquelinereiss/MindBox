@@ -6,7 +6,7 @@ export interface Item {
   box_related: number;
   subarea_box: number
   realization_date: string;
-  completed: boolean
+  item_completed: boolean
 }
 
 export interface Box {
