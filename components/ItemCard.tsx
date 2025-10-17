@@ -1,24 +1,37 @@
 import React, { useState } from "react";
-import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
+import { View, Text, StyleSheet, TouchableOpacity, Alert } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { Item } from "../src/types";
+import completeItem from "../src/services/completeItem"
 
 interface ItemCardProps {
   item: Item;
 }
 
 export default function ItemCard({ item }: ItemCardProps) {
-  const [completed, setCompleted] = useState(item.completed || false);
+  const [completed, setCompleted] = useState(item.item_completed || false);
+
   const formatDate = (isoDate: string) => {
     if (!isoDate) return "";
     const date = new Date(isoDate);
     return date.toLocaleDateString("pt-BR"); 
   };
 
+  const toggleCompletion = async() => {
+    const newStatus = !completed;
+    setCompleted(newStatus);
+
+    const { error } = await completeItem(item.id, newStatus);
+    if (error) {
+      Alert.alert("Erro", "Não foi possível atualizar o item.")
+      setCompleted(!newStatus);
+    }
+  }
+
   return (
     <View style={styles.card}>
       <View style={styles.left}>
-        <TouchableOpacity onPress={() => setCompleted(!completed)}>
+        <TouchableOpacity onPress={toggleCompletion}>
           <Ionicons
             name={completed ? "checkbox" : "square-outline"}
             size={30}

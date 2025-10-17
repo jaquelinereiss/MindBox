@@ -11,8 +11,8 @@ export default async function insertItem(title: string, description: string, pri
           priority_number: priority ?? 4,
           realization_date: realization,
           box_related: box,
-          subarea_box: subarea
-          
+          subarea_box: subarea,
+          item_completed: false
         }
       ])
 
