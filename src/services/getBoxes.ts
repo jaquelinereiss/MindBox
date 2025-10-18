@@ -10,9 +10,8 @@ export default async function getBoxes(): Promise<Box[]> {
       box_area,
       box_description,
       deadline_date,
-      AREA (
-        area_name
-      )
+      AREA (area_name),
+      ITEM(id)
     `)
 
   if (error) {
@@ -27,7 +26,8 @@ export default async function getBoxes(): Promise<Box[]> {
     box_area: b.box_area,
     box_description: b.box_description,
     area_name: b.AREA?.area_name || 'Área não informada',
-    deadline_date: b.deadline_date
+    deadline_date: b.deadline_date,
+    items_count: b.ITEM?.length || 0
   }))
 
   console.log("Boxes recebidos:", boxes)
