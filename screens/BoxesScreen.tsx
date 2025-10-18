@@ -141,7 +141,7 @@ export default function BoxesScreen({ navigate }: BoxesScreenProps) {
         renderItem={({ item }) => (
           <BoxCard
             title={item.box_title}
-            subtitle="Itens: 5"
+            subtitle={`Itens: ${item.items_count}`}
             color={getColor(item.box_area)}
             icon={getIcon(item.box_area)}
             onPress={() => navigate("BoxDetailScreen", { box: item })}
