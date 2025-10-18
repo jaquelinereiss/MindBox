@@ -27,7 +27,7 @@ export default function BoxDetailScreen({ route, navigation }: Props) {
                   box_related: d.box_related ?? 0,                 // fallback pra 0 se vier null
                   subarea_box: d.subarea_box ?? 0,                 // idem
                   realization_date: d.realization_date ?? "",
-                  item_completed: false
+                  item_completed: d.item_completed ?? false
           }))
         );
       } catch (error) {
