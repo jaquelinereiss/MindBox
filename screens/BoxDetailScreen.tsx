@@ -1,12 +1,13 @@
 import { NativeStackScreenProps } from "@react-navigation/native-stack"; 
 import { RootStackParamList } from "../src/navigation/types";
+import { Ionicons } from "@expo/vector-icons";
 import { Item } from "../src/types";
 import { useEffect, useState } from "react";
 import { View, Text, FlatList, StyleSheet, SafeAreaView, TouchableOpacity, Modal } from "react-native";
 import getItems from "../src/services/getItems";
 import ItemCard from "../components/ItemCard";
-import { Ionicons } from "@expo/vector-icons";
 import BoxEditModal from "../components/BoxEditModal";
+import BoxDeleteModal from "../components/BoxDeleteModal";
 
 type Props = NativeStackScreenProps<RootStackParamList, "BoxDetailScreen">;
 
@@ -17,6 +18,7 @@ export default function BoxDetailScreen({ route, navigation }: Props) {
   const [optionsVisible, setOptionsVisible] = useState(false);
   const [editModalVisible, setEditModalVisible] = useState(false);
   const [currentBox, setCurrentBox] = useState(box);
+  const [deleteModalVisible, setDeleteModalVisible] = useState(false);
 
   useEffect(() => {
     const fetchItems = async () => {
@@ -77,7 +79,7 @@ export default function BoxDetailScreen({ route, navigation }: Props) {
         >
         <View style={styles.overlay}>
           <View style={styles.optionsContainer}>
-            {/* Header do Modal */}
+            {/* Header do modal de opções */}
             <View style={styles.modalHeader}>
               <Text style={styles.modalTitle}>Escolha uma opção</Text>
               <TouchableOpacity
@@ -104,15 +106,12 @@ export default function BoxDetailScreen({ route, navigation }: Props) {
             <TouchableOpacity
               style={[styles.optionButton, { borderTopWidth: 1, borderTopColor: "#eee" }]}
               onPress={() => {
-                setOptionsVisible(false);
-                  // aqui será criado a lógica de excluir o box
-                  console.log("Excluir Box");
+                  setOptionsVisible(false);
+                  setDeleteModalVisible(true);
                 }}
               >
                 <Ionicons name="trash-outline" size={22} color="#c1121f" />
-                <Text style={[styles.optionText, { color: "#c1121f" }]}>
-                  Excluir Box
-                </Text>
+                <Text style={[styles.optionText, { color: "#c1121f" }]}>Excluir Box</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -126,6 +125,16 @@ export default function BoxDetailScreen({ route, navigation }: Props) {
               ...currentBox,
               ...updatedBox
             });
+          }}
+        />
+        
+        {/* Modal de exclusão */}
+        <BoxDeleteModal
+          visible={deleteModalVisible}
+          onClose={() => setDeleteModalVisible(false)}
+          box={currentBox}
+          onDeleted={() => {
+            navigation.navigate("Boxes");
           }}
         />
 
