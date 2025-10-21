@@ -41,7 +41,7 @@ export default function BoxEditModal({ visible, onClose, box, onSave }: BoxEditM
 
   const handleSave = async () => {
     if (!title.trim() || !description.trim()) {
-      Alert.alert("Atenção", "O título e descrição são obrigatórios.");
+      Alert.alert("Atenção", "O título e descrição são obrigatórios, anjo.");
       return;
     }
 
@@ -71,15 +71,15 @@ export default function BoxEditModal({ visible, onClose, box, onSave }: BoxEditM
     try {
       const updatedBox = await updateBox(box.id, updatedData);
       if (updatedBox) {
-        Alert.alert("Sucesso", "Box atualizado com sucesso!");
+        Alert.alert("Sucesso", "Uhull, o box foi atualizado!");
         onSave(updatedBox);
         onClose();
       } else {
-        Alert.alert("Erro", "Não foi possível atualizar o box.");
+        Alert.alert("Erro", "Vish, não foi possível atualizar o box.");
       }
     } catch (error) {
       console.error("Erro ao atualizar box:", error);
-      Alert.alert("Erro", "Ocorreu um problema ao atualizar o box.");
+      Alert.alert("Erro", "Ops! Ocorreu um problema ao atualizar o box.");
     }
   };
 
@@ -94,9 +94,9 @@ export default function BoxEditModal({ visible, onClose, box, onSave }: BoxEditM
       <View style={styles.overlay}>
         <View style={styles.modalContainer}>
           <View style={styles.header}>
-            <Text style={styles.headerTitle}>Editar Box</Text>
+            <Text style={styles.headerTitle}>Editar informações do Box</Text>
             <TouchableOpacity onPress={onClose}>
-              <Ionicons name="close" size={24} color="#134074" />
+              <Ionicons name="close" size={24} color="#333" />
             </TouchableOpacity>
           </View>
 
@@ -189,7 +189,6 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     paddingHorizontal: 15,
     borderRadius: 8,
-    backgroundColor: "#ccc",
     marginRight: 10,
   },
   cancelButtonText: {
