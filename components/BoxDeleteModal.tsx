@@ -34,14 +34,16 @@ export default function BoxDeleteModal({ visible, onClose, box, onDeleted, }: Bo
       <View style={styles.overlay}>
         <View style={styles.modalContainer}>
           <View style={styles.header}>
-            <Text style={styles.headerTitle}>Excluir o Box</Text>
             <TouchableOpacity onPress={onClose}>
               <Ionicons name="close" size={24} color="#333" />
             </TouchableOpacity>
           </View>
 
           <Text style={styles.label}>
-            Tem certeza que deseja excluir o box?
+            Tem certeza que deseja excluir este box?
+          </Text>
+          <Text style={styles.labelAttention}>
+            Atenção: todos os itens cadastrados no box serão excluídos com essa ação.
           </Text>
 
           <View style={styles.buttonsContainer}>
@@ -81,21 +83,23 @@ const styles = StyleSheet.create({
   },
   header: {
     flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: 15,
-  },
-  headerTitle: {
-    fontSize: 20,
-    fontWeight: "bold",
-    color: "#134074",
+    justifyContent: "flex-end",
+    alignItems: "center"
   },
   label: {
-    fontSize: 15,
+    fontSize: 18,
     color: "#333",
-    fontWeight: "500",
-    marginBottom: 20,
+    fontWeight: "700",
+    marginBottom: 10,
+    paddingHorizontal: 20,
     textAlign: "center",
+  },
+  labelAttention: {
+    fontSize: 13,
+    color: "#333",
+    textAlign: "center",
+    marginBottom: 10,
+    paddingHorizontal: 10
   },
   buttonsContainer: {
     flexDirection: "row",
