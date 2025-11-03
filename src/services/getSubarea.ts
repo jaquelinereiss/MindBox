@@ -7,7 +7,7 @@ export interface Subarea {
 }
 
 export default async function getSubarea(idArea: number): Promise<Subarea[]> {
-  
+  try {
     const { data, error } = await supabase
       .from('SUBAREA')
       .select('id, subarea_name, id_area')
@@ -15,9 +15,13 @@ export default async function getSubarea(idArea: number): Promise<Subarea[]> {
 
     if (error) {
       console.error("Erro ao buscar dados:", error)
-    } else {
-      console.log("Dados recebidos subArea:", data)
+      return []
     }
 
-  return data as Subarea[]
+    console.log("Dados recebidos subArea:", data)
+    return data || []
+  } catch (err) {
+    console.error("Erro inesperado ao buscar subáreas:", err)
+    return []
+  }
 }

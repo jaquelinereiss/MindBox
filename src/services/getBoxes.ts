@@ -19,7 +19,6 @@ export default async function getBoxes(): Promise<Box[]> {
     return []
   }
 
-  // Mapeia o formato retornado (Supabase aninha o objeto AREA)
   const boxes: Box[] = (data || []).map((b: any) => ({
     id: b.id,
     box_title: b.box_title,
