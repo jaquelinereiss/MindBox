@@ -1,11 +1,11 @@
-import { NativeStackScreenProps } from "@react-navigation/native-stack"; 
-import { RootStackParamList } from "../src/navigation/types";
+import { NativeStackScreenProps } from "@react-navigation/native-stack";
+import { RootStackParamList, Item } from "../src/navigation/types";
 import { Ionicons } from "@expo/vector-icons";
-import { Item } from "../src/types";
 import { useEffect, useState } from "react";
-import { View, Text, FlatList, StyleSheet, SafeAreaView, TouchableOpacity, Modal } from "react-native";
+import { View, Text, FlatList, StyleSheet, SafeAreaView, TouchableOpacity } from "react-native";
 import getItems from "../src/services/getItems";
 import ItemCard from "../components/ItemCard";
+import OptionsModal from "../components/OptionsModal";
 import BoxEditModal from "../components/BoxEditModal";
 import BoxDeleteModal from "../components/BoxDeleteModal";
 
@@ -20,151 +20,109 @@ export default function BoxDetailScreen({ route, navigation }: Props) {
   const [currentBox, setCurrentBox] = useState(box);
   const [deleteModalVisible, setDeleteModalVisible] = useState(false);
 
+  const handleItemDeleted = (itemId: number) => {
+    setItems(prevItems => prevItems.filter(item => item.id !== itemId));
+  };
+
   useEffect(() => {
     const fetchItems = async () => {
       try {
         const data = await getItems(box.id.toString());
-        setItems(
-                  data.map((d) => ({
-                  id: d.id,
-                  item_title: d.item_title,
-                  item_description: d.item_description,
-                  priority_number: Number(d.priority_number) || 0, // converte pra number
-                  box_related: d.box_related ?? 0,                 // fallback pra 0 se vier null
-                  subarea_box: d.subarea_box ?? 0,                 // idem
-                  realization_date: d.realization_date ?? "",
-                  item_completed: d.item_completed ?? false
-          }))
-        );
+        const normalizedItems = data.map((d) => ({
+          ...d,
+          box_related: d.box_related ?? box.id, 
+        }));
+
+        setItems(normalizedItems);
       } catch (error) {
         console.error("Erro ao buscar itens:", error);
       }
     };
-    fetchItems();
-    if(box.deadline_date){
-      const rData = new Date(box.deadline_date)
-      setFData(rData.toLocaleDateString("pt-BR"))
-    } else {
-      setFData("Data não informada :)")
-    }
-  }, [box.id]);
 
-  useEffect(() => {
-    if (currentBox.deadline_date) {
-      const rData = new Date(currentBox.deadline_date);
-      setFData(rData.toLocaleDateString("pt-BR"));
+    fetchItems();
+
+    if (box.deadline_date) {
+      setFData(new Date(box.deadline_date).toLocaleDateString("pt-BR"));
     } else {
       setFData("Data não informada :)");
     }
-  }, [currentBox]);
+  }, [box.id]);
 
   return (
     <SafeAreaView style={styles.container}>
-      {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity style={styles.backButton} onPress={() => navigation.navigate("Boxes")}>
-          <Ionicons name="arrow-back" size={28} color="#eef4ed"/>
+        <TouchableOpacity
+          style={styles.backButton}
+          onPress={() => navigation.navigate("Boxes")}
+        >
+          <Ionicons name="arrow-back" size={28} color="#eef4ed" />
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.optionsButton} onPress={() => setOptionsVisible(true)}>
+        <TouchableOpacity
+          style={styles.optionsButton}
+          onPress={() => setOptionsVisible(true)}
+        >
           <Ionicons name="ellipsis-vertical" size={28} color="#eef4ed" />
         </TouchableOpacity>
-        
-        {/* Modal de opções */}
-        <Modal
-          visible={optionsVisible}
-          transparent
-          animationType="fade"
-          onRequestClose={() => setOptionsVisible(false)}
-        >
-        <View style={styles.overlay}>
-          <View style={styles.optionsContainer}>
-            {/* Header do modal de opções */}
-            <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>Escolha uma opção</Text>
-              <TouchableOpacity
-                style={styles.closeButton}
-                onPress={() => setOptionsVisible(false)}
-              >
-                <Ionicons name="close" size={25} color="#4d535aff" />
-              </TouchableOpacity>
-            </View>
-              
-            {/* Botão Editar */}
-            <TouchableOpacity
-              style={styles.optionButton}
-              onPress={() => {
-                setOptionsVisible(false);
-                setEditModalVisible(true);
-              }}
-            >
-              <Ionicons name="create-outline" size={22} color="#034078" />
-              <Text style={styles.optionText}>Editar Box</Text>
-            </TouchableOpacity>
-
-            {/* Botão Excluir */}
-            <TouchableOpacity
-              style={[styles.optionButton, { borderTopWidth: 1, borderTopColor: "#eee" }]}
-              onPress={() => {
-                  setOptionsVisible(false);
-                  setDeleteModalVisible(true);
-                }}
-              >
-                <Ionicons name="trash-outline" size={22} color="#c1121f" />
-                <Text style={[styles.optionText, { color: "#c1121f" }]}>Excluir Box</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        </Modal>
-
-        {/* Modal de edição */}
-        <BoxEditModal
-          visible={editModalVisible} onClose={() => setEditModalVisible(false)}
-          box={currentBox} onSave={(updatedBox) => {
-            setCurrentBox ({
-              ...currentBox,
-              ...updatedBox
-            });
-          }}
-        />
-        
-        {/* Modal de exclusão */}
-        <BoxDeleteModal
-          visible={deleteModalVisible}
-          onClose={() => setDeleteModalVisible(false)}
-          box={currentBox}
-          onDeleted={() => {
-            navigation.navigate("Boxes");
-          }}
-        />
 
         <Text style={styles.title}>{currentBox.box_title}</Text>
-
-        {box.box_description ? (
+        {currentBox.box_description && (
           <Text style={styles.description}>{currentBox.box_description}</Text>
-        ) : null}
+        )}
 
         <View style={styles.infoContainer}>
-          {box.area_name && (
+          {currentBox.area_name && (
             <Text style={styles.infoText}>
-              <Ionicons name="reader" size={16} color="#eef4ed"/> Área: {currentBox.area_name}
+              <Ionicons name="reader" size={16} color="#eef4ed" /> Área:{" "}
+              {currentBox.area_name}
             </Text>
           )}
           {fdata && (
             <Text style={styles.infoText}>
-              <Ionicons name="calendar" size={16} color="#eef4ed"/> Prazo: {fdata}
+              <Ionicons name="calendar" size={16} color="#eef4ed" /> Prazo:{" "}
+              {fdata}
             </Text>
           )}
         </View>
       </View>
 
-      {/* Lista de itens */}
       <FlatList
         data={items}
         keyExtractor={(item) => item.id.toString()}
-        renderItem={({ item }) => <ItemCard item={item}/>}
+        renderItem={({ item }) => (
+          <ItemCard item={item} onDeleteSuccess={handleItemDeleted} />
+        )}
         contentContainerStyle={styles.listContent}
         showsVerticalScrollIndicator={false}
+      />
+
+      {/* Modais */}
+      <OptionsModal
+        visible={optionsVisible}
+        onClose={() => setOptionsVisible(false)}
+        type="box"
+        onEdit={() => {
+          setOptionsVisible(false);
+          setEditModalVisible(true);
+        }}
+        onDelete={() => {
+          setOptionsVisible(false);
+          setDeleteModalVisible(true);
+        }}
+      />
+
+      <BoxEditModal
+        visible={editModalVisible}
+        onClose={() => setEditModalVisible(false)}
+        box={currentBox}
+        onSave={(updatedBox) => setCurrentBox({ ...currentBox, ...updatedBox })}
+      />
+
+      <BoxDeleteModal
+        visible={deleteModalVisible}
+        onClose={() => setDeleteModalVisible(false)}
+        box={currentBox}
+        onDeleted={() => navigation.navigate("Boxes")}
       />
     </SafeAreaView>
   );

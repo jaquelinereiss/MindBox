@@ -107,7 +107,6 @@ export default function AddScreen({ navigate }: AddScreenProps) {
     setPickerVisible(true);
   };
 
-  // Validação de datas
   const formatDeadlineToTimestamptz = (input: string) => {
     if (!input) return null;
     const numberOnly = input.replace(/\D/g, "");
@@ -132,7 +131,6 @@ export default function AddScreen({ navigate }: AddScreenProps) {
     return date.getFullYear() === +yearStr && date.getMonth() === +monthStr - 1 && date.getDate() === +dayStr;
   };
 
-  // Handlers
   const handleCreateBox = async () => {
     if (!boxTitle || !boxArea || !boxDescription) {
       alert("Informe título, descrição e área!");
@@ -157,8 +155,8 @@ export default function AddScreen({ navigate }: AddScreenProps) {
   };
 
   const handleAddItem = async () => {
-    if (!itemTitle || !itemDescription || !itemBox) {
-      alert("Defina um título, descrição e box!");
+    if (!itemTitle || !itemBox) {
+      alert("Defina um título e escolha um box!");
       return;
     }
     const selectedBox = box.find((b) => b.box_title === itemBox);
