@@ -1,5 +1,5 @@
 import React from "react";
-import { SafeAreaView, ScrollView, View, Text, StyleSheet } from "react-native";
+import { SafeAreaView, ScrollView, View, Text, StyleSheet, TouchableOpacity } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import Header from "../components/Header";
 import { RootStackParamList } from "../App";
@@ -13,16 +13,20 @@ export default function HomeScreen({ navigate }: HomeScreenProps) {
     navigate("Add");
   };
 
+  const handleDashboard = () => {
+    navigate("Dashboard");
+  };
+
   return (
     <SafeAreaView style={styles.container}>
       <Header onAdd={handleAdd} />
 
       <ScrollView contentContainerStyle={{ flexGrow: 1, paddingBottom: 100 }}>
-        <View style={styles.card}>
+        <TouchableOpacity style={styles.card} onPress={handleDashboard} activeOpacity={0.8}>
           <Ionicons name="trending-up-sharp" size={30} color="#eef4ed" />
           <Text style={styles.cardTitle}>Dashboard</Text>
           <Text style={styles.cardSubtitle}>O resumo do caos diário.</Text>
-        </View>
+        </TouchableOpacity>
 
         <View style={styles.styleSubCard}>
           <View style={styles.subCard}>
@@ -42,7 +46,10 @@ export default function HomeScreen({ navigate }: HomeScreenProps) {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#eef4ed" },
+  container: {
+    flex: 1,
+    backgroundColor: "#eef4ed"
+  },
   card: {
     borderRadius: 10,
     padding: 15,
@@ -50,16 +57,23 @@ const styles = StyleSheet.create({
     margin: 20,
     height: 150,
     backgroundColor: "#034078",
+    shadowColor: "#0b2545",
+    shadowOpacity: 0.5,
+    shadowOffset: { width: 0, height: 5 },
+    shadowRadius: 5,
+    elevation: 10,
   },
   cardTitle: { 
     fontSize: 26, 
     fontWeight: "bold", 
     color: "#eef4ed", 
-    marginTop: 5 },
+    marginTop: 5 
+  },
   cardSubtitle: { 
     fontSize: 15, 
     color: "#eef4ed", 
-    marginTop: 5 },
+    marginTop: 5
+  },
   styleSubCard: {
     flexDirection: "row",
     justifyContent: "space-between",
@@ -73,6 +87,11 @@ const styles = StyleSheet.create({
     backgroundColor: "#8da9c4",
     marginHorizontal: 5,
     height: 150,
+    shadowColor: "#0b2545",
+    shadowOpacity: 0.5,
+    shadowOffset: { width: 0, height: 5 },
+    shadowRadius: 5,
+    elevation: 10,
   },
   subCardTitle: { 
     fontSize: 26, 
@@ -84,5 +103,5 @@ const styles = StyleSheet.create({
     fontSize: 15, 
     color: "#034078", 
     marginTop: 5 
-  },
+  }
 });
