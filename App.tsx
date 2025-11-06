@@ -7,36 +7,44 @@ import AddScreen from "./screens/AddScreen";
 import BoxesScreen from "./screens/BoxesScreen";
 import BoxDetailScreen from "./screens/BoxDetailScreen";
 import SettingsScreen from "./screens/SettingsScreen";
+import DashboardScreen from "./screens/DashboardScreen";
 import Menu from "./components/Menu";
 
 export type RootStackParamList = {
   Home: undefined;
   Add: undefined;
   Boxes: undefined;
-  BoxDetailScreen: { box: any }; // precisa de param
+  BoxDetailScreen: { box: any };
   Settings: undefined;
+  Dashboard: undefined;
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
 export default function App() {
-  const [currentScreen, setCurrentScreen] = useState<keyof RootStackParamList>("Home");
+  const [currentScreen, setCurrentScreen] =
+    useState<keyof RootStackParamList>("Home");
+
   const navigationRef = useRef<NavigationContainerRef<RootStackParamList>>(null);
 
-  // Função de navegação
-  const handleNavigate = (screen: keyof RootStackParamList, params?: any) => {
+  const handleNavigate = <T extends keyof RootStackParamList>(
+    screen: T,
+    params?: RootStackParamList[T]
+  ) => {
     if (!navigationRef.current?.isReady()) return;
 
-    if (screen === "BoxDetailScreen") {
-      if (!params) {
-        console.warn("BoxDetailScreen precisa de parâmetro 'box'");
-        return;
-      }
-      navigationRef.current.navigate(screen, params); // BoxDetailScreen exige params
+    if (params !== undefined) {
+      navigationRef.current.navigate({
+        name: screen,
+        params,
+      } as never);
     } else {
-      // Todas as outras telas não têm params
-      navigationRef.current.navigate(screen as Exclude<keyof RootStackParamList, "BoxDetailScreen">);
+      navigationRef.current.navigate({
+        name: screen,
+      } as never);
     }
+
+    setCurrentScreen(screen);
   };
 
   return (
@@ -45,16 +53,18 @@ export default function App() {
         <View style={{ flex: 1 }}>
           <Stack.Navigator screenOptions={{ headerShown: false }}>
             <Stack.Screen name="Home">
-              {() => <HomeScreen navigate={handleNavigate} />}
+              {(props) => <HomeScreen {...props} navigate={handleNavigate} />}
             </Stack.Screen>
 
             <Stack.Screen name="Add">
-              {() => <AddScreen navigate={handleNavigate} />}
+              {(props) => <AddScreen {...props} navigate={handleNavigate} />}
             </Stack.Screen>
 
             <Stack.Screen name="Boxes">
-              {() => <BoxesScreen navigate={handleNavigate} />}
+              {(props) => <BoxesScreen {...props} navigate={handleNavigate} />}
             </Stack.Screen>
+
+            <Stack.Screen name="Dashboard" component={DashboardScreen} />
 
             <Stack.Screen name="Settings" component={SettingsScreen} />
 
