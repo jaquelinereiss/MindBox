@@ -234,7 +234,7 @@ export default function AddScreen({ navigate }: AddScreenProps) {
       setBoxDeadline("");
       setErrorItem("");
       navigate("Boxes");
-      
+
     } catch (err) {
       console.error("Erro inesperado ao adicionar item:", err);
       setErrorItem("Ops! Erro ao adicionar o item. Tente novamente.");
@@ -299,8 +299,9 @@ export default function AddScreen({ navigate }: AddScreenProps) {
 
         {tab && (
           <KeyboardAvoidingView
-            behavior={Platform.OS === "ios" ? "padding" : "height"}
             style={{ flex: 1 }}
+            behavior={Platform.OS === "ios" ? "padding" : "height"}
+            keyboardVerticalOffset={Platform.OS === "ios" ? 60 : 60}
           >
             <View style={{ flex: 1 }}>
               <View style={styles.formPanel}>
@@ -331,6 +332,8 @@ export default function AddScreen({ navigate }: AddScreenProps) {
                         value={boxDeadline}
                         onChangeText={(text) => setBoxDeadline(formatDateInput(text))}
                         placeholderTextColor="#bfcad5"
+                        keyboardType="number-pad"
+                        maxLength={10}
                       />
 
                       <TouchableOpacity style={styles.pickerBtn} onPress={openAreaPicker}>
