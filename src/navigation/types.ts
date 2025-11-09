@@ -1,6 +1,8 @@
 import { Box } from "../types";
 
 export type RootStackParamList = {
+  Login: undefined;
+  Register: undefined;
   Home: undefined;
   Add: undefined;
   Dashboard: undefined;

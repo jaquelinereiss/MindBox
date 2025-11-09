@@ -2,6 +2,9 @@ import React, { useRef, useState } from "react";
 import { View, StyleSheet } from "react-native";
 import { NavigationContainer, NavigationContainerRef } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
+import { supabase } from "./src/lib/supabaseClient"; 
+import LoginScreen from "./screens/LoginScreen";
+import RegisterScreen from "./screens/RegisterScreen";
 import HomeScreen from "./screens/HomeScreen";
 import AddScreen from "./screens/AddScreen";
 import BoxesScreen from "./screens/BoxesScreen";
@@ -11,6 +14,8 @@ import DashboardScreen from "./screens/DashboardScreen";
 import Menu from "./components/Menu";
 
 export type RootStackParamList = {
+  Login: undefined;
+  Register: undefined;
   Home: undefined;
   Add: undefined;
   Boxes: undefined;
@@ -22,10 +27,13 @@ export type RootStackParamList = {
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
 export default function App() {
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+
   const [currentScreen, setCurrentScreen] =
     useState<keyof RootStackParamList>("Home");
 
-  const navigationRef = useRef<NavigationContainerRef<RootStackParamList>>(null);
+  const navigationRef =
+    useRef<NavigationContainerRef<RootStackParamList>>(null);
 
   const handleNavigate = <T extends keyof RootStackParamList>(
     screen: T,
@@ -33,16 +41,9 @@ export default function App() {
   ) => {
     if (!navigationRef.current?.isReady()) return;
 
-    if (params !== undefined) {
-      navigationRef.current.navigate({
-        name: screen,
-        params,
-      } as never);
-    } else {
-      navigationRef.current.navigate({
-        name: screen,
-      } as never);
-    }
+    navigationRef.current.navigate(
+      params !== undefined ? ({ name: screen, params } as never) : ({ name: screen } as never)
+    );
 
     setCurrentScreen(screen);
   };
@@ -52,31 +53,58 @@ export default function App() {
       <View style={styles.container}>
         <View style={{ flex: 1 }}>
           <Stack.Navigator screenOptions={{ headerShown: false }}>
-            <Stack.Screen name="Home">
-              {(props) => <HomeScreen {...props} navigate={handleNavigate} />}
-            </Stack.Screen>
+            {!isAuthenticated ? (
+              <>
+                <Stack.Screen name="Login">
+                  {(props) => (
+                    <LoginScreen
+                      {...props}
+                      onLoginSuccess={() => setIsAuthenticated(true)}
+                    />
+                  )}
+                </Stack.Screen>
 
-            <Stack.Screen name="Add">
-              {(props) => <AddScreen {...props} navigate={handleNavigate} />}
-            </Stack.Screen>
+                <Stack.Screen name="Register" component={RegisterScreen} />
+              </>
+            ) : (
+              <>
+                <Stack.Screen name="Home">
+                  {(props) => <HomeScreen {...props} navigate={handleNavigate} />}
+                </Stack.Screen>
 
-            <Stack.Screen name="Boxes">
-              {(props) => <BoxesScreen {...props} navigate={handleNavigate} />}
-            </Stack.Screen>
+                <Stack.Screen name="Add">
+                  {(props) => <AddScreen {...props} navigate={handleNavigate} />}
+                </Stack.Screen>
 
-            <Stack.Screen name="Dashboard" component={DashboardScreen} />
+                <Stack.Screen name="Boxes">
+                  {(props) => <BoxesScreen {...props} navigate={handleNavigate} />}
+                </Stack.Screen>
 
-            <Stack.Screen name="Settings" component={SettingsScreen} />
-
-            <Stack.Screen name="BoxDetailScreen" component={BoxDetailScreen} />
+                <Stack.Screen name="Dashboard" component={DashboardScreen} />
+                <Stack.Screen name="Settings">
+                  {(props) => (
+                    <SettingsScreen
+                      {...props}
+                      onLogout={async () => {
+                        await supabase.auth.signOut();
+                        setIsAuthenticated(false);
+                      }}
+                    />
+                  )}
+                </Stack.Screen>
+                <Stack.Screen name="BoxDetailScreen" component={BoxDetailScreen} />
+              </>
+            )}
           </Stack.Navigator>
         </View>
 
-        <Menu
-          currentScreen={currentScreen}
-          setCurrentScreen={setCurrentScreen}
-          navigate={handleNavigate}
-        />
+        {isAuthenticated && (
+          <Menu
+            currentScreen={currentScreen}
+            setCurrentScreen={setCurrentScreen}
+            navigate={handleNavigate}
+          />
+        )}
       </View>
     </NavigationContainer>
   );
