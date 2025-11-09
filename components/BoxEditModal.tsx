@@ -1,8 +1,9 @@
-import { Modal, View, Text, TextInput, TouchableOpacity, StyleSheet, Alert } from "react-native";
+import { Modal, View, Text, TextInput, TouchableOpacity, StyleSheet } from "react-native";
+import { useEffect, useState } from "react";
 import { Ionicons } from "@expo/vector-icons";
 import updateBox from "../src/services/updateBox";
 import { Box } from "../src/types";
-import { useEffect, useState } from "react";
+import { useToast } from "../components/ToastContext";
 
 interface BoxEditModalProps {
   visible: boolean;
@@ -14,7 +15,15 @@ interface BoxEditModalProps {
 export default function BoxEditModal({ visible, onClose, box, onSave }: BoxEditModalProps) {
   const [title, setTitle] = useState(box.box_title);
   const [description, setDescription] = useState(box.box_description || "");
-  const [deadline, setDeadline] = useState(box.deadline_date ? formatDateDisplay(box.deadline_date) : "");
+  const [deadline, setDeadline] = useState<string | undefined>(
+    box.deadline_date ? formatDateDisplay(box.deadline_date) : ""
+  );
+
+  const [titleError, setTitleError] = useState("");
+  const [descriptionError, setDescriptionError] = useState("");
+  const [deadlineError, setDeadlineError] = useState("");
+
+  const { showToast } = useToast();
 
   function formatDateDisplay(dateStr: string) {
     const date = new Date(dateStr);
@@ -29,20 +38,29 @@ export default function BoxEditModal({ visible, onClose, box, onSave }: BoxEditM
     if (cleaned.length > 8) cleaned = cleaned.slice(0, 8);
 
     let formatted = "";
-    if (cleaned.length <= 2) {
-      formatted = cleaned;
-    } else if (cleaned.length <= 4) {
-      formatted = `${cleaned.slice(0, 2)}/${cleaned.slice(2)}`;
-    } else {
-      formatted = `${cleaned.slice(0, 2)}/${cleaned.slice(2, 4)}/${cleaned.slice(4)}`;
-    }
+    if (cleaned.length <= 2) formatted = cleaned;
+    else if (cleaned.length <= 4) formatted = `${cleaned.slice(0, 2)}/${cleaned.slice(2)}`;
+    else formatted = `${cleaned.slice(0, 2)}/${cleaned.slice(2, 4)}/${cleaned.slice(4)}`;
+
     setDeadline(formatted);
+    if (deadlineError) setDeadlineError("");
   };
 
   const handleSave = async () => {
-    if (!title.trim() || !description.trim()) {
-      Alert.alert("Atenção", "O título e descrição são obrigatórios, anjo.");
-      return;
+    setTitleError("");
+    setDescriptionError("");
+    setDeadlineError("");
+
+    let valid = true;
+
+    if (!title.trim()) {
+      setTitleError("O título é obrigatório, anjo.");
+      valid = false;
+    }
+
+    if (!description.trim()) {
+      setDescriptionError("Não esqueça da descrição, ela é importante.");
+      valid = false;
     }
 
     let formattedDate: string | null = null;
@@ -52,42 +70,49 @@ export default function BoxEditModal({ visible, onClose, box, onSave }: BoxEditM
         const [day, month, year] = parts;
         const dateObj = new Date(Number(year), Number(month) - 1, Number(day));
         if (isNaN(dateObj.getTime())) {
-          Alert.alert("Erro", "Data inválida.");
-          return;
+          setDeadlineError("A data informada parece inválida.");
+          valid = false;
+        } else {
+          formattedDate = dateObj.toISOString();
         }
-        formattedDate = dateObj.toISOString();
       } else {
-        Alert.alert("Erro", "Data inválida.");
-        return;
+        setDeadlineError("Hmm...essa data não parece válida.");
+        valid = false;
       }
     }
 
-    const updatedData = {
-      box_title: title.trim(),
-      box_description: description.trim(),
-      deadline_date: formattedDate ?? undefined,
-    };
+    if (!valid) return;
 
     try {
-      const updatedBox = await updateBox(box.id, updatedData);
+      const updatedBox = await updateBox(box.id, {
+        box_title: title.trim(),
+        box_description: description.trim(),
+        deadline_date: formattedDate,
+      });
+
       if (updatedBox) {
-        Alert.alert("Sucesso", "Uhull, o box foi atualizado!");
         onSave(updatedBox);
         onClose();
+        showToast("Box atualizado com sucesso!");
       } else {
-        Alert.alert("Erro", "Vish, não foi possível atualizar o box.");
+        showToast("Vish! Não foi possível atualizar o box.");
       }
-    } catch (error) {
-      console.error("Erro ao atualizar box:", error);
-      Alert.alert("Erro", "Ops! Ocorreu um problema ao atualizar o box.");
+    } catch (err) {
+      console.error(err);
+      showToast("Ops! Ocorreu um problema ao atualizar o box.");
     }
   };
 
   useEffect(() => {
-    setTitle(box.box_title);
-    setDescription(box.box_description || "");
-    setDeadline(box.deadline_date ? formatDateDisplay(box.deadline_date) : "");
-  }, [box]);
+    if (visible) {
+      setTitle(box.box_title);
+      setDescription(box.box_description || "");
+      setDeadline(box.deadline_date ? formatDateDisplay(box.deadline_date) : "");
+      setTitleError("");
+      setDescriptionError("");
+      setDeadlineError("");
+    }
+  }, [visible]);
 
   return (
     <Modal visible={visible} transparent animationType="fade">
@@ -106,7 +131,13 @@ export default function BoxEditModal({ visible, onClose, box, onSave }: BoxEditM
             placeholder="Digite um título"
             value={title}
             onChangeText={setTitle}
+            maxLength={60}
+            multiline
           />
+          <View style={styles.row}>
+            {titleError ? <Text style={styles.errorText}>{titleError}</Text> : <View />}
+            <Text style={styles.counterText}>{title.length}/60</Text>
+          </View>
 
           <Text style={styles.label}>Descrição</Text>
           <TextInput
@@ -114,8 +145,13 @@ export default function BoxEditModal({ visible, onClose, box, onSave }: BoxEditM
             placeholder="Escreva uma descrição"
             value={description}
             onChangeText={setDescription}
+            maxLength={120}
             multiline
           />
+          <View style={styles.row}>
+            {descriptionError ? <Text style={styles.errorText}>{descriptionError}</Text> : <View />}
+            <Text style={styles.counterText}>{description.length}/120</Text>
+          </View>
 
           <Text style={styles.label}>Prazo</Text>
           <TextInput
@@ -126,6 +162,9 @@ export default function BoxEditModal({ visible, onClose, box, onSave }: BoxEditM
             keyboardType="number-pad"
             maxLength={10}
           />
+          <View style={styles.row}>
+            {deadlineError ? <Text style={styles.errorText}>{deadlineError}</Text> : <View />}
+          </View>
 
           <View style={styles.buttonsContainer}>
             <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
@@ -146,63 +185,76 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "rgba(0,0,0,0.4)",
     justifyContent: "center",
-    alignItems: "center",
+    alignItems: "center"
   },
-  modalContainer: {
+  modalContainer: { 
     width: "90%",
     backgroundColor: "#fff",
     borderRadius: 15,
     padding: 20,
-    elevation: 6,
+    elevation: 6
   },
-  header: {
+  header: { 
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: 15,
+    marginBottom: 15
   },
   headerTitle: {
     fontSize: 20,
     fontWeight: "bold",
-    color: "#134074",
+    color: "#134074"
   },
   label: {
     fontSize: 14,
     color: "#134074",
     fontWeight: "500",
-    marginBottom: 5,
+    marginBottom: 5
   },
-  input: {
+  input: { 
     borderWidth: 1,
     borderColor: "#ccc",
     borderRadius: 8,
     padding: 10,
-    marginBottom: 15,
-    fontSize: 14,
+    marginBottom: 10,
+    fontSize: 14
+  },
+  row: {
+    flexDirection: "row",
+    justifyContent: "space-between"
+  },
+  counterText: {
+    fontSize: 12,
+    color: "#666"
   },
   buttonsContainer: {
     flexDirection: "row",
     justifyContent: "flex-end",
-    marginTop: 10,
+    marginTop: 10
   },
   cancelButton: {
     paddingVertical: 10,
     paddingHorizontal: 15,
     borderRadius: 8,
-    marginRight: 10,
+    marginRight: 10
   },
   cancelButtonText: {
     color: "#333",
-    fontWeight: "500",
+    fontWeight: "500"
   },
   saveButton: {
     paddingVertical: 10,
     paddingHorizontal: 15,
     borderRadius: 8,
-    backgroundColor: "#034078",
+    backgroundColor: "#034078"
   },
   saveButtonText: {
     color: "#fff",
-    fontWeight: "600",
+    fontWeight: "600"
+  },
+  errorText: {
+    color: "#d9534f",
+    fontSize: 13,
+    marginBottom: 10
   },
 });

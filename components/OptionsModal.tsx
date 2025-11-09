@@ -21,7 +21,7 @@ export default function OptionsModal({
     <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
       <View style={styles.overlay}>
         <View style={styles.modalContainer}>
-          {/* Cabeçalho */}
+
           <View style={styles.modalHeader}>
             <Text style={styles.modalTitle}>
               {type === "box" ? "Escolha uma opção" : "Escolha uma opção"}
@@ -31,7 +31,6 @@ export default function OptionsModal({
             </TouchableOpacity>
           </View>
 
-          {/* Botão Editar */}
           <TouchableOpacity style={styles.optionButton} onPress={onEdit}>
             <Ionicons name="create-outline" size={22} color="#034078" />
             <Text style={styles.optionText}>
@@ -39,7 +38,6 @@ export default function OptionsModal({
             </Text>
           </TouchableOpacity>
 
-          {/* Botão Excluir */}
           <TouchableOpacity
             style={[styles.optionButton, { borderTopWidth: 1, borderTopColor: "#eee" }]}
             onPress={onDelete}
@@ -61,7 +59,7 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(0,0,0,0.4)",
     justifyContent: "center",
     alignItems: "center",
-    paddingHorizontal: 20,
+    paddingHorizontal: 20
   },
   modalContainer: {
     width: "85%",
@@ -73,30 +71,30 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.25,
     shadowOffset: { width: 0, height: 4 },
     shadowRadius: 6,
-    elevation: 6,
+    elevation: 6
   },
   modalHeader: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: 20,
+    marginBottom: 20
   },
   modalTitle: {
     fontSize: 20,
     fontWeight: "700",
-    color: "#034078",
+    color: "#034078"
   },
   optionButton: {
     flexDirection: "row",
     alignItems: "center",
     paddingVertical: 16,
     borderBottomWidth: 1,
-    borderBottomColor: "#eee",
+    borderBottomColor: "#eee"
   },
   optionText: {
     fontSize: 16,
     color: "#034078",
     marginLeft: 12,
-    fontWeight: "500",
+    fontWeight: "500"
   },
 });
