@@ -1,13 +1,13 @@
 import React, { useEffect, useState } from "react";
 import { SafeAreaView, View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, Modal, FlatList, KeyboardAvoidingView, Platform } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import insertBox from "../src/services/insertBox"
-import getArea, { Area } from "../src/services/getArea";
-import getBoxes from "../src/services/getBoxes";
-import { Box } from "../src/types";
-import getSubarea, { Subarea } from "../src/services/getSubarea";
-import insertItem from "../src/services/insertItem";
+import insertBox from "../src/services/insertBox";
 import { RootStackParamList } from "../src/navigation/types";
+import { Box } from "../src/types";
+import getArea, { Area } from "../src/services/getArea";
+import getSubarea, { Subarea } from "../src/services/getSubarea";
+import getBoxes from "../src/services/getBoxes";
+import insertItem from "../src/services/insertItem";
 
 interface AddScreenProps {
   navigate: (screen: keyof RootStackParamList, params?: any) => void;
@@ -31,6 +31,8 @@ export default function AddScreen({ navigate }: AddScreenProps) {
   const [selectedId, setSelectedId] = useState<number>();
   const [areas, setAreas] = useState<Area[]>([]);
   const [box, setBox] = useState<Box[]>([]);
+  const [errorBox, setErrorBox] = useState<string>("");
+  const [errorItem, setErrorItem] = useState<string>("");
 
   const getAreas = async () => {
     try {
@@ -120,7 +122,8 @@ export default function AddScreen({ navigate }: AddScreenProps) {
   const formatDateInput = (value: string) => {
     const numberOnly = value.replace(/\D/g, "").substring(0, 8);
     if (numberOnly.length <= 2) return numberOnly;
-    if (numberOnly.length <= 4) return `${numberOnly.substring(0, 2)}/${numberOnly.substring(2, 4)}`;
+    if (numberOnly.length <= 4)
+      return `${numberOnly.substring(0, 2)}/${numberOnly.substring(2, 4)}`;
     return `${numberOnly.substring(0, 2)}/${numberOnly.substring(2, 4)}/${numberOnly.substring(4, 8)}`;
   };
 
@@ -128,61 +131,96 @@ export default function AddScreen({ navigate }: AddScreenProps) {
     const [dayStr, monthStr, yearStr] = dateStr.split("/");
     if (!dayStr || !monthStr || !yearStr) return false;
     const date = new Date(+yearStr, +monthStr - 1, +dayStr);
-    return date.getFullYear() === +yearStr && date.getMonth() === +monthStr - 1 && date.getDate() === +dayStr;
+    return (
+      date.getFullYear() === +yearStr &&
+      date.getMonth() === +monthStr - 1 &&
+      date.getDate() === +dayStr
+    );
   };
 
   const handleCreateBox = async () => {
+    setErrorBox("");
+
     if (!boxTitle || !boxArea || !boxDescription) {
-      alert("Informe título, descrição e área!");
+      setErrorBox("Parece que faltou preencher título, descrição ou área.");
       return;
     }
     if (boxDeadline && !isValidDate(boxDeadline)) {
-      alert("Informe uma data válida!");
+      setErrorBox("A data informada não parece válida.");
       return;
     }
+
     const deadlineTimestamptz = boxDeadline ? formatDeadlineToTimestamptz(boxDeadline) : undefined;
+
+    let adjustedDeadline = deadlineTimestamptz ? new Date(deadlineTimestamptz) : null;
+    if (adjustedDeadline) {
+      adjustedDeadline = new Date(adjustedDeadline.getTime() + adjustedDeadline.getTimezoneOffset() * 60000);
+    }
+
     try {
-      await insertBox(boxTitle, boxDescription, selectedId, deadlineTimestamptz);
+      await insertBox(
+        boxTitle,
+        boxDescription,
+        selectedId,
+        adjustedDeadline ? adjustedDeadline.toISOString() : undefined
+      );
+      
       setBoxTitle("");
       setBoxDescription("");
       setBoxDeadline("");
       setBoxArea(null);
+      setErrorBox("");
       navigate("Boxes");
     } catch (err) {
       console.error("Erro ao inserir box:", err);
-      alert("Erro ao adicionar a box. Tente novamente.");
+      setErrorBox("Ops! Algo deu errado ao adicionar sua box. Tente novamente.");
     }
   };
 
   const handleAddItem = async () => {
-    if (!itemTitle || !itemBox) {
-      alert("Defina um título e escolha um box!");
+    setErrorItem("");
+
+    if (!itemTitle || !boxDeadline || !itemBox || !itemSubitem) {
+      setErrorItem("Preencha todos os campos essenciais para continuar.");
       return;
     }
+
+    if (!isValidDate(boxDeadline)) {
+      setErrorItem("A data informada não parece válida.");
+      return;
+    }
+
     const selectedBox = box.find((b) => b.box_title === itemBox);
     if (!selectedBox) {
-      alert("Box inválido!");
+      setErrorItem("Box inválido! Escolha uma opção da lista.");
       return;
     }
+
     let selectedSubareaId = 0;
     if (itemSubitem && selectedBox.box_area) {
       const subareas = await getSubareaScreen(selectedBox.box_area);
       const selectedSub = subareas?.find((sa) => sa.subarea_name === itemSubitem);
       if (selectedSub) selectedSubareaId = selectedSub.id;
     }
-    let realizationDate: string | undefined = undefined;
-    if (boxDeadline && isValidDate(boxDeadline)) {
-      realizationDate = formatDeadlineToTimestamptz(boxDeadline) ?? undefined;
+
+    const realizationDate = formatDeadlineToTimestamptz(boxDeadline);
+
+    let adjustedDate = realizationDate ? new Date(realizationDate) : null;
+    if (adjustedDate) {
+      adjustedDate = new Date(adjustedDate.getTime() + adjustedDate.getTimezoneOffset() * 60000);
     }
+
+
     try {
       await insertItem(
         itemTitle,
-        itemDescription,
+        itemDescription || "",
         itemPriority ? Number(itemPriority) : undefined,
-        realizationDate,
+        adjustedDate ? adjustedDate.toISOString() : undefined,
         selectedBox.id,
         selectedSubareaId
       );
+
       setItemTitle("");
       setItemDescription("");
       setItemPriority("");
@@ -190,10 +228,11 @@ export default function AddScreen({ navigate }: AddScreenProps) {
       setItemSubitem(null);
       setSubitemOptions([]);
       setBoxDeadline("");
+      setErrorItem("");
       navigate("Boxes");
     } catch (err) {
       console.error("Erro inesperado ao adicionar item:", err);
-      alert("Erro ao adicionar o item. Tente novamente.");
+      setErrorItem("Ops! Erro ao adicionar o item. Tente novamente.");
     }
   };
 
@@ -220,7 +259,6 @@ export default function AddScreen({ navigate }: AddScreenProps) {
 
   return (
     <SafeAreaView style={styles.safe}>
-
       <View style={styles.topHeader}>
         <Text style={styles.title}>Adicionar</Text>
         <Text style={styles.subtitle}>Organize essa cabecinha agitada.</Text>
@@ -228,7 +266,8 @@ export default function AddScreen({ navigate }: AddScreenProps) {
 
       <ScrollView contentContainerStyle={{ paddingBottom: 120 }}>
         <View style={styles.section}>
-          <Text style={styles.sectionLabel}>Escolha uma opção para começar:</Text>
+          <Text style={styles.sectionLabel}>Vamos colocar suas ideias em movimento?</Text>
+          <Text style={[styles.sectionLabel, { color: "#0b2545", marginBottom: 35 }]}>Escolha uma categoria para começar.</Text>
 
           <View style={styles.tabsRow}>
             <TouchableOpacity
@@ -236,7 +275,9 @@ export default function AddScreen({ navigate }: AddScreenProps) {
               onPress={() => setTab("Box")}
               activeOpacity={0.8}
             >
-              <Text style={tab === "Box" ? styles.tabTextActive : styles.tabTextInactive}>Box</Text>
+              <Text style={tab === "Box" ? styles.tabTextActive : styles.tabTextInactive}>
+                Box
+              </Text>
             </TouchableOpacity>
 
             <TouchableOpacity
@@ -244,118 +285,132 @@ export default function AddScreen({ navigate }: AddScreenProps) {
               onPress={() => setTab("Item")}
               activeOpacity={0.8}
             >
-              <Text style={tab === "Item" ? styles.tabTextActive : styles.tabTextInactive}>Item</Text>
+              <Text style={tab === "Item" ? styles.tabTextActive : styles.tabTextInactive}>
+                Item
+              </Text>
             </TouchableOpacity>
           </View>
         </View>
 
         {tab && (
-  <KeyboardAvoidingView
-    behavior={Platform.OS === "ios" ? "padding" : "height"}
-    style={{ flex: 1 }}
-  >
-    <View style={{ flex: 1 }}>
-      <View style={styles.formPanel}>
-        <ScrollView contentContainerStyle={{ paddingBottom: 4 }}>
-          {tab === "Box" ? (
-            <>
-              <TextInput
-                style={styles.input}
-                placeholder="Coloque um título na sua box"
-                value={boxTitle}
-                onChangeText={setBoxTitle}
-                placeholderTextColor="#bfcad5"
-              />
-              <TextInput
-                style={styles.input}
-                placeholder="Escreva uma breve descrição"
-                value={boxDescription}
-                onChangeText={setBoxDescription}
-                placeholderTextColor="#bfcad5"
-              />
-              <TextInput
-                style={styles.input}
-                placeholder="Estipule uma data de prazo (opcional)"
-                value={boxDeadline}
-                onChangeText={(text) => setBoxDeadline(formatDateInput(text))}
-                placeholderTextColor="#bfcad5"
-              />
+          <KeyboardAvoidingView
+            behavior={Platform.OS === "ios" ? "padding" : "height"}
+            style={{ flex: 1 }}
+          >
+            <View style={{ flex: 1 }}>
+              <View style={styles.formPanel}>
+                <ScrollView contentContainerStyle={{ paddingBottom: 4 }}>
+                  {tab === "Box" ? (
+                    <>
+                      <TextInput
+                        style={styles.input}
+                        placeholder="Coloque um título na sua box"
+                        value={boxTitle}
+                        onChangeText={setBoxTitle}
+                        placeholderTextColor="#bfcad5"
+                      />
+                      <TextInput
+                        style={styles.input}
+                        placeholder="Escreva uma breve descrição"
+                        value={boxDescription}
+                        onChangeText={setBoxDescription}
+                        placeholderTextColor="#bfcad5"
+                      />
+                      <TextInput
+                        style={styles.input}
+                        placeholder="Estipule uma data de prazo (opcional)"
+                        value={boxDeadline}
+                        onChangeText={(text) => setBoxDeadline(formatDateInput(text))}
+                        placeholderTextColor="#bfcad5"
+                      />
 
-              <TouchableOpacity style={styles.pickerBtn} onPress={openAreaPicker}>
-                <Text style={styles.pickerBtnText}>
-                  {boxArea ? boxArea : "Área (escolha uma opção da lista)"}
-                </Text>
-                <Ionicons name="chevron-down" size={18} color="#0b2545" />
-              </TouchableOpacity>
+                      <TouchableOpacity style={styles.pickerBtn} onPress={openAreaPicker}>
+                        <Text style={styles.pickerBtnText}>
+                          {boxArea ? boxArea : "Área (escolha uma opção da lista)"}
+                        </Text>
+                        <Ionicons name="chevron-down" size={18} color="#0b2545" />
+                      </TouchableOpacity>
 
-              <TouchableOpacity style={styles.submitButton} onPress={handleCreateBox}>
-                <Text style={styles.submitButtonText}>Cadastrar box</Text>
-              </TouchableOpacity>
-            </>
-            ) : (
-                <>
-                  <TextInput
-                    style={styles.input}
-                    placeholder="Coloque um título no seu item"
-                    value={itemTitle}
-                    onChangeText={setItemTitle}
-                    placeholderTextColor="#bfcad5"
-                  />
-                  <TextInput
-                    style={styles.input}
-                    placeholder="Escreva uma breve descrição"
-                    value={itemDescription}
-                    onChangeText={setItemDescription}
-                    placeholderTextColor="#bfcad5"
-                  />
-                  <TextInput
-                    style={styles.input}
-                    placeholder="Defina uma prioridade: 1 a 4 (opcional)"
-                    value={itemPriority}
-                    onChangeText={(text) => {
-                      const numeric = text.replace(/[^0-9]/g, '');
-                      if (numeric === '' || /^[1-4]$/.test(numeric)) {
-                        setItemPriority(numeric);
-                      }
-                    }}
-                    keyboardType="numeric"
-                    placeholderTextColor="#bfcad5"
-                  />
-                  <TextInput
-                    style={styles.input}
-                    placeholder="Informe uma data de realização"
-                    value={boxDeadline}
-                    onChangeText={(text) => setBoxDeadline(formatDateInput(text))}
-                    placeholderTextColor="#bfcad5"
-                  />
+                      {errorBox ? <Text style={styles.errorText}>{errorBox}</Text> : null}
 
-                  <TouchableOpacity style={styles.pickerBtn} onPress={openBoxPickerForItem}>
-                    <Text style={styles.pickerBtnText}>
-                      {itemBox ? itemBox : "Box (escolha uma opção da lista)"}
-                    </Text>
-                    <Ionicons name="chevron-down" size={18} color="#0b2545" />
-                  </TouchableOpacity>
+                      <TouchableOpacity style={styles.submitButton} onPress={handleCreateBox}>
+                        <Text style={styles.submitButtonText}>Cadastrar box</Text>
+                      </TouchableOpacity>
+                    </>
+                  ) : (
+                    <>
+                      <TextInput
+                        style={styles.input}
+                        placeholder="Coloque um título no seu item"
+                        value={itemTitle}
+                        onChangeText={setItemTitle}
+                        placeholderTextColor="#bfcad5"
+                      />
+                      <TextInput
+                        style={styles.input}
+                        placeholder="Escreva uma breve descrição (opcional)"
+                        value={itemDescription}
+                        onChangeText={setItemDescription}
+                        placeholderTextColor="#bfcad5"
+                      />
+                      <TextInput
+                        style={styles.input}
+                        placeholder="Defina uma prioridade: 1 a 4 (opcional)"
+                        value={itemPriority}
+                        onChangeText={(text) => {
+                          const numeric = text.replace(/[^0-9]/g, "");
+                          if (numeric === "" || /^[1-4]$/.test(numeric)) {
+                            setItemPriority(numeric);
+                          }
+                        }}
+                        keyboardType="numeric"
+                        placeholderTextColor="#bfcad5"
+                      />
+                      <TextInput
+                        style={styles.input}
+                        placeholder="Informe uma data de realização"
+                        value={boxDeadline}
+                        onChangeText={(text) => setBoxDeadline(formatDateInput(text))}
+                        placeholderTextColor="#bfcad5"
+                      />
 
-                  {subitemOptions.length > 0 && (
-                    <TouchableOpacity style={styles.pickerBtn} onPress={openSubitemPicker}>
-                      <Text style={styles.pickerBtnText}>
-                        {itemSubitem ? itemSubitem : "Subárea (escolha uma opção)"}
-                      </Text>
-                      <Ionicons name="chevron-down" size={18} color="#0b2545" />
-                    </TouchableOpacity>
+                      <TouchableOpacity
+                        style={styles.pickerBtn}
+                        onPress={openBoxPickerForItem}
+                      >
+                        <Text style={styles.pickerBtnText}>
+                          {itemBox ? itemBox : "Box (escolha uma opção da lista)"}
+                        </Text>
+                        <Ionicons name="chevron-down" size={18} color="#0b2545" />
+                      </TouchableOpacity>
+
+                      {subitemOptions.length > 0 && (
+                        <TouchableOpacity
+                          style={styles.pickerBtn}
+                          onPress={openSubitemPicker}
+                        >
+                          <Text style={styles.pickerBtnText}>
+                            {itemSubitem
+                              ? itemSubitem
+                              : "Subárea (escolha uma opção)"}
+                          </Text>
+                          <Ionicons name="chevron-down" size={18} color="#0b2545" />
+                        </TouchableOpacity>
+                      )}
+
+                      {errorItem ? <Text style={styles.errorText}>{errorItem}</Text> : null}
+
+                      <TouchableOpacity style={styles.submitButton} onPress={handleAddItem}>
+                        <Text style={styles.submitButtonText}>Adicionar item</Text>
+                      </TouchableOpacity>
+                    </>
                   )}
-
-                  <TouchableOpacity style={styles.submitButton} onPress={handleAddItem}>
-                    <Text style={styles.submitButtonText}>Adicionar item</Text>
-                  </TouchableOpacity>
-                </>
-              )}
-            </ScrollView>
-          </View>
-        </View>
-      </KeyboardAvoidingView>
-    )}
-    </ScrollView>
+                </ScrollView>
+              </View>
+            </View>
+          </KeyboardAvoidingView>
+        )}
+      </ScrollView>
 
       {PickerModal()}
     </SafeAreaView>
@@ -363,18 +418,18 @@ export default function AddScreen({ navigate }: AddScreenProps) {
 }
 
 const styles = StyleSheet.create({
-  safe: { 
-    flex: 1, 
-    backgroundColor: "#eef4ed" 
+  safe: {
+    flex: 1,
+    backgroundColor: "#eef4ed"
   },
-  topHeader: { 
-    paddingVertical: 20, 
-    alignItems: "center", 
-    padding: 20, 
-    marginTop: 30 
+  topHeader: {
+    paddingVertical: 20,
+    alignItems: "center",
+    padding: 20,
+    marginTop: 30
   },
-  title: { 
-    fontSize: 25, 
+  title: {
+    fontSize: 25,
     fontWeight: "bold", 
     textAlign: "center", 
     marginBottom: 10 
@@ -387,31 +442,32 @@ const styles = StyleSheet.create({
   },
   section: { 
     paddingHorizontal: 20, 
-    marginTop: 10 
+    marginTop: 5 
   },
   sectionLabel: { 
     fontSize: 15, 
     fontWeight: "bold", 
-    marginBottom: 35 
+    color: "#758a93",
+    marginBottom: 5 
   },
   tabsRow: { 
     flexDirection: "row", 
-    justifyContent: "center"
+    justifyContent: "center" 
   },
-  tab: { 
-    flex: 1, 
-    padding: 45, 
-    borderRadius: 8, 
-    alignItems: "center", 
+  tab: {
+    flex: 1,
+    padding: 45,
+    borderRadius: 8,
+    alignItems: "center",
     marginHorizontal: 15,
     shadowColor: "#0b2545",
     shadowOpacity: 0.5,
     shadowOffset: { width: 0, height: 5 },
     shadowRadius: 5,
-    elevation: 10,
+    elevation: 10
   },
   tabActive: { 
-    backgroundColor: "#0b2545"
+    backgroundColor: "#0b2545" 
   },
   tabInactive: { 
     backgroundColor: "#8da9c4" 
@@ -419,37 +475,36 @@ const styles = StyleSheet.create({
   tabTextActive: { 
     color: "#fff", 
     fontWeight: "bold", 
-    fontSize: 20,
+    fontSize: 20 
   },
   tabTextInactive: { 
     color: "#0b2545", 
     fontWeight: "bold", 
     fontSize: 20 
   },
-  formPanel: { 
+  formPanel: {
     flex: 1,
-    backgroundColor: "#0b2545", 
+    backgroundColor: "#0b2545",
     padding: 40,
     paddingHorizontal: 55,
     height: 600,
-    margin: -20,
-
+    margin: -20
   },
-  input: { 
-    backgroundColor: "#fff", 
-    borderRadius: 8, 
+  input: {
+    backgroundColor: "#fff",
+    borderRadius: 8,
     padding: 15,
-    marginBottom: 15, 
+    marginBottom: 15,
     fontSize: 15
   },
-  pickerBtn: { 
-    backgroundColor: "#fff", 
-    borderRadius: 8, 
-    padding: 15, 
-    marginBottom: 12, 
-    flexDirection: "row", 
-    justifyContent: "space-between", 
-    alignItems: "center" 
+  pickerBtn: {
+    backgroundColor: "#fff",
+    borderRadius: 8,
+    padding: 15,
+    marginBottom: 12,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center"
   },
   pickerBtnText: { 
     color: "#0b2545", 
@@ -460,7 +515,7 @@ const styles = StyleSheet.create({
     borderRadius: 80,
     paddingVertical: 12,
     marginTop: 30,
-    alignItems: "center",
+    alignItems: "center"
   },
   submitButtonText: { 
     color: "#0b2545", 
@@ -471,29 +526,35 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "rgba(0,0,0,0.5)",
+    backgroundColor: "rgba(0,0,0,0.5)"
   },
-  modalContent: { 
-    backgroundColor: "#fff", 
-    borderRadius: 10, 
-    padding: 20, 
-    width: "80%", 
-    maxHeight: "60%" 
+  modalContent: {
+    backgroundColor: "#fff",
+    borderRadius: 10,
+    padding: 20,
+    width: "80%",
+    maxHeight: "60%"
   },
   modalItem: { 
-    padding: 15, 
-    borderBottomWidth: 1, 
-    borderBottomColor: "#ccc" 
+    padding: 15,
+    borderBottomWidth: 0.5, 
+    borderBottomColor: "#ccc"
   },
   modalItemText: { 
-    fontSize: 16 
+    fontSize: 16
   },
   modalClose: { 
-    marginTop: 15, 
+    marginTop: 10, 
     alignItems: "center" 
   },
   modalCloseText: { 
-    color: "#134074", 
+    color: "#034078", 
     fontWeight: "bold" 
+  },
+  errorText: {
+    fontSize: 14,
+    marginBottom: 8,
+    textAlign: "center",
+    color: "#ff9013"
   },
 });
