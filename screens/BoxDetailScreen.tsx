@@ -9,18 +9,19 @@ import ItemCard from "../components/ItemCard";
 import OptionsModal from "../components/OptionsModal";
 import BoxEditModal from "../components/BoxEditModal";
 import BoxDeleteModal from "../components/BoxDeleteModal";
+import { useToast } from "../components/ToastContext";
 
 type Props = NativeStackScreenProps<RootStackParamList, "BoxDetailScreen">;
 
 export default function BoxDetailScreen({ route, navigation }: Props) {
   const { box } = route.params;
   const [items, setItems] = useState<Item[]>([]);
-  const [fdata, setFData] = useState("Data não informada :)");
+  const [fdata, setFData] = useState("Data não informada");
   const [optionsVisible, setOptionsVisible] = useState(false);
   const [editModalVisible, setEditModalVisible] = useState(false);
   const [currentBox, setCurrentBox] = useState(box);
   const [deleteModalVisible, setDeleteModalVisible] = useState(false);
-  const [toastMessage, setToastMessage] = useState("");
+  const { showToast } = useToast();
 
   const handleItemDeleted = (itemId: number) => {
     setItems(prevItems => prevItems.filter(item => item.id !== itemId));
@@ -42,7 +43,7 @@ export default function BoxDetailScreen({ route, navigation }: Props) {
   if (currentBox.deadline_date) {
     setFData(new Date(currentBox.deadline_date).toLocaleDateString("pt-BR"));
   } else {
-    setFData("Nenhuma não informada");
+    setFData("Nenhuma data informada");
   }
 }, [currentBox.deadline_date]);
 
@@ -53,7 +54,7 @@ export default function BoxDetailScreen({ route, navigation }: Props) {
     box_description: updatedBox.box_description,
     deadline_date: updatedBox.deadline_date ?? undefined,
   }));
-  setToastMessage("Box atualizado com sucesso!");
+  showToast("Box atualizado com sucesso!");
 };
 
   return (
