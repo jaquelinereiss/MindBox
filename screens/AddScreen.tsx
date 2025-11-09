@@ -8,6 +8,7 @@ import getArea, { Area } from "../src/services/getArea";
 import getSubarea, { Subarea } from "../src/services/getSubarea";
 import getBoxes from "../src/services/getBoxes";
 import insertItem from "../src/services/insertItem";
+import { useToast } from "../components/ToastContext";
 
 interface AddScreenProps {
   navigate: (screen: keyof RootStackParamList, params?: any) => void;
@@ -33,6 +34,7 @@ export default function AddScreen({ navigate }: AddScreenProps) {
   const [box, setBox] = useState<Box[]>([]);
   const [errorBox, setErrorBox] = useState<string>("");
   const [errorItem, setErrorItem] = useState<string>("");
+  const { showToast } = useToast();
 
   const getAreas = async () => {
     try {
@@ -169,11 +171,13 @@ export default function AddScreen({ navigate }: AddScreenProps) {
       setBoxDescription("");
       setBoxDeadline("");
       setBoxArea(null);
-      setErrorBox("");
-      navigate("Boxes");
+      showToast("Ops! Algo deu errado ao adicionar o box. Tente novamente.");
+      showToast("Box cadastrado com sucesso!");
+      setTimeout(() => navigate("Boxes"), 2000);
+
     } catch (err) {
       console.error("Erro ao inserir box:", err);
-      setErrorBox("Ops! Algo deu errado ao adicionar sua box. Tente novamente.");
+      showToast("Ocorreu um erro ao cadastrar o box.");
     }
   };
 
@@ -230,6 +234,7 @@ export default function AddScreen({ navigate }: AddScreenProps) {
       setBoxDeadline("");
       setErrorItem("");
       navigate("Boxes");
+      
     } catch (err) {
       console.error("Erro inesperado ao adicionar item:", err);
       setErrorItem("Ops! Erro ao adicionar o item. Tente novamente.");
@@ -308,6 +313,8 @@ export default function AddScreen({ navigate }: AddScreenProps) {
                         value={boxTitle}
                         onChangeText={setBoxTitle}
                         placeholderTextColor="#bfcad5"
+                        maxLength={60}
+                        multiline
                       />
                       <TextInput
                         style={styles.input}
@@ -315,6 +322,8 @@ export default function AddScreen({ navigate }: AddScreenProps) {
                         value={boxDescription}
                         onChangeText={setBoxDescription}
                         placeholderTextColor="#bfcad5"
+                        maxLength={120}
+                        multiline
                       />
                       <TextInput
                         style={styles.input}

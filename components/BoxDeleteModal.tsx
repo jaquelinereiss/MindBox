@@ -1,7 +1,9 @@
 import { Modal, View, Text, TouchableOpacity, StyleSheet, Alert } from "react-native";
+import React, { useState } from "react";
 import { Ionicons } from "@expo/vector-icons";
 import deleteBox from "../src/services/deleteBox";
 import { Box } from "../src/types";
+import { useToast } from "./ToastContext";
 
 interface BoxDeleteModalProps {
   visible: boolean;
@@ -11,21 +13,25 @@ interface BoxDeleteModalProps {
 }
 
 export default function BoxDeleteModal({ visible, onClose, box, onDeleted, }: BoxDeleteModalProps) {
+  const { showToast } = useToast();
+
   const handleDelete = async () => {
     try {
       const result = await deleteBox(box.id);
 
         if (result.success) {
-            Alert.alert("Sucesso", "O box foi excluído.");
-            onClose();
-            onDeleted();
+            showToast("Box excluído com sucesso!");
+            setTimeout(() => {
+              onClose();
+              onDeleted();
+            }, 500);
         } else {
-            Alert.alert("Erro", "Ops! Não foi possível excluir o box.");
+            showToast("Ops! Não foi possível excluir o box.");
         }
     }
     catch (error) {
       console.error(error);
-      Alert.alert("Erro", "Ops! Ocorreu um erro inesperado.");
+      showToast("Ops! Ocorreu um erro inesperado."); 
     }
   };
 

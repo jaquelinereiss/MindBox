@@ -15,6 +15,6 @@ export interface Box {
   box_area: number;
   box_description?: string;
   area_name: string;
-  deadline_date: string;
+  deadline_date?: string | null; 
   items_count?: number;
 }

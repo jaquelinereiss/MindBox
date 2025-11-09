@@ -12,6 +12,7 @@ import BoxDetailScreen from "./screens/BoxDetailScreen";
 import SettingsScreen from "./screens/SettingsScreen";
 import DashboardScreen from "./screens/DashboardScreen";
 import Menu from "./components/Menu";
+import { ToastProvider } from "./components/ToastContext";
 
 export type RootStackParamList = {
   Login: undefined;
@@ -49,7 +50,8 @@ export default function App() {
   };
 
   return (
-    <NavigationContainer ref={navigationRef}>
+    <ToastProvider>
+      <NavigationContainer ref={navigationRef}>
       <View style={styles.container}>
         <View style={{ flex: 1 }}>
           <Stack.Navigator screenOptions={{ headerShown: false }}>
@@ -107,6 +109,7 @@ export default function App() {
         )}
       </View>
     </NavigationContainer>
+    </ToastProvider>
   );
 }
 
