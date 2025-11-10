@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from "react";
-import { Modal, View, Text, TextInput, TouchableOpacity, Alert, FlatList, StyleSheet } from "react-native";
+import { Modal, View, Text, TextInput, TouchableOpacity, FlatList, StyleSheet } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import updateItem from "../src/services/updateItem";
 import getBoxById from "../src/services/getBoxById";
 import getSubarea, { Subarea } from "../src/services/getSubarea";
 import { Item } from "../src/navigation/types";
+import { useToast } from "../components/ToastContext";
 
 interface Box {
   id: number;
@@ -37,6 +38,12 @@ export default function ItemEditModal({
   const [pickerVisible, setPickerVisible] = useState(false);
   const [loadingSubareas, setLoadingSubareas] = useState(true);
 
+  const [titleError, setTitleError] = useState("");
+  const [priorityError, setPriorityError] = useState("");
+  const [dateError, setDateError] = useState("");
+
+  const { showToast } = useToast();
+
   function formatDateInput(value: string) {
     const numberOnly = value.replace(/\D/g, "").substring(0, 8);
     if (numberOnly.length <= 2) return numberOnly;
@@ -51,8 +58,9 @@ export default function ItemEditModal({
     const day = numberOnly.substring(0, 2);
     const month = numberOnly.substring(2, 4);
     const year = numberOnly.substring(4, 8);
-    return new Date(`${year}-${month}-${day}T00:00:00Z`).toISOString();
+    return new Date(`${year}-${month}-${day}T00:00:00`).toISOString();
   }
+
 
   function isValidDate(dateStr: string) {
     const [dayStr, monthStr, yearStr] = dateStr.split("/");
@@ -60,7 +68,7 @@ export default function ItemEditModal({
     const date = new Date(+yearStr, +monthStr - 1, +dayStr);
     return date.getFullYear() === +yearStr && date.getMonth() === +monthStr - 1 && date.getDate() === +dayStr;
   }
-  
+
   useEffect(() => {
     if (!visible) return;
     if (item.box_related == null) return;
@@ -70,23 +78,20 @@ export default function ItemEditModal({
     setTitle(item.item_title);
     setDescription(item.item_description ?? "");
     setPriority(item.priority_number ? String(item.priority_number) : "4");
-    setRealizationDate(
-      item.realization_date ? new Date(item.realization_date).toLocaleDateString("pt-BR") : ""
-    );
+    setRealizationDate(item.realization_date ? new Date(item.realization_date).toLocaleDateString("pt-BR") : "");
+    setTitleError("");
+    setPriorityError("");
+    setDateError("");
 
     const fetchSubareas = async () => {
       setLoadingSubareas(true);
       try {
         const relatedBox = await getBoxById(boxId);
-        if (relatedBox === null) {
-          throw new Error("Box relacionado não encontrado");
-        }
+        if (relatedBox === null) throw new Error("Box relacionado não encontrado");
 
         const subs = await getSubarea(relatedBox.box_area);
         setSubareaOptions(subs);
-        setSelectedSubarea(
-         subs.find((s) => s.id === item.subarea_box)?.id ?? undefined
-        );
+        setSelectedSubarea(subs.find((s) => s.id === item.subarea_box)?.id ?? undefined);
       } catch (err) {
         console.error("Erro ao carregar subáreas:", err);
         setSubareaOptions([]);
@@ -97,38 +102,41 @@ export default function ItemEditModal({
     };
 
     fetchSubareas();
-  }, [
-      visible,
-      item.box_related,
-      item.item_title,
-      item.item_description,
-      item.priority_number,
-      item.realization_date,
-      item.subarea_box,
-    ]);
+  }, [visible]);
 
-    const handleSave = async () => {
-      if (!title.trim()) {
-        Alert.alert("Erro", "O título é obrigatório!");
-      return;
+  const handleSave = async () => {
+    setTitleError("");
+    setPriorityError("");
+    setDateError("");
+
+    let valid = true;
+
+    if (!title.trim()) {
+      setTitleError("Não esqueça do título, ele é obrigatório.");
+      valid = false;
     }
 
     const priorityNumber = priority ? Number(priority) : 4;
     if (priorityNumber < 1 || priorityNumber > 4) {
-      Alert.alert("Erro", "A prioridade deve ser um número entre 1 e 4.");
-      return;
+      setPriorityError("Informe um número entre 1 e 4.");
+      valid = false;
     }
 
-    if (realizationDate && !isValidDate(realizationDate)) {
-      Alert.alert("Erro", "Data inválida.");
-      return;
+    if (!realizationDate.trim()) {
+      setDateError("A data de realização é obrigatória.");
+      valid = false;
+    } else if (!isValidDate(realizationDate)) {
+      setDateError("Hmm...essa data não parece válida.");
+      valid = false;
     }
+
+    if (!valid) return;
 
     const formattedDate = realizationDate ? formatDeadlineToTimestamptz(realizationDate) : undefined;
 
     const updated: Partial<Item> = {
-      item_title: title,
-      item_description: description ?? undefined,
+      item_title: title.trim(),
+      item_description: description.trim(),
       priority_number: priorityNumber,
       realization_date: formattedDate,
       subarea_box: selectedSubarea,
@@ -137,12 +145,14 @@ export default function ItemEditModal({
     try {
       const response = await updateItem(item.id, updated);
       if (!response || !response[0]) throw new Error("Erro ao atualizar item");
+      
       onItemUpdated(response[0]);
-      Alert.alert("Sucesso", "Item atualizado!");
+      showToast("Item atualizado com sucesso!");
       onClose();
+
     } catch (err) {
       console.error("Erro ao atualizar item:", err);
-      Alert.alert("Erro", "Não foi possível atualizar o item.");
+      showToast("Ops! Não foi possível atualizar o item.");
     }
   };
 
@@ -162,8 +172,17 @@ export default function ItemEditModal({
             style={styles.input}
             placeholder="Título do item"
             value={title}
-            onChangeText={setTitle}
+            onChangeText={(text) => {
+              setTitle(text);
+              if (titleError) setTitleError("");
+            }}
+            maxLength={50}
+            multiline
           />
+          <View style={styles.row}>
+            {titleError ? <Text style={styles.errorText}>{titleError}</Text> : <View />}
+            <Text style={styles.counterText}>{title.length}/50</Text>
+          </View>
 
           <Text style={styles.label}>Descrição</Text>
           <TextInput
@@ -171,8 +190,13 @@ export default function ItemEditModal({
             placeholder="Descrição (opcional)"
             value={description}
             onChangeText={setDescription}
+            maxLength={100}
             multiline
           />
+          <View style={styles.row}>
+            <View />
+            <Text style={styles.counterText}>{description.length}/100</Text>
+          </View>
 
           <Text style={styles.label}>Prioridade</Text>
           <TextInput
@@ -182,17 +206,26 @@ export default function ItemEditModal({
             value={priority}
             onChangeText={(text) => {
               const numeric = text.replace(/[^0-9]/g, "");
-              if (numeric === "" || /^[1-4]$/.test(numeric)) setPriority(numeric);
+              setPriority(numeric);
+              if (priorityError) setPriorityError("");
             }}
+            maxLength={1}
           />
+          {priorityError ? <Text style={styles.errorText}>{priorityError}</Text> : null}
 
           <Text style={styles.label}>Data de realização</Text>
           <TextInput
             style={styles.input}
-            placeholder="Data de realização (opcional)"
+            placeholder="Data prevista para realização"
             value={realizationDate}
-            onChangeText={(text) => setRealizationDate(formatDateInput(text))}
+            onChangeText={(text) => {
+              setRealizationDate(formatDateInput(text));
+              if (dateError) setDateError("");
+            }}
+            keyboardType="number-pad"
+            maxLength={10}
           />
+          {dateError ? <Text style={styles.errorText}>{dateError}</Text> : null}
 
           <Text style={styles.label}>Subárea</Text>
           <TouchableOpacity
@@ -221,7 +254,7 @@ export default function ItemEditModal({
             </TouchableOpacity>
           </View>
 
-          {/* Seleção de subáreas */}
+          {/* Modal de seleção da subárea */}
           <Modal visible={pickerVisible} transparent animationType="slide">
             <View style={styles.modalOverlay}>
               <View style={styles.modalContent}>
@@ -257,39 +290,47 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "rgba(0,0,0,0.4)",
     justifyContent: "center",
-    alignItems: "center",
+    alignItems: "center"
   },
   modal: {
     width: "90%",
     backgroundColor: "#fff",
     borderRadius: 15,
     padding: 20,
-    elevation: 6,
+    elevation: 6
   },
   header: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: 15,
+    marginBottom: 15
   },
   title: {
     fontSize: 20,
     fontWeight: "bold",
-    color: "#134074",
+    color: "#134074"
   },
   label: {
     fontSize: 14,
     color: "#134074",
     fontWeight: "500",
-    marginBottom: 5,
+    marginBottom: 5
   },
   input: {
     borderWidth: 1,
     borderColor: "#ccc",
     borderRadius: 8,
     padding: 10,
-    marginBottom: 15,
-    fontSize: 14,
+    marginBottom: 10,
+    fontSize: 14
+  },
+  row: {
+    flexDirection: "row",
+    justifyContent: "space-between"
+  },
+  counterText: {
+    fontSize: 12,
+    color: "#666"
   },
   buttonsContainer: {
     flexDirection: "row",
@@ -310,11 +351,11 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     paddingHorizontal: 15,
     borderRadius: 8,
-    marginRight: 10,
+    marginRight: 10
   },
   cancelText: {
     color: "#333",
-    fontWeight: "500",
+    fontWeight: "500"
   },
   pickerBtn: {
     borderWidth: 1,
@@ -324,7 +365,7 @@ const styles = StyleSheet.create({
     padding: 15,
     marginBottom: 12,
     flexDirection: "row",
-    justifyContent: "space-between"
+    justifyContent: "space-between",
   },
   pickerBtnText: {
     color: "#0b2545",
@@ -359,4 +400,9 @@ const styles = StyleSheet.create({
     color: "#134074",
     fontWeight: "bold"
   },
+  errorText: {
+    color: "#d9534f",
+    fontSize: 13,
+    marginBottom: 10
+  }
 });
