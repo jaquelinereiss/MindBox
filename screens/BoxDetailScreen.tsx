@@ -27,6 +27,14 @@ export default function BoxDetailScreen({ route, navigation }: Props) {
     setItems(prevItems => prevItems.filter(item => item.id !== itemId));
   };
 
+  const handleItemUpdated = (updatedItem: Item) => {
+  setItems((prevItems) =>
+    prevItems.map((item) =>
+      item.id === updatedItem.id ? { ...item, ...updatedItem } : item
+    )
+  );
+};
+
   useEffect(() => {
     const fetchItems = async () => {
       try {
@@ -95,7 +103,7 @@ export default function BoxDetailScreen({ route, navigation }: Props) {
         data={items}
         keyExtractor={(item) => item.id.toString()}
         renderItem={({ item }) => (
-          <ItemCard item={item} onDeleteSuccess={handleItemDeleted} />
+          <ItemCard item={item} onDeleteSuccess={handleItemDeleted} onItemUpdated={handleItemUpdated} />
         )}
         contentContainerStyle={styles.listContent}
         showsVerticalScrollIndicator={false}

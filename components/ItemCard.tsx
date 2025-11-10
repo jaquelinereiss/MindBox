@@ -10,6 +10,7 @@ import ItemDeleteModal from "../components/ItemDeleteModal";
 interface ItemCardProps {
   item: Item;
   onDeleteSuccess: (itemId: number) => void;
+  onItemUpdated: (updatedItem: Item) => void;
 }
 
 export default function ItemCard({ item, onDeleteSuccess }: ItemCardProps) {
@@ -20,9 +21,18 @@ export default function ItemCard({ item, onDeleteSuccess }: ItemCardProps) {
   const [deleteModalVisible, setDeleteModalVisible] = useState(false);
 
   const formatDate = (isoDate: string | null) => {
-    if (!isoDate) return "";
-    const date = new Date(isoDate);
-    return date.toLocaleDateString("pt-BR");
+    if (!isoDate) return "Data não definida";
+
+    try {
+      const dateObj = new Date(isoDate);
+      const day = String(dateObj.getUTCDate()).padStart(2, "0");
+      const month = String(dateObj.getUTCMonth() + 1).padStart(2, "0");
+      const year = dateObj.getUTCFullYear();
+
+      return `${day}/${month}/${year}`;
+    } catch {
+      return "Data inválida";
+    }
   };
 
   const toggleCompletion = async () => {
@@ -52,21 +62,35 @@ export default function ItemCard({ item, onDeleteSuccess }: ItemCardProps) {
           />
         </TouchableOpacity>
       </View>
+
       <View style={styles.center}>
-        <Text style={[styles.title, completed && { textDecorationLine: "line-through" }]}>
+        <Text
+          style={[
+            styles.title,
+            completed && { textDecorationLine: "line-through" },
+          ]}
+        >
           {itemState.item_title}
         </Text>
         <Text style={styles.description}>{itemState.item_description}</Text>
+
         <View style={styles.meta}>
-          <Text style={styles.metaText}>Prioridade: {itemState.priority_number}</Text>
-          <Text style={styles.metaText}>Data: {formatDate(itemState.realization_date ?? null)}</Text>
+          <Text style={styles.metaText}>
+            Prioridade: {itemState.priority_number}
+          </Text>
+          <Text style={styles.metaText}>
+            Data: {formatDate(itemState.realization_date ?? null)}
+          </Text>
         </View>
       </View>
-      <TouchableOpacity style={styles.right} onPress={() => setOptionsVisible(true)}>
+
+      <TouchableOpacity
+        style={styles.right}
+        onPress={() => setOptionsVisible(true)}
+      >
         <Ionicons name="ellipsis-vertical" size={25} color="#134074" />
       </TouchableOpacity>
 
-      {/* Modal de opções */}
       <OptionsModal
         visible={optionsVisible}
         onClose={() => setOptionsVisible(false)}
@@ -81,7 +105,6 @@ export default function ItemCard({ item, onDeleteSuccess }: ItemCardProps) {
         }}
       />
 
-      {/* Modal de edição */}
       <ItemEditModal
         visible={editModalVisible}
         onClose={() => setEditModalVisible(false)}
@@ -90,7 +113,6 @@ export default function ItemCard({ item, onDeleteSuccess }: ItemCardProps) {
         onItemUpdated={handleItemUpdated}
       />
 
-      {/* Modal de exclusão */}
       <ItemDeleteModal
         visible={deleteModalVisible}
         onClose={() => setDeleteModalVisible(false)}
@@ -115,7 +137,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowOffset: { width: 0, height: 3 },
     shadowRadius: 4,
-    elevation: 3,
+    elevation: 3
   },
   left: {
     justifyContent: "center",

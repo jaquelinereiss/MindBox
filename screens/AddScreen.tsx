@@ -232,12 +232,12 @@ export default function AddScreen({ navigate }: AddScreenProps) {
       setItemSubitem(null);
       setSubitemOptions([]);
       setBoxDeadline("");
-      setErrorItem("");
-      navigate("Boxes");
+      showToast("Ops! Algo deu errado ao adicionar o item. Tente novamente.");
+      showToast("Item adicionado com sucesso!");
 
     } catch (err) {
       console.error("Erro inesperado ao adicionar item:", err);
-      setErrorItem("Ops! Erro ao adicionar o item. Tente novamente.");
+      showToast("Ops! Erro ao adicionar o item. Tente novamente.");
     }
   };
 
@@ -268,8 +268,12 @@ export default function AddScreen({ navigate }: AddScreenProps) {
         <Text style={styles.title}>Adicionar</Text>
         <Text style={styles.subtitle}>Organize essa cabecinha agitada.</Text>
       </View>
-
-      <ScrollView contentContainerStyle={{ paddingBottom: 120 }}>
+      <KeyboardAvoidingView
+            style={{ flex: 1 }}
+            behavior={Platform.OS === "ios" ? "padding" : "height"}
+            keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 0}
+      >
+      <ScrollView>
         <View style={styles.section}>
           <Text style={styles.sectionLabel}>Vamos colocar suas ideias em movimento?</Text>
           <Text style={[styles.sectionLabel, { color: "#0b2545", marginBottom: 35 }]}>Escolha uma categoria para começar.</Text>
@@ -298,11 +302,6 @@ export default function AddScreen({ navigate }: AddScreenProps) {
         </View>
 
         {tab && (
-          <KeyboardAvoidingView
-            style={{ flex: 1 }}
-            behavior={Platform.OS === "ios" ? "padding" : "height"}
-            keyboardVerticalOffset={Platform.OS === "ios" ? 60 : 60}
-          >
             <View style={{ flex: 1 }}>
               <View style={styles.formPanel}>
                 <ScrollView contentContainerStyle={{ paddingBottom: 4 }}>
@@ -357,6 +356,8 @@ export default function AddScreen({ navigate }: AddScreenProps) {
                         value={itemTitle}
                         onChangeText={setItemTitle}
                         placeholderTextColor="#bfcad5"
+                        maxLength={50}
+                        multiline
                       />
                       <TextInput
                         style={styles.input}
@@ -364,6 +365,8 @@ export default function AddScreen({ navigate }: AddScreenProps) {
                         value={itemDescription}
                         onChangeText={setItemDescription}
                         placeholderTextColor="#bfcad5"
+                        maxLength={100}
+                        multiline
                       />
                       <TextInput
                         style={styles.input}
@@ -384,6 +387,8 @@ export default function AddScreen({ navigate }: AddScreenProps) {
                         value={boxDeadline}
                         onChangeText={(text) => setBoxDeadline(formatDateInput(text))}
                         placeholderTextColor="#bfcad5"
+                        keyboardType="number-pad"
+                        maxLength={10}
                       />
 
                       <TouchableOpacity
@@ -420,9 +425,9 @@ export default function AddScreen({ navigate }: AddScreenProps) {
                 </ScrollView>
               </View>
             </View>
-          </KeyboardAvoidingView>
         )}
       </ScrollView>
+      </KeyboardAvoidingView>
 
       {PickerModal()}
     </SafeAreaView>
@@ -495,11 +500,11 @@ const styles = StyleSheet.create({
     fontSize: 20 
   },
   formPanel: {
-    flex: 1,
+    flexGrow: 1,
     backgroundColor: "#0b2545",
-    padding: 40,
+    paddingVertical: 30,
     paddingHorizontal: 55,
-    height: 600,
+    minHeight: 650,
     margin: -20
   },
   input: {
@@ -526,7 +531,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#8da9c4",
     borderRadius: 80,
     paddingVertical: 12,
-    marginTop: 30,
+    marginTop: 15,
     alignItems: "center"
   },
   submitButtonText: { 

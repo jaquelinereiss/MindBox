@@ -1,8 +1,9 @@
 import React from "react";
-import { Modal, View, Text, TouchableOpacity, StyleSheet, Alert } from "react-native";
+import { Modal, View, Text, TouchableOpacity, StyleSheet } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import deleteItem from "../src/services/deleteItem";
 import { Item } from "../src/navigation/types";
+import { useToast } from "./ToastContext";
 
 interface ItemDeleteModalProps {
   visible: boolean;
@@ -11,27 +12,24 @@ interface ItemDeleteModalProps {
   onDeleteSuccess: (itemId: number) => void;
 }
 
-export default function ItemDeleteModal({
-  visible,
-  onClose,
-  item,
-  onDeleteSuccess,
-}: ItemDeleteModalProps) {
+export default function ItemDeleteModal({ visible, onClose, item, onDeleteSuccess }: ItemDeleteModalProps) {
+  const { showToast } = useToast();
+
   const handleDelete = async () => {
     try {
       const { error } = await deleteItem(item.id);
 
       if (error) {
-        Alert.alert("Erro", "Ops! Não foi possível excluir o item.");
+        showToast("Ops! Não foi possível excluir o item.");
         return;
       }
 
-      Alert.alert("Sucesso", "O item foi excluído com sucesso.");
+      showToast("O item foi excluído com sucesso!");
       onDeleteSuccess(item.id);
       onClose();
     } catch (err) {
       console.error(err);
-      Alert.alert("Erro", "Ops! Ocorreu um erro inesperado.");
+      showToast("Ocorreu um erro inesperado ao excluir o item.");
     }
   };
 
