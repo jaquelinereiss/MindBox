@@ -107,6 +107,12 @@ export default function BoxDetailScreen({ route, navigation }: Props) {
         )}
         contentContainerStyle={styles.listContent}
         showsVerticalScrollIndicator={false}
+
+        ListEmptyComponent={
+          <Text style={styles.emptyText}>
+            Ops! Ainda não há itens por aqui.
+          </Text>
+        }
       />
 
       {/* Modais */}
@@ -209,4 +215,12 @@ const styles = StyleSheet.create({
     paddingTop: 20,
     paddingBottom: 40
   },
+  emptyText: {
+    textAlign: "center",
+    fontWeight: "500",
+    color: "#0b2545",
+    fontSize: 16,
+    opacity: 0.8,
+    paddingHorizontal: 25
+},
 });
