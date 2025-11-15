@@ -4,13 +4,16 @@ import AddButton from "./AddButton";
 
 type HeaderProps = {
   onAdd: () => void;
+  displayName?: string;
 };
 
-export default function Header({ onAdd }: HeaderProps) {
+export default function Header({ onAdd, displayName }: HeaderProps) {
   return (
     <View style={styles.container}>
       <Text style={styles.title}>MindBox</Text>
-      <Text style={styles.subtitle}>Olá. Sinta-se em casa!</Text>
+      <Text style={styles.subtitle}>
+        {displayName ? `Olá, ${displayName}. Sinta-se em casa!` : "Olá. Sinta-se em casa!"}
+      </Text>
 
       <AddButton onPress={onAdd} />
     </View>

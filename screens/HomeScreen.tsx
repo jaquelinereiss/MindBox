@@ -1,8 +1,9 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { SafeAreaView, ScrollView, View, Text, StyleSheet, TouchableOpacity } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import Header from "../components/Header";
 import { RootStackParamList } from "../App";
+import { getUser } from "../src/services/auth";
 
 interface HomeScreenProps {
   navigate: (screen: keyof RootStackParamList, params?: any) => void;
@@ -17,9 +18,24 @@ export default function HomeScreen({ navigate }: HomeScreenProps) {
     navigate("Dashboard");
   };
 
+  const [displayName, setDisplayName] = useState("");
+  
+  useEffect(() => {
+    async function loadUser() {
+      const { data } = await getUser();
+      const name = data?.user?.user_metadata?.display_name;
+      if (name) setDisplayName(name);
+    }
+
+    loadUser();
+  }, []);
+
   return (
     <SafeAreaView style={styles.container}>
-      <Header onAdd={handleAdd} />
+      <Header
+        onAdd={handleAdd}
+        displayName={displayName}
+      />
 
       <ScrollView contentContainerStyle={{ flexGrow: 1, paddingBottom: 100 }}>
         <TouchableOpacity style={styles.card} onPress={handleDashboard} activeOpacity={0.8}>
