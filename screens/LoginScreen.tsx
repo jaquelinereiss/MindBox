@@ -1,9 +1,9 @@
 import React, { useState } from "react";
+import { View, Text, TextInput, TouchableOpacity, StyleSheet } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { RootStackParamList } from "../src/navigation/types";
 import { supabase } from "../src/lib/supabaseClient";
-import { View, Text, TextInput, TouchableOpacity, StyleSheet } from "react-native";
 
 type Props = NativeStackScreenProps<RootStackParamList, "Login"> & {
   onLoginSuccess: () => void;
@@ -25,7 +25,7 @@ export default function LoginScreen({ navigation, onLoginSuccess }: Props) {
     setLoginError("");
 
     if (!email.trim()) {
-      setEmailError("O e-mail é obrigatório.");
+      setEmailError("Não deixe de informar seu e-mail.");
       valid = false;
     } else if (!/\S+@\S+\.\S+/.test(email)) {
       setEmailError("Digite um e-mail válido.");
@@ -33,7 +33,7 @@ export default function LoginScreen({ navigation, onLoginSuccess }: Props) {
     }
 
     if (!password.trim()) {
-      setPasswordError("A senha é obrigatória.");
+      setPasswordError("Ops! Não esqueça da senha.");
       valid = false;
     }
 
@@ -61,6 +61,7 @@ export default function LoginScreen({ navigation, onLoginSuccess }: Props) {
       <View style={styles.formContainer}>
         <Text style={styles.description}>Informe seus dados para continuar</Text>
 
+        {emailError ? <Text style={styles.errorText}>{emailError}</Text> : null}
         <View style={styles.inputContainer}>
           <TextInput
             style={styles.input}
@@ -76,8 +77,8 @@ export default function LoginScreen({ navigation, onLoginSuccess }: Props) {
           />
           <Ionicons name="mail-outline" size={20} color="#7a8ca5" style={styles.icon} />
         </View>
-        {emailError ? <Text style={styles.errorText}>{emailError}</Text> : null}
-
+        
+        {passwordError ? <Text style={styles.errorText}>{passwordError}</Text> : null}
         <View style={styles.inputContainer}>
           <TextInput
             style={styles.input}
@@ -93,7 +94,6 @@ export default function LoginScreen({ navigation, onLoginSuccess }: Props) {
           <Ionicons name="lock-closed-outline" size={20} color="#7a8ca5" style={styles.icon} />
         </View>
 
-        {passwordError ? <Text style={styles.errorText}>{passwordError}</Text> : null}
         {loginError ? <Text style={styles.loginError}>{loginError}</Text> : null}
 
         <TouchableOpacity
@@ -115,27 +115,27 @@ export default function LoginScreen({ navigation, onLoginSuccess }: Props) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#034078",
+    backgroundColor: "#034078"
   },
   header: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    paddingTop: 70,
+    paddingTop: 70
   },
   title: {
     fontSize: 34,
     fontWeight: "bold",
     color: "#fff",
     marginBottom: 6,
-    letterSpacing: 1,
+    letterSpacing: 1
   },
   subtitle: {
     fontSize: 15,
     color: "#cde2f7",
     textAlign: "center",
     width: "80%",
-    lineHeight: 22,
+    lineHeight: 22
   },
   formContainer: {
     flex: 2,
@@ -149,14 +149,14 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.08,
     shadowOffset: { width: 0, height: -2 },
     shadowRadius: 6,
-    elevation: 6,
+    elevation: 6
   },
   description: {
     fontSize: 16,
     color: "#034078",
     width: "95%",
     marginBottom: 25,
-    fontWeight: "600",
+    fontWeight: "600"
   },
   inputContainer: {
     width: "95%",
@@ -170,29 +170,28 @@ const styles = StyleSheet.create({
     marginBottom: 15,
     shadowColor: "#000",
     shadowOpacity: 0.05,
-    shadowRadius: 3,
+    shadowRadius: 3
   },
   input: {
     flex: 1,
     height: 45,
-    color: "#333",
+    color: "#333"
   },
   icon: {
-    marginLeft: 8,
+    marginLeft: 8
   },
   errorText: {
-    width: "95%",
+    width: "92%",
     color: "#d9534f",
     fontSize: 13,
-    marginBottom: 10,
-    textAlign: "left",
+    marginBottom: 2
   },
   loginError: {
     color: "#d9534f",
     fontSize: 14,
     marginTop: 5,
     marginBottom: 10,
-    textAlign: "center",
+    textAlign: "center"
   },
   button: {
     width: "95%",
@@ -201,17 +200,17 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     alignItems: "center",
     marginTop: 10,
-    elevation: 2,
+    elevation: 2
   },
   buttonText: {
     color: "#fff",
     fontSize: 17,
     fontWeight: "600",
-    letterSpacing: 0.5,
+    letterSpacing: 0.5
   },
   link: {
     marginTop: 50,
     color: "#52667a",
-    fontWeight: "600",
+    fontWeight: "600"
   },
 });
