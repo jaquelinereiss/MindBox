@@ -42,9 +42,9 @@ export default function SettingsScreen({ onLogout }: Props) {
               color="#034078"
               style={{ marginBottom: 10 }}
             />
-            <Text style={styles.modalTitle}>Poxa...deseja sair?</Text>
+            <Text style={styles.modalTitle}>Ei...vai sair agora?</Text>
             <Text style={styles.modalSubtitle}>
-              Tem certeza que deseja encerrar sua sessão no MindBox?
+              Suas coisas ficam bem guardadas aqui, esperando você voltar.
             </Text>
 
             <View style={styles.modalButtons}>
@@ -56,7 +56,7 @@ export default function SettingsScreen({ onLogout }: Props) {
               </Pressable>
 
               <Pressable
-                style={[styles.button, styles.cancelButton]}
+                style={[styles.button]}
                 onPress={() => setModalVisible(false)}
               >
                 <Text style={[styles.buttonText, { color: "#034078" }]}>
@@ -155,14 +155,11 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginHorizontal: 5,
   },
-  cancelButton: {
+  confirmButton: {
     backgroundColor: "#f0f4f8",
   },
-  confirmButton: {
-    backgroundColor: "#034078",
-  },
   buttonText: {
-    color: "#fff",
+    color: "#034078",
     fontWeight: "600",
     fontSize: 16,
   },
