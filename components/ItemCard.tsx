@@ -52,13 +52,13 @@ export default function ItemCard({ item, onDeleteSuccess }: ItemCardProps) {
   };
 
   return (
-    <View style={styles.card}>
+    <View style={[styles.card, completed && styles.completedCard]}>
       <View style={styles.left}>
         <TouchableOpacity onPress={toggleCompletion}>
           <Ionicons
             name={completed ? "checkbox" : "square-outline"}
             size={30}
-            color="#134074"
+            color={completed ? "#777":"#134074"}
           />
         </TouchableOpacity>
       </View>
@@ -68,11 +68,12 @@ export default function ItemCard({ item, onDeleteSuccess }: ItemCardProps) {
           style={[
             styles.title,
             completed && { textDecorationLine: "line-through" },
+            completed && styles.completedText,
           ]}
         >
           {itemState.item_title}
         </Text>
-        <Text style={styles.description}>{itemState.item_description}</Text>
+        <Text style={[styles.description, completed && styles.completedText && completed && { textDecorationLine: "line-through" }]}>{itemState.item_description}</Text>
 
         <View style={styles.meta}>
           <Text style={styles.metaText}>
@@ -88,7 +89,7 @@ export default function ItemCard({ item, onDeleteSuccess }: ItemCardProps) {
         style={styles.right}
         onPress={() => setOptionsVisible(true)}
       >
-        <Ionicons name="ellipsis-vertical" size={25} color="#134074" />
+        <Ionicons name="ellipsis-vertical" size={25} color={completed ? "#777":"#134074"} />
       </TouchableOpacity>
 
       <OptionsModal
@@ -172,4 +173,10 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: "#999"
   },
+  completedCard: {
+    opacity: 0.7
+  },
+  completedText: {
+    color: "#777"
+  }
 });
