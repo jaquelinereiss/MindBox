@@ -13,7 +13,7 @@ interface ItemCardProps {
   onItemUpdated: (updatedItem: Item) => void;
 }
 
-export default function ItemCard({ item, onDeleteSuccess }: ItemCardProps) {
+export default function ItemCard({ item, onDeleteSuccess, onItemUpdated }: ItemCardProps) {
   const [itemState, setItemState] = useState(item);
   const [completed, setCompleted] = useState(item.item_completed || false);
   const [optionsVisible, setOptionsVisible] = useState(false);
@@ -40,15 +40,26 @@ export default function ItemCard({ item, onDeleteSuccess }: ItemCardProps) {
     setCompleted(newStatus);
 
     const { error } = await completeItem(itemState.id, newStatus);
+
     if (error) {
       Alert.alert("Erro", "Não foi possível atualizar o item.");
       setCompleted(!newStatus);
+      return;
     }
+
+    onItemUpdated({
+      ...itemState,
+      item_completed: newStatus
+    });
+
+    setItemState(prev => ({ ...prev, item_completed: newStatus }));
   };
 
   const handleItemUpdated = (updatedItem: Item) => {
     setItemState(updatedItem);
     setCompleted(updatedItem.item_completed || false);
+
+    onItemUpdated(updatedItem);
   };
 
   return (
@@ -58,7 +69,7 @@ export default function ItemCard({ item, onDeleteSuccess }: ItemCardProps) {
           <Ionicons
             name={completed ? "checkbox" : "square-outline"}
             size={30}
-            color={completed ? "#777":"#134074"}
+            color={completed ? "#777" : "#134074"}
           />
         </TouchableOpacity>
       </View>
@@ -73,7 +84,16 @@ export default function ItemCard({ item, onDeleteSuccess }: ItemCardProps) {
         >
           {itemState.item_title}
         </Text>
-        <Text style={[styles.description, completed && styles.completedText && completed && { textDecorationLine: "line-through" }]}>{itemState.item_description}</Text>
+
+        <Text
+          style={[
+            styles.description,
+            completed && styles.completedText,
+            completed && { textDecorationLine: "line-through" }
+          ]}
+        >
+          {itemState.item_description}
+        </Text>
 
         <View style={styles.meta}>
           <Text style={styles.metaText}>
@@ -89,7 +109,11 @@ export default function ItemCard({ item, onDeleteSuccess }: ItemCardProps) {
         style={styles.right}
         onPress={() => setOptionsVisible(true)}
       >
-        <Ionicons name="ellipsis-vertical" size={25} color={completed ? "#777":"#134074"} />
+        <Ionicons
+          name="ellipsis-vertical"
+          size={25}
+          color={completed ? "#777" : "#134074"}
+        />
       </TouchableOpacity>
 
       <OptionsModal

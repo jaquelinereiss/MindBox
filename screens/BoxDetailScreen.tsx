@@ -1,9 +1,9 @@
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { RootStackParamList, Item } from "../src/navigation/types";
+import { View, Text, FlatList, StyleSheet, SafeAreaView, TouchableOpacity, LayoutAnimation } from "react-native";
 import { Box } from "../src/types";
 import { Ionicons } from "@expo/vector-icons";
 import { useEffect, useState } from "react";
-import { View, Text, FlatList, StyleSheet, SafeAreaView, TouchableOpacity } from "react-native";
 import getItems from "../src/services/getItems";
 import ItemCard from "../components/ItemCard";
 import OptionsModal from "../components/OptionsModal";
@@ -24,22 +24,47 @@ export default function BoxDetailScreen({ route, navigation }: Props) {
   const { showToast } = useToast();
 
   const handleItemDeleted = (itemId: number) => {
-    setItems(prevItems => prevItems.filter(item => item.id !== itemId));
+    setItems((prev) => prev.filter((item) => item.id !== itemId));
   };
 
-  const handleItemUpdated = (updatedItem: Item) => {
-  setItems((prevItems) =>
-    prevItems.map((item) =>
-      item.id === updatedItem.id ? { ...item, ...updatedItem } : item
-    )
-  );
+  const sortItems = (itemsList: Item[]) => {
+  const pending = itemsList
+    .filter((i) => !i.item_completed)
+    .sort((a, b) => (a.priority_number! ) - (b.priority_number! ));
+
+  const completed = itemsList
+    .filter((i) => i.item_completed)
+    .sort((a, b) => {
+      const dateA = a.realization_date ? new Date(a.realization_date).getTime() : 0;
+      const dateB = b.realization_date ? new Date(b.realization_date).getTime() : 0;
+      return dateB - dateA;
+    });
+
+  return [...pending, ...completed];
 };
+
+  const handleItemUpdated = (updatedItem: Item) => {
+    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+
+    setItems((prev) => {
+      const updated = prev.map((item) =>
+        item.id === updatedItem.id ? { ...item, ...updatedItem } : item
+      );
+
+      return sortItems(updated);
+    });
+  };
 
   useEffect(() => {
     const fetchItems = async () => {
       try {
         const data = await getItems(currentBox.id.toString());
-        setItems(data.map(d => ({ ...d, box_related: d.box_related ?? currentBox.id })));
+        const normalized = data.map((d) => ({
+          ...d,
+          box_related: d.box_related ?? currentBox.id,
+        }));
+
+        setItems(sortItems(normalized));
       } catch (error) {
         console.error("Erro ao buscar itens:", error);
       }
@@ -48,22 +73,22 @@ export default function BoxDetailScreen({ route, navigation }: Props) {
   }, [currentBox.id]);
 
   useEffect(() => {
-  if (currentBox.deadline_date) {
-    setFData(new Date(currentBox.deadline_date).toLocaleDateString("pt-BR"));
-  } else {
-    setFData("Nenhuma data informada");
-  }
-}, [currentBox.deadline_date]);
+    if (currentBox.deadline_date) {
+      setFData(new Date(currentBox.deadline_date).toLocaleDateString("pt-BR"));
+    } else {
+      setFData("Nenhuma data informada");
+    }
+  }, [currentBox.deadline_date]);
 
   const handleBoxUpdated = (updatedBox: Box) => {
-  setCurrentBox(prev => ({
-    ...prev,
-    box_title: updatedBox.box_title,
-    box_description: updatedBox.box_description,
-    deadline_date: updatedBox.deadline_date ?? undefined,
-  }));
-  showToast("Box atualizado com sucesso!");
-};
+    setCurrentBox((prev) => ({
+      ...prev,
+      box_title: updatedBox.box_title,
+      box_description: updatedBox.box_description,
+      deadline_date: updatedBox.deadline_date ?? undefined,
+    }));
+    showToast("Box atualizado com sucesso!");
+  };
 
   return (
     <SafeAreaView style={styles.container}>
@@ -90,11 +115,13 @@ export default function BoxDetailScreen({ route, navigation }: Props) {
         <View style={styles.infoContainer}>
           {currentBox.area_name && (
             <Text style={styles.infoText}>
-              <Ionicons name="reader" size={16} color="#eef4ed" /> Área: {currentBox.area_name}
+              <Ionicons name="reader" size={16} color="#eef4ed" /> Área:{" "}
+              {currentBox.area_name}
             </Text>
           )}
           <Text style={styles.infoText}>
-            <Ionicons name="calendar" size={16} color="#eef4ed" /> Prazo: {fdata}
+            <Ionicons name="calendar" size={16} color="#eef4ed" /> Prazo:{" "}
+            {fdata}
           </Text>
         </View>
       </View>
@@ -103,15 +130,16 @@ export default function BoxDetailScreen({ route, navigation }: Props) {
         data={items}
         keyExtractor={(item) => item.id.toString()}
         renderItem={({ item }) => (
-          <ItemCard item={item} onDeleteSuccess={handleItemDeleted} onItemUpdated={handleItemUpdated} />
+          <ItemCard
+            item={item}
+            onDeleteSuccess={handleItemDeleted}
+            onItemUpdated={handleItemUpdated}
+          />
         )}
         contentContainerStyle={styles.listContent}
         showsVerticalScrollIndicator={false}
-
         ListEmptyComponent={
-          <Text style={styles.emptyText}>
-            Ops! Ainda não há itens por aqui.
-          </Text>
+          <Text style={styles.emptyText}>Ops! Ainda não há itens por aqui.</Text>
         }
       />
 
@@ -222,5 +250,5 @@ const styles = StyleSheet.create({
     fontSize: 16,
     opacity: 0.8,
     paddingHorizontal: 25
-},
+  },
 });
