@@ -41,19 +41,19 @@ export default function HomeScreen({ navigate }: HomeScreenProps) {
         <TouchableOpacity style={styles.card} onPress={handleDashboard} activeOpacity={0.8}>
           <Ionicons name="trending-up-sharp" size={30} color="#eef4ed" />
           <Text style={styles.cardTitle}>Dashboard</Text>
-          <Text style={styles.cardSubtitle}>O resumo do caos diário.</Text>
+          <Text style={styles.cardSubtitle}>Tudo sob controle… ou quase.</Text>
         </TouchableOpacity>
 
         <View style={styles.styleSubCard}>
           <View style={styles.subCard}>
             <Ionicons name="calendar-sharp" size={30} color="#034078" />
             <Text style={styles.subCardTitle}>Calendário</Text>
-            <Text style={styles.subCardSubtitle}>Tudo sob controle… ou quase.</Text>
+            <Text style={styles.subCardSubtitle}>Acompanhe o caos diário.</Text>
           </View>
           <View style={styles.subCard}>
             <Ionicons name="information-circle-sharp" size={30} color="#034078" />
             <Text style={styles.subCardTitle}>Ajuda</Text>
-            <Text style={styles.subCardSubtitle}>Apoio? Eu te ajudo docinho.</Text>
+            <Text style={styles.subCardSubtitle}>Tem dúvidas? Vem comigo!</Text>
           </View>
         </View>
       </ScrollView>
