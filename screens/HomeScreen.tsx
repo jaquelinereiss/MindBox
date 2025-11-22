@@ -1,59 +1,105 @@
 import React, { useEffect, useState } from "react";
-import { SafeAreaView, ScrollView, View, Text, StyleSheet, TouchableOpacity } from "react-native";
-import { Ionicons } from "@expo/vector-icons";
-import Header from "../components/Header";
+import { SafeAreaView, ScrollView, View, Text, StyleSheet } from "react-native";
 import { RootStackParamList } from "../App";
-import { getUser } from "../src/services/auth";
+import { supabase } from "../src/lib/supabaseClient";
+import { getDashboardData } from "../src/services/getDashboardData";
+import Header from "../components/Header";
+import WeeklyCalendar from "../components/WeeklyCalendar"
+import TodayItems from "../components/TodayItems";
+import DashboardCard from "../components/DashboardCard";
+import ActionCard from "../components/ActionCard";
 
 interface HomeScreenProps {
   navigate: (screen: keyof RootStackParamList, params?: any) => void;
 }
 
 export default function HomeScreen({ navigate }: HomeScreenProps) {
-  const handleAdd = () => {
-    navigate("Add");
-  };
-
-  const handleDashboard = () => {
-    navigate("Dashboard");
-  };
+  const handleAdd = () => navigate("Add");
+  const handleDashboard = () => navigate("Dashboard");
 
   const [displayName, setDisplayName] = useState("");
-  
+  const [dashboardData, setDashboardData] = useState({
+    totalBoxes: 0,
+    totalItems: 0,
+    overallProgress: 0,
+    averageProgress: 0,
+  });
+  const [loadingDashboard, setLoadingDashboard] = useState(true);
+
+
   useEffect(() => {
-    async function loadUser() {
-      const { data } = await getUser();
-      const name = data?.user?.user_metadata?.display_name;
+    async function loadUserAndDashboard() {
+      const { data: userData } = await supabase.auth.getUser();
+      const name = userData?.user?.user_metadata?.display_name;
       if (name) setDisplayName(name);
+
+      if (!userData.user) return;
+
+      setLoadingDashboard(true);
+      const data = await getDashboardData(userData.user.id);
+      setDashboardData(data);
+      setLoadingDashboard(false);
     }
 
-    loadUser();
+    loadUserAndDashboard();
   }, []);
 
   return (
     <SafeAreaView style={styles.container}>
-      <Header
-        onAdd={handleAdd}
-        displayName={displayName}
-      />
+      <Header onAdd={handleAdd} displayName={displayName} />
 
-      <ScrollView contentContainerStyle={{ flexGrow: 1, paddingBottom: 100 }}>
-        <TouchableOpacity style={styles.card} onPress={handleDashboard} activeOpacity={0.8}>
-          <Ionicons name="trending-up-sharp" size={30} color="#eef4ed" />
-          <Text style={styles.cardTitle}>Dashboard</Text>
-          <Text style={styles.cardSubtitle}>Tudo sob controle… ou quase.</Text>
-        </TouchableOpacity>
+      <ScrollView
+        contentContainerStyle={{ paddingBottom: 120 }}
+        showsVerticalScrollIndicator={false}
+      >
+        
+        <Text style={styles.sectionTitle}>O que vamos fazer hoje?</Text>
 
-        <View style={styles.styleSubCard}>
-          <View style={styles.subCard}>
-            <Ionicons name="calendar-sharp" size={30} color="#034078" />
-            <Text style={styles.subCardTitle}>Calendário</Text>
-            <Text style={styles.subCardSubtitle}>Acompanhe o caos diário.</Text>
-          </View>
-          <View style={styles.subCard}>
-            <Ionicons name="information-circle-sharp" size={30} color="#034078" />
-            <Text style={styles.subCardTitle}>Ajuda</Text>
-            <Text style={styles.subCardSubtitle}>Tem dúvidas? Vem comigo!</Text>
+        <WeeklyCalendar 
+          month="Novembro 2025"
+          days={["Dom 16", "Seg 17", "Ter 18", "Qua 19", "Qui 20", "Sex 21", "Sab 22"]}
+          activeIndex={1}
+        />
+
+        <TodayItems
+        items={[
+            { title: "nome item 1", subtitle: "nome do box 1" },
+            { title: "nome item 2", subtitle: "nome do box 2" },
+          ]}
+          onSeeMore={() => console.log("Ver tudo clicado")}
+        />
+
+        <DashboardCard
+          loading={loadingDashboard}
+          boxCount={dashboardData.totalBoxes}
+          itemCount={dashboardData.totalItems}
+          progressPercent={Math.round(dashboardData.overallProgress * 100)}
+          onPress={handleDashboard}
+        />
+
+        <View>
+          <Text style={styles.sectionMore}>Confira mais opções:</Text>
+          <View style={styles.moreList}>
+            <ActionCard
+              iconName="star-outline"
+              title="Favoritos"
+              subtitle="onde ficam suas preciosidades"
+            />
+            <ActionCard
+              iconName="flag-outline"
+              title="Metas"
+              subtitle="seus planos mais ambiciosos"
+            />
+            <ActionCard
+              iconName="alarm-outline"
+              title="Lembretes"
+              subtitle="confiar apenas na memória é arriscado"
+            />
+            <ActionCard
+              iconName="help-circle-outline"
+              title="Ajuda"
+              subtitle="Tem dúvidas? Vem comigo!"
+            />
           </View>
         </View>
       </ScrollView>
@@ -66,58 +112,23 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#eef4ed"
   },
-  card: {
-    borderRadius: 10,
-    padding: 15,
-    justifyContent: "center",
-    margin: 20,
-    height: 150,
-    backgroundColor: "#034078",
-    shadowColor: "#0b2545",
-    shadowOpacity: 0.5,
-    shadowOffset: { width: 0, height: 5 },
-    shadowRadius: 5,
-    elevation: 10,
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: "bold",
+    color: "#0b2545",
+    marginTop: 10,
+    marginLeft: 30
   },
-  cardTitle: { 
-    fontSize: 26, 
-    fontWeight: "bold", 
-    color: "#eef4ed", 
-    marginTop: 5 
+  sectionMore: {
+    fontSize: 18,
+    fontWeight: "bold",
+    color: "#0b2545",
+    marginTop: 10,
+    marginLeft: 30
   },
-  cardSubtitle: { 
-    fontSize: 15, 
-    color: "#eef4ed", 
-    marginTop: 5
-  },
-  styleSubCard: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    marginHorizontal: 15,
-  },
-  subCard: {
-    flex: 1,
-    borderRadius: 10,
-    padding: 15,
-    justifyContent: "center",
-    backgroundColor: "#8da9c4",
-    marginHorizontal: 5,
-    height: 150,
-    shadowColor: "#0b2545",
-    shadowOpacity: 0.5,
-    shadowOffset: { width: 0, height: 5 },
-    shadowRadius: 5,
-    elevation: 10,
-  },
-  subCardTitle: { 
-    fontSize: 26, 
-    fontWeight: "bold", 
-    color: "#034078", 
-    marginTop: 5 
-  },
-  subCardSubtitle: { 
-    fontSize: 15, 
-    color: "#034078", 
-    marginTop: 5 
+  moreList: {
+    marginTop: 10,
+    marginHorizontal: 30,
+    backgroundColor: "#eef4ed00"
   }
 });
