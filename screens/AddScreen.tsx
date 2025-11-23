@@ -1,13 +1,13 @@
 import React, { useEffect, useState } from "react";
 import { SafeAreaView, View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, Modal, FlatList, KeyboardAvoidingView, Platform } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import insertBox from "../src/services/insertBox";
+import insertBox from "../src/services/boxes/insertBox";
 import { RootStackParamList } from "../src/navigation/types";
 import { Box } from "../src/types";
-import getArea, { Area } from "../src/services/getArea";
-import getSubarea, { Subarea } from "../src/services/getSubarea";
-import getBoxes from "../src/services/getBoxes";
-import insertItem from "../src/services/insertItem";
+import getArea, { Area } from "../src/services/areas/getArea";
+import getSubarea, { Subarea } from "../src/services/areas/getSubarea";
+import getBoxes from "../src/services/boxes/getBoxes";
+import insertItem from "../src/services/items/insertItem";
 import { useToast } from "../components/ToastContext";
 
 interface AddScreenProps {

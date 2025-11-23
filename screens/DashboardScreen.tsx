@@ -4,7 +4,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { ProgressChart } from "react-native-chart-kit";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { RootStackParamList } from "../src/navigation/types";
-import { getDashboardData } from "../src/services/getDashboardData";
+import { getDashboardData } from "../src/services/dashboard/getDashboardData";
 import { supabase } from "../src/lib/supabaseClient";
 
 const screenWidth = Dimensions.get("window").width;

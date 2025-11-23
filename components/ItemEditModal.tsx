@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { Modal, View, Text, TextInput, TouchableOpacity, FlatList, StyleSheet } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import updateItem from "../src/services/updateItem";
-import getBoxById from "../src/services/getBoxById";
-import getSubarea, { Subarea } from "../src/services/getSubarea";
+import updateItem from "../src/services/items/updateItem";
+import getBoxById from "../src/services/boxes/getBoxById";
+import getSubarea, { Subarea } from "../src/services/areas/getSubarea";
 import { Item } from "../src/navigation/types";
 import { useToast } from "../components/ToastContext";
 

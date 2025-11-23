@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { View, Text, StyleSheet, TouchableOpacity, Alert } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { Item } from "../src/navigation/types";
-import completeItem from "../src/services/completeItem";
+import completeItem from "../src/services/items/completeItem";
 import OptionsModal from "../components/OptionsModal";
 import ItemEditModal from "../components/ItemEditModal";
 import ItemDeleteModal from "../components/ItemDeleteModal";

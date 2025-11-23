@@ -1,5 +1,5 @@
-import { supabase } from '../lib/supabaseClient'
-import { Item } from '../types'
+import { supabase } from '../../lib/supabaseClient'
+import { Item } from '../../types'
 
 export default async function getItems(box_id: string): Promise<Item[]> {
   const { data, error } = await supabase

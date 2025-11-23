@@ -4,7 +4,7 @@ import { View, Text, FlatList, StyleSheet, SafeAreaView, TouchableOpacity, Layou
 import { Box } from "../src/types";
 import { Ionicons } from "@expo/vector-icons";
 import { useEffect, useState } from "react";
-import getItems from "../src/services/getItems";
+import getItems from "../src/services/items/getItems";
 import ItemCard from "../components/ItemCard";
 import OptionsModal from "../components/OptionsModal";
 import BoxEditModal from "../components/BoxEditModal";
