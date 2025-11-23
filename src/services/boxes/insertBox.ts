@@ -1,4 +1,4 @@
-import { supabase } from '../lib/supabaseClient'
+import { supabase } from '../../lib/supabaseClient'
 
 export default async function insertBox(title: string, description: string, area: number | undefined, deadline?: string | null) {
   

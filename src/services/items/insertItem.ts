@@ -1,4 +1,4 @@
-import { supabase } from '../lib/supabaseClient'
+import { supabase } from '../../lib/supabaseClient'
 
 export default async function insertItem(title: string, description: string, priority: number | undefined , realization: string | undefined, box: number, subarea: number) {
   

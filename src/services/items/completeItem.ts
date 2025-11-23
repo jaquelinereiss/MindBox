@@ -1,4 +1,4 @@
-import { supabase } from '../lib/supabaseClient'
+import { supabase } from '../../lib/supabaseClient'
 
 export default async function completeItem(id: number, isCompleted: boolean) {
   

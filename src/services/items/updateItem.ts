@@ -1,5 +1,5 @@
-import { supabase } from "../lib/supabaseClient";
-import { Item } from "../navigation/types";
+import { supabase } from "../../lib/supabaseClient";
+import { Item } from "../../navigation/types";
 
 const updateItem = async (id: number, updatedData: Partial<Item>) => {
   try {

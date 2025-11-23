@@ -4,7 +4,7 @@ import { Ionicons } from "@expo/vector-icons";
 import BoxCard from "../components/BoxCard";
 import AddButton from "../components/AddButton";
 import { Box } from "../src/types";
-import getBoxes from "../src/services/getBoxes";
+import getBoxes from "../src/services/boxes/getBoxes";
 import { RootStackParamList } from "../src/navigation/types";
 
 interface BoxesScreenProps {
