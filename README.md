@@ -61,7 +61,6 @@ A arquitetura do MindBox é pensada para crescer com o projeto:
 
 ## 🚀 Melhorias Futuras
 
-- ➕ Fluxo de adição de itens dentro do Box
 - ⚡ Perfil de usuário 
 - ⭐ Favoritos e Metas
 - 🔔 Sistema de lembretes e notificações  
