@@ -1,3 +1,5 @@
+const BASE_URL = process.env.EXPO_PUBLIC_CALENDAR_API!;
+
 export interface WeekData {
   month: string;
   days: string[];
@@ -6,7 +8,7 @@ export interface WeekData {
 
 export async function getCurrentWeek(): Promise<WeekData | null> {
   try {
-    const response = await fetch("http://localhost:3000/calendar/currentWeek");
+    const response = await fetch(`${BASE_URL}/calendar/currentWeek`);
     if (!response.ok) {
       throw new Error("Erro ao buscar calendário");
     }
