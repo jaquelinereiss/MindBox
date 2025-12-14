@@ -10,6 +10,8 @@ import OptionsModal from "../components/OptionsModal";
 import BoxEditModal from "../components/BoxEditModal";
 import BoxDeleteModal from "../components/BoxDeleteModal";
 import { useToast } from "../components/ToastContext";
+import AddItemButton from "../components/AddItemButton"; 
+import AddItemModal from "../components/AddItemModal"; 
 
 type Props = NativeStackScreenProps<RootStackParamList, "BoxDetailScreen">;
 
@@ -22,6 +24,7 @@ export default function BoxDetailScreen({ route, navigation }: Props) {
   const [currentBox, setCurrentBox] = useState(box);
   const [deleteModalVisible, setDeleteModalVisible] = useState(false);
   const { showToast } = useToast();
+  const [addItemModalVisible, setAddItemModalVisible] = useState(false);
 
   const handleItemDeleted = (itemId: number) => {
     setItems((prev) => prev.filter((item) => item.id !== itemId));
@@ -124,6 +127,9 @@ export default function BoxDetailScreen({ route, navigation }: Props) {
             {fdata}
           </Text>
         </View>
+
+        <AddItemButton onPress={() => setAddItemModalVisible(true)} />
+
       </View>
 
       <FlatList
@@ -143,7 +149,6 @@ export default function BoxDetailScreen({ route, navigation }: Props) {
         }
       />
 
-      {/* Modais */}
       <OptionsModal
         visible={optionsVisible}
         onClose={() => setOptionsVisible(false)}
@@ -171,6 +176,16 @@ export default function BoxDetailScreen({ route, navigation }: Props) {
         box={currentBox}
         onDeleted={() => navigation.navigate("Boxes")}
       />
+
+      <AddItemModal
+        visible={addItemModalVisible}
+        onClose={() => setAddItemModalVisible(false)}
+        boxId={currentBox.id}
+        onItemCreated={async () => {
+          const data = await getItems(currentBox.id.toString());
+          setItems(sortItems(data));
+        }}
+      />
     </SafeAreaView>
   );
 }
@@ -183,7 +198,7 @@ const styles = StyleSheet.create({
   header: {
     backgroundColor: "#034078",
     paddingTop: 80,
-    paddingBottom: 30,
+    paddingBottom: 10,
     paddingHorizontal: 20,
     borderBottomLeftRadius: 25,
     borderBottomRightRadius: 25,
