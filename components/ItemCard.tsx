@@ -11,6 +11,7 @@ interface ItemCardProps {
   item: Item;
   onDeleteSuccess: (itemId: number) => void;
   onItemUpdated: (updatedItem: Item) => void;
+  context?: "box" | "calendar";
 }
 
 export default function ItemCard({ item, onDeleteSuccess, onItemUpdated }: ItemCardProps) {
