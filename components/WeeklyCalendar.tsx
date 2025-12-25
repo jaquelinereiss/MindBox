@@ -27,9 +27,7 @@ export default function WeeklyCalendar({
               <Text style={[styles.dayText, isActive && styles.dayTextActive]}>
                 {day.split(" ")[0]}
               </Text>
-              <Text
-                style={[styles.dayNumber, isActive && styles.dayNumberActive]}
-              >
+              <Text style={[styles.dayNumber, isActive && styles.dayNumberActive]}>
                 {day.split(" ")[1]}
               </Text>
             </View>
@@ -44,19 +42,12 @@ const styles = StyleSheet.create({
   container: {
     marginBottom: 5
   },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: "bold",
-    color: "#0b2545",
-    marginTop: 10,
-    marginLeft: 30
-  },
   sectionMonth: {
-    fontSize: 15,
-    fontWeight: "bold",
-    color: "#034078",
-    marginLeft: 30,
-    marginTop: 15
+    fontSize: 15, 
+    fontWeight: "bold", 
+    color: "#034078", 
+    marginLeft: 30, 
+    marginTop: 15 
   },
   weekContainer: {
     width: "85%",
@@ -64,7 +55,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     marginHorizontal: 15,
-    marginTop: 5
+    marginTop: 5,
   },
   dayBubble: {
     width: 45,
@@ -91,5 +82,5 @@ const styles = StyleSheet.create({
   dayNumberActive: {
     fontWeight: "bold",
     color: "#eef4ed"
-  }
+  },
 });
