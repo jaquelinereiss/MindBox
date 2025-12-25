@@ -23,9 +23,8 @@ export default function HomeScreen({ navigate }: HomeScreenProps) {
   const [weekData, setWeekData] = useState<WeekData | null>(null);
   const [allItems, setAllItems] = useState<{ title: string; subtitle: string }[]>([]);
   const [todayItems, setTodayItems] = useState<{ title: string; subtitle: string }[]>([]);
-  const remaining = allItems.length - todayItems.length;
   const [expanded, setExpanded] = useState(false);
-
+  const remaining = allItems.length - todayItems.length;
   const [dashboardData, setDashboardData] = useState({
     totalBoxes: 0,
     totalItems: 0,
@@ -39,8 +38,7 @@ export default function HomeScreen({ navigate }: HomeScreenProps) {
       setTodayItems(allItems);
       setExpanded(true);
     } else {
-      const limited = allItems.slice(0, 2);
-      setTodayItems(limited);
+      setTodayItems(allItems.slice(0, 2));
       setExpanded(false);
     }
   };
@@ -59,13 +57,16 @@ export default function HomeScreen({ navigate }: HomeScreenProps) {
       setLoadingDashboard(false);
 
       const week = await getCurrentWeek();
-      setWeekData(week);
-
+      if (week) {
+        setWeekData({
+          month: week.month,
+          days: week.days,
+          todayIndex: new Date().getDay(),
+        });
+      }
       const items = await getTodayItems(user.id);
       setAllItems(items);
-
-      const limited = items.slice(0, 2);
-      setTodayItems(limited);
+      setTodayItems(items.slice(0, 2));
     }
 
     loadAllInformation();
@@ -88,10 +89,10 @@ export default function HomeScreen({ navigate }: HomeScreenProps) {
 
         <TodayItems
           items={todayItems}
-          remaining={remaining} 
-          expanded={expanded} 
-          onShowRemaining={handleToggleItems} 
-          onSeeMore={() => console.log("'ver tudo' foi clicado")}
+          remaining={remaining}
+          expanded={expanded}
+          onShowRemaining={handleToggleItems}
+          onSeeMore={() => navigate("Calendar")}
         />
 
         <DashboardCard
@@ -104,8 +105,8 @@ export default function HomeScreen({ navigate }: HomeScreenProps) {
 
         <Text style={styles.sectionMore}>Confira mais opções:</Text>
         <View style={styles.moreList}>
-          <ActionCard iconName="star-outline" title="Favoritos" subtitle="onde ficam suas preciosidades" />
           <ActionCard iconName="flag-outline" title="Metas" subtitle="seus planos mais ambiciosos" />
+          <ActionCard iconName="star-outline" title="Favoritos" subtitle="onde ficam suas preciosidades" />
           <ActionCard iconName="alarm-outline" title="Lembretes" subtitle="confiar apenas na memória é arriscado" />
           <ActionCard iconName="help-circle-outline" title="Ajuda" subtitle="tem dúvidas? vem comigo!" />
         </View>
@@ -135,7 +136,6 @@ const styles = StyleSheet.create({
   },
   moreList: {
     marginTop: 10,
-    marginHorizontal: 30,
-    backgroundColor: "#eef4ed00"
-  }
+    marginHorizontal: 30
+  },
 });
