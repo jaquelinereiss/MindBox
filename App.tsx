@@ -13,6 +13,7 @@ import SettingsScreen from "./screens/SettingsScreen";
 import DashboardScreen from "./screens/DashboardScreen";
 import Menu from "./components/Menu";
 import { ToastProvider } from "./components/ToastContext";
+import CalendarScreen from "./screens/CalendarScreen";
 
 export type RootStackParamList = {
   Login: undefined;
@@ -23,6 +24,7 @@ export type RootStackParamList = {
   BoxDetailScreen: { box: any };
   Settings: undefined;
   Dashboard: undefined;
+  Calendar: undefined;
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -82,7 +84,6 @@ export default function App() {
                   {(props) => <BoxesScreen {...props} navigate={handleNavigate} />}
                 </Stack.Screen>
 
-                <Stack.Screen name="Dashboard" component={DashboardScreen} />
                 <Stack.Screen name="Settings">
                   {(props) => (
                     <SettingsScreen
@@ -94,7 +95,12 @@ export default function App() {
                     />
                   )}
                 </Stack.Screen>
+
                 <Stack.Screen name="BoxDetailScreen" component={BoxDetailScreen} />
+
+                <Stack.Screen name="Dashboard" component={DashboardScreen} />
+
+                <Stack.Screen name="Calendar" component={CalendarScreen} />
               </>
             )}
           </Stack.Navigator>
