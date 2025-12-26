@@ -1,48 +1,48 @@
-import React, { useEffect, useState } from "react";
-import { View, Text, TouchableOpacity, StyleSheet, FlatList, LayoutAnimation } from "react-native";
+import React, { useState, useEffect } from "react";
+import { View, Text, TouchableOpacity, StyleSheet, FlatList, LayoutAnimation, } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import NotificationBell from "../components/NotificationBell";
+import { useNotifications } from "../src/hooks/useNotifications";
 import { supabase } from "../src/lib/supabaseClient";
-import { CalendarDay, getCalendarByMonth } from "../src/services/calendar/calendarService";
+import { CalendarDay, getCalendarByMonth, } from "../src/services/calendar/calendarService";
 import getItemsByDate from "../src/services/items/getItemsByDate";
 import { CalendarItem } from "../src/types/CalendarItem";
 import ItemCard from "../components/ItemCard";
 
 export default function CalendarScreen({ navigation }: any) {
+  const [userId, setUserId] = useState<string | null>(null);
   const [currentDate, setCurrentDate] = useState(new Date());
   const [calendar, setCalendar] = useState<CalendarDay[]>([]);
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const [items, setItems] = useState<CalendarItem[]>([]);
-  const [userId, setUserId] = useState<string | null>(null);
 
-  const now = new Date();
-  const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
+  const today = `${new Date().getFullYear()}-${String(
+    new Date().getMonth() + 1
+  ).padStart(2, "0")}-${String(new Date().getDate()).padStart(2, "0")}`;
 
   useEffect(() => {
     async function loadUser() {
       const {
         data: { user },
       } = await supabase.auth.getUser();
-
       if (user) setUserId(user.id);
     }
-
     loadUser();
   }, []);
 
+  const notifications = useNotifications(userId);
+
   useEffect(() => {
+    if (!currentDate) return;
     async function loadCalendar() {
       const year = currentDate.getFullYear();
       const month = currentDate.getMonth() + 1;
-
       const response = await getCalendarByMonth(year, month);
-
       if (response) {
         setCalendar(response.calendar);
-
         const isCurrentMonth =
           year === new Date().getFullYear() &&
           month === new Date().getMonth() + 1;
-
         setSelectedDate(isCurrentMonth ? today : null);
       }
     }
@@ -67,15 +67,13 @@ export default function CalendarScreen({ navigation }: any) {
     const pending = list
       .filter((i) => !i.item_completed)
       .sort((a, b) => (a.priority_number ?? 0) - (b.priority_number ?? 0));
-
     const completed = list
       .filter((i) => i.item_completed)
-      .sort((a, b) => {
-        const da = a.realization_date ? new Date(a.realization_date).getTime() : 0;
-        const db = b.realization_date ? new Date(b.realization_date).getTime() : 0;
-        return db - da;
-      });
-
+      .sort(
+        (a, b) =>
+          new Date(b.realization_date ?? 0).getTime() -
+          new Date(a.realization_date ?? 0).getTime()
+      );
     return [...pending, ...completed];
   };
 
@@ -91,7 +89,6 @@ export default function CalendarScreen({ navigation }: any) {
 
   const handleItemUpdated = (updatedItem: any) => {
     LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
-
     setItems((prev) =>
       sortByPriority(
         prev.map((item) =>
@@ -105,19 +102,16 @@ export default function CalendarScreen({ navigation }: any) {
     setItems((prev) => prev.filter((item) => item.id !== itemId));
   };
 
-  const daysOfWeek = ["D", "S", "T", "Q", "Q", "S", "S"];
-
-  const handlePrevMonth = () => {
+  const handlePrevMonth = () =>
     setCurrentDate(
       new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1)
     );
-  };
-
-  const handleNextMonth = () => {
+  const handleNextMonth = () =>
     setCurrentDate(
       new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1)
     );
-  };
+
+  const daysOfWeek = ["D", "S", "T", "Q", "Q", "S", "S"];
 
   return (
     <View style={styles.container}>
@@ -127,8 +121,12 @@ export default function CalendarScreen({ navigation }: any) {
         </TouchableOpacity>
 
         <Text style={styles.headerTitle}>Calendário</Text>
-        <Ionicons name="notifications-outline" size={28} color="#fff" />
+
+        <View style={{ flexDirection: "row", justifyContent: "flex-end" }}>
+          <NotificationBell notifications={notifications} />
+        </View>
       </View>
+
       <View style={styles.containerCalendar}>
         <TouchableOpacity style={styles.addButton}>
           <Ionicons name="add" size={28} color="#034078" />
@@ -139,14 +137,12 @@ export default function CalendarScreen({ navigation }: any) {
             <TouchableOpacity onPress={handlePrevMonth}>
               <Ionicons name="chevron-back" size={28} color="#034078" />
             </TouchableOpacity>
-
             <Text style={styles.monthTitle}>
               {currentDate.toLocaleString("pt-BR", {
                 month: "long",
                 year: "numeric",
               })}
             </Text>
-
             <TouchableOpacity onPress={handleNextMonth}>
               <Ionicons name="chevron-forward" size={28} color="#034078" />
             </TouchableOpacity>
@@ -234,9 +230,9 @@ export default function CalendarScreen({ navigation }: any) {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#134074"
+  container: { 
+    flex: 1, 
+    backgroundColor: "#134074" 
   },
   header: {
     flexDirection: "row",
@@ -248,10 +244,10 @@ const styles = StyleSheet.create({
     marginBottom: 40,
     backgroundColor: "#134074"
   },
-  headerTitle: {
-    fontSize: 20,
-    fontWeight: "700",
-    color: "#fff"
+  headerTitle: { 
+    fontSize: 20, 
+    fontWeight: "700", 
+    color: "#fff" 
   },
   addButton: {
     alignSelf: "center",
@@ -267,9 +263,9 @@ const styles = StyleSheet.create({
     borderTopEndRadius: 40,
     backgroundColor: "#fff"
   },
-  calendarContainer: {
-    paddingTop: 5,
-    paddingHorizontal: 20
+  calendarContainer: { 
+    paddingTop: 5, 
+    paddingHorizontal: 20 
   },
   monthNavigation: {
     flexDirection: "row",
@@ -277,10 +273,10 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginBottom: 18
   },
-  monthTitle: {
-    fontSize: 16,
-    fontWeight: "bold",
-    color: "#034078"
+  monthTitle: { 
+    fontSize: 16, 
+    fontWeight: "bold", 
+    color: "#034078" 
   },
   weekDays: {
     flexDirection: "row",
@@ -306,17 +302,17 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     borderRadius: 12,
     borderWidth: 1,
-    borderColor: "transparent",
+    borderColor: "transparent"
   },
-  todayDay: {
-    borderColor: "#034078"
+  todayDay: { 
+    borderColor: "#034078" 
   },
-  selectedDay: {
-    backgroundColor: "#8da9c4"
+  selectedDay: { 
+    backgroundColor: "#8da9c4" 
   },
-  sundayText: {
-    fontWeight: "600",
-    color: "#b23a48"
+  sundayText: { 
+    fontWeight: "600", 
+    color: "#b23a48" 
   },
   dayText: {
     fontSize: 14,
@@ -325,48 +321,28 @@ const styles = StyleSheet.create({
     lineHeight: 20,
     color: "#034078"
   },
-  selectedDayText: {
-    fontWeight: "700",
-    color: "#fff"
+  selectedDayText: { 
+    fontWeight: "700", 
+    color: "#fff" 
   },
-  emptyDay: {
-    backgroundColor: "transparent"
+  emptyDay: { 
+    backgroundColor: "transparent" 
   },
-  itemsContainer: {
-    alignItems: "center",
-    paddingHorizontal: 10
+  itemsContainer: { 
+    alignItems: "center", 
+    paddingHorizontal: 10 
   },
   separator: {
     height: 0.8,
     width: "50%",
     alignSelf: "center",
     marginBottom: 6,
-    backgroundColor: "#ccd3da",
+    backgroundColor: "#ccd3da"
   },
   sectionTitle: {
     fontWeight: "bold",
     fontSize: 18,
     margin: 5,
-    color: "#034078"
-  },
-  itemCard: {
-    borderRadius: 10,
-    padding: 10,
-    marginBottom: 10,
-    backgroundColor: "#c7dbe9ff"
-  },
-  itemTitle: {
-    fontWeight: "600",
-    fontSize: 14,
-    color: "#034078"
-  },
-  itemSubtitle: {
-    fontSize: 12,
-    color: "#6e7a8a"
-  },
-  itemPriority: {
-    fontSize: 12,
-    fontWeight: "600",
     color: "#034078"
   },
   noItems: {
