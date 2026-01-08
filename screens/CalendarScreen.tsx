@@ -1,115 +1,32 @@
-import React, { useState, useEffect } from "react";
+import React from "react";
 import { View, Text, TouchableOpacity, StyleSheet, FlatList, LayoutAnimation, } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import { useAuthUser } from "../src/hooks/auth/useAuthUser";
 import NotificationBell from "../components/NotificationBell";
-import { useNotifications } from "../src/hooks/useNotifications";
-import { supabase } from "../src/lib/supabaseClient";
-import { CalendarDay, getCalendarByMonth, } from "../src/services/calendar/calendarService";
-import getItemsByDate from "../src/services/items/getItemsByDate";
-import { CalendarItem } from "../src/types/CalendarItem";
+import { useNotifications } from "../src/hooks/notifications/useNotifications";
+import { useCalendarMonth } from "../src/hooks/calendar/useCalendarMonth";
+import { useCalendarItems } from "../src/hooks/calendar/useCalendarItems";
 import ItemCard from "../components/ItemCard";
 
 export default function CalendarScreen({ navigation }: any) {
-  const [userId, setUserId] = useState<string | null>(null);
-  const [currentDate, setCurrentDate] = useState(new Date());
-  const [calendar, setCalendar] = useState<CalendarDay[]>([]);
-  const [selectedDate, setSelectedDate] = useState<string | null>(null);
-  const [items, setItems] = useState<CalendarItem[]>([]);
+  const userId = useAuthUser();
+  const notifications = useNotifications(userId);
+
+  const {
+    currentDate,
+    calendar,
+    selectedDate,
+    setSelectedDate,
+    handlePrevMonth,
+    handleNextMonth,
+  } = useCalendarMonth();
+
+  const { items, handleItemUpdated, handleItemDeleted, normalizeItem } =
+    useCalendarItems(selectedDate, userId);
 
   const today = `${new Date().getFullYear()}-${String(
     new Date().getMonth() + 1
   ).padStart(2, "0")}-${String(new Date().getDate()).padStart(2, "0")}`;
-
-  useEffect(() => {
-    async function loadUser() {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-      if (user) setUserId(user.id);
-    }
-    loadUser();
-  }, []);
-
-  const notifications = useNotifications(userId);
-
-  useEffect(() => {
-    if (!currentDate) return;
-    async function loadCalendar() {
-      const year = currentDate.getFullYear();
-      const month = currentDate.getMonth() + 1;
-      const response = await getCalendarByMonth(year, month);
-      if (response) {
-        setCalendar(response.calendar);
-        const isCurrentMonth =
-          year === new Date().getFullYear() &&
-          month === new Date().getMonth() + 1;
-        setSelectedDate(isCurrentMonth ? today : null);
-      }
-    }
-    loadCalendar();
-  }, [currentDate]);
-
-  useEffect(() => {
-    async function loadItems() {
-      if (!selectedDate || !userId) {
-        setItems([]);
-        return;
-      }
-
-      const data = await getItemsByDate(selectedDate, userId);
-      setItems(sortByPriority(data));
-    }
-
-    loadItems();
-  }, [selectedDate, userId]);
-
-  const sortByPriority = (list: CalendarItem[]) => {
-    const pending = list
-      .filter((i) => !i.item_completed)
-      .sort((a, b) => (a.priority_number ?? 0) - (b.priority_number ?? 0));
-    const completed = list
-      .filter((i) => i.item_completed)
-      .sort(
-        (a, b) =>
-          new Date(b.realization_date ?? 0).getTime() -
-          new Date(a.realization_date ?? 0).getTime()
-      );
-    return [...pending, ...completed];
-  };
-
-  const normalizeItem = (item: CalendarItem) => ({
-    id: item.id,
-    item_title: item.item_title,
-    item_description: item.item_description,
-    priority_number: item.priority_number,
-    item_completed: item.item_completed,
-    realization_date: item.realization_date ?? undefined,
-    box_related: item.BOX.id,
-  });
-
-  const handleItemUpdated = (updatedItem: any) => {
-    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
-    setItems((prev) =>
-      sortByPriority(
-        prev.map((item) =>
-          item.id === updatedItem.id ? { ...item, ...updatedItem } : item
-        )
-      )
-    );
-  };
-
-  const handleItemDeleted = (itemId: number) => {
-    setItems((prev) => prev.filter((item) => item.id !== itemId));
-  };
-
-  const handlePrevMonth = () =>
-    setCurrentDate(
-      new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1)
-    );
-  const handleNextMonth = () =>
-    setCurrentDate(
-      new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1)
-    );
 
   const daysOfWeek = ["D", "S", "T", "Q", "Q", "S", "S"];
 
@@ -159,7 +76,7 @@ export default function CalendarScreen({ navigation }: any) {
           <View style={styles.daysGrid}>
             {calendar.map((day, index) => {
               const isToday = day.date === today;
-              const isSelected = day.date && day.date === selectedDate;
+              const isSelected = day.date === selectedDate;
               const isSunday =
                 day.date && new Date(day.date + "T00:00:00").getDay() === 0;
 
@@ -244,10 +161,10 @@ const styles = StyleSheet.create({
     marginBottom: 40,
     backgroundColor: "#134074"
   },
-  headerTitle: { 
-    fontSize: 20, 
-    fontWeight: "700", 
-    color: "#fff" 
+  headerTitle: {
+    fontSize: 20,
+    fontWeight: "700",
+    color: "#fff"
   },
   addButton: {
     alignSelf: "center",
