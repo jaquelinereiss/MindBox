@@ -4,7 +4,7 @@ import { Ionicons } from "@expo/vector-icons";
 import updateItem from "../src/services/items/updateItem";
 import getBoxById from "../src/services/boxes/getBoxById";
 import getSubarea, { Subarea } from "../src/services/areas/getSubarea";
-import { Item } from "../src/navigation/types";
+import { Item } from "../src/types/Item";
 import { useToast } from "../components/ToastContext";
 
 interface Box {

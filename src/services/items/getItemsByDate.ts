@@ -18,6 +18,7 @@ export default async function getItemsByDate(
       priority_number,
       item_completed,
       realization_date,
+      subarea_box,
       BOX:box_related!inner (
         id,
         box_title
@@ -40,6 +41,7 @@ export default async function getItemsByDate(
     priority_number: item.priority_number,
     item_completed: item.item_completed,
     realization_date: item.realization_date,
+    subarea_box: item.subarea_box,
     BOX: Array.isArray(item.BOX) ? item.BOX[0] : item.BOX
   }));
 }

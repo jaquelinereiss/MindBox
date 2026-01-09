@@ -2,7 +2,7 @@ import { Modal, View, Text, TouchableOpacity, StyleSheet, Alert } from "react-na
 import React, { useState } from "react";
 import { Ionicons } from "@expo/vector-icons";
 import deleteBox from "../src/services/boxes/deleteBox";
-import { Box } from "../src/types";
+import { Box } from "../src/types/Box";
 import { useToast } from "./ToastContext";
 
 interface BoxDeleteModalProps {
