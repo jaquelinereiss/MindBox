@@ -2,9 +2,11 @@ import React, { useState, useEffect } from "react";
 import { View, Text, TextInput, TouchableOpacity, ScrollView, StyleSheet, Dimensions, KeyboardAvoidingView, Platform } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import insertItem from "../src/services/items/insertItem";
-import getBoxById, { Box } from "../src/services/boxes/getBoxById";
+import getBoxById from "../src/services/boxes/getBoxById";
 import getSubarea, { Subarea } from "../src/services/areas/getSubarea";
 import { useToast } from "../components/ToastContext";
+import getBoxes from "../src/services/boxes/getBoxes";
+import { Box } from "../src/types/Box";
 
 interface AddItemModalProps {
   visible: boolean;
@@ -28,9 +30,7 @@ export default function AddItemModal({
   const [realizationDate, setRealizationDate] = useState("");
   const [boxName, setBoxName] = useState("");
   const [subareaOptions, setSubareaOptions] = useState<Subarea[]>([]);
-  const [selectedSubarea, setSelectedSubarea] = useState<number | undefined>(
-    undefined
-  );
+  const [selectedSubarea, setSelectedSubarea] = useState<number | undefined>(undefined);
   const [pickerVisible, setPickerVisible] = useState(false);
   const [loadingSubareas, setLoadingSubareas] = useState(false);
 
@@ -40,6 +40,11 @@ export default function AddItemModal({
   const [dateError, setDateError] = useState("");
   const [subareaError, setSubareaError] = useState("");
 
+  const [selectedBoxId, setSelectedBoxId] = useState<number | undefined>(boxId);
+  const [boxOptions, setBoxOptions] = useState<Box[]>([]);
+  const [boxPickerVisible, setBoxPickerVisible] = useState(false);
+  
+  const isBoxSelected = !!(boxId || selectedBoxId);
   const { showToast } = useToast();
 
   function formatDateInput(value: string) {
@@ -96,33 +101,27 @@ export default function AddItemModal({
   };
 
   useEffect(() => {
-    if (!visible || !boxId) return;
+    if (!visible) return;
 
-    const fetchBoxAndSubareas = async () => {
-      setLoadingSubareas(true);
-      try {
-        const box: Box | null = await getBoxById(boxId);
+    const loadData = async () => {
+      if (boxId) {
+        setSelectedBoxId(boxId);
+
+        const box = await getBoxById(boxId);
         if (box) {
           setBoxName(box.box_title);
           const subs = await getSubarea(box.box_area);
           setSubareaOptions(subs);
-          setSelectedSubarea(undefined);
-        } else {
-          setBoxName("");
-          setSubareaOptions([]);
-          setSelectedSubarea(undefined);
         }
-      } catch (err) {
-        console.error(err);
-        setBoxName("");
-        setSubareaOptions([]);
-        setSelectedSubarea(undefined);
-      } finally {
-        setLoadingSubareas(false);
+      }
+
+      if (!boxId) {
+        const boxes = await getBoxes();
+        setBoxOptions(boxes);
       }
     };
 
-    fetchBoxAndSubareas();
+    loadData();
   }, [visible, boxId]);
 
   const handleSave = async () => {
@@ -134,7 +133,9 @@ export default function AddItemModal({
 
     let valid = true;
 
-    if (!boxId) {
+    const finalBoxId = boxId ?? selectedBoxId;
+
+    if (!finalBoxId) {
       setBoxError("Escolha um box válido da lista.");
       valid = false;
     }
@@ -173,7 +174,7 @@ export default function AddItemModal({
         description.trim(),
         priorityNumber,
         formattedDate,
-        boxId!,
+        finalBoxId!,
         selectedSubarea!
       );
 
@@ -214,11 +215,56 @@ export default function AddItemModal({
             </View>
 
             <Text style={styles.label}>Box</Text>
-            <TextInput
-              style={[styles.input, { backgroundColor: "#eee", color: "#333" }]}
-              value={boxName}
-              editable={false}
-            />
+            {boxId ? (
+              <TextInput
+                style={[
+                  styles.input,
+                  { backgroundColor: "#eee", color: "#333" },
+                ]}
+                value={boxName}
+                editable={false}
+              />
+            ) : (
+              <>
+                <TouchableOpacity
+                  style={styles.pickerBtn}
+                  onPress={() => setBoxPickerVisible(!boxPickerVisible)}
+                >
+                  <Text style={styles.pickerBtnText}>
+                    {selectedBoxId ? boxOptions.find((b) => b.id === selectedBoxId) ?.box_title: "Escolha um box da lista"}
+                  </Text>
+                  <Ionicons name="chevron-down" size={18} color="#0b2545" />
+                </TouchableOpacity>
+
+                {boxPickerVisible && (
+                  <View style={styles.dropdownContainer}>
+                    {boxOptions.map((box) => (
+                      <TouchableOpacity
+                        key={box.id}
+                        style={styles.dropdownItem}
+                        onPress={async () => {
+                          setSelectedBoxId(box.id);
+                          setBoxName(box.box_title);
+                          setBoxPickerVisible(false);
+                          setLoadingSubareas(true);
+                          try {
+                            const subs = await getSubarea(box.box_area);
+                            setSubareaOptions(subs);
+                            setSelectedSubarea(undefined);
+                          } finally {
+                            setLoadingSubareas(false);
+                          }
+                        }}
+                      >
+                        <Text style={styles.dropdownItemText}>
+                          {box.box_title}
+                        </Text>
+                      </TouchableOpacity>
+                    ))}
+                  </View>
+                )}
+              </>
+            )}
             {boxError ? <Text style={styles.errorText}>{boxError}</Text> : null}
 
             <Text style={styles.label}>Título</Text>
@@ -273,17 +319,19 @@ export default function AddItemModal({
             <Text style={styles.label}>Subárea</Text>
             <View style={{ marginBottom: 10 }}>
               <TouchableOpacity
-                style={styles.pickerBtn}
+                style={[
+                  styles.pickerBtn,
+                  !isBoxSelected && { backgroundColor: "#eee" },
+                ]}
                 onPress={() => setPickerVisible(!pickerVisible)}
                 disabled={loadingSubareas || subareaOptions.length === 0}
               >
                 <Text style={styles.pickerBtnText}>
-                  {loadingSubareas
-                    ? "Carregando subáreas..."
-                    : selectedSubarea
-                    ? subareaOptions.find((s) => s.id === selectedSubarea)
-                        ?.subarea_name
-                    : "Escolha uma subárea"}
+                  {!isBoxSelected
+                  ? "Escolha um box primeiro" : loadingSubareas
+                  ? "Carregando subáreas..." : selectedSubarea
+                  ? subareaOptions.find((s) => s.id === selectedSubarea)?.subarea_name
+                  : "Escolha uma subárea da lista"}
                 </Text>
                 <Ionicons
                   name={pickerVisible ? "chevron-up" : "chevron-down"}
@@ -338,7 +386,7 @@ const styles = StyleSheet.create({
     top: 0,
     bottom: 0,
     left: 0,
-    right: 0,
+    right: 0
   },
   modal: {
     position: "absolute",
@@ -351,18 +399,18 @@ const styles = StyleSheet.create({
     padding: 20,
     paddingBottom: 50,
     elevation: 60,
-    height: screenHeight * 0.8,
+    height: screenHeight * 0.8
   },
   header: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: 15,
+    marginBottom: 15
   },
   title: {
     fontSize: 20,
     fontWeight: "bold",
-    color: "#134074",
+    color: "#134074"
   },
   label: {
     fontSize: 14,
@@ -376,7 +424,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     padding: 10,
     marginBottom: 5,
-    fontSize: 14,
+    fontSize: 14
   },
   pickerBtn: {
     borderWidth: 1,
@@ -386,7 +434,7 @@ const styles = StyleSheet.create({
     padding: 15,
     marginBottom: 5,
     flexDirection: "row",
-    justifyContent: "space-between",
+    justifyContent: "space-between"
   },
   pickerBtnText: {
     color: "#333",
@@ -395,13 +443,13 @@ const styles = StyleSheet.create({
   buttonsContainer: {
     flexDirection: "row",
     justifyContent: "flex-end",
-    marginTop: 10,
+    marginTop: 10
   },
   saveBtn: {
     backgroundColor: "#134074",
     borderRadius: 8,
     padding: 12,
-    marginRight: 10,
+    marginRight: 10
   },
   saveText: {
     color: "#fff",
@@ -411,7 +459,7 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     paddingHorizontal: 15,
     borderRadius: 8,
-    marginRight: 10,
+    marginRight: 10
   },
   cancelText: {
     color: "#333",
@@ -428,12 +476,12 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     backgroundColor: "#fff",
     marginTop: 5,
-    maxHeight: 600,
+    maxHeight: 600
   },
   dropdownItem: {
     padding: 12,
     borderBottomWidth: 1,
-    borderBottomColor: "#eee",
+    borderBottomColor: "#eee"
   },
   dropdownItemText: {
     fontSize: 14,

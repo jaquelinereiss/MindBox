@@ -1,27 +1,19 @@
 import { useState, useEffect } from "react";
 import getItemsByDate from "../../services/items/getItemsByDate";
+import { Item } from "../../types/Item";
 import { CalendarItem } from "../../types/CalendarItem";
-import { Item } from "../../navigation/types";
 
-export function useCalendarItems(selectedDate: string | null, userId: string | null) {
+export function useCalendarItems(
+  selectedDate: string | null,
+  userId: string | null
+) {
   const [items, setItems] = useState<CalendarItem[]>([]);
-
-  useEffect(() => {
-    async function loadItems() {
-      if (!selectedDate || !userId) {
-        setItems([]);
-        return;
-      }
-      const data = await getItemsByDate(selectedDate, userId);
-      setItems(sortByPriority(data));
-    }
-    loadItems();
-  }, [selectedDate, userId]);
 
   const sortByPriority = (list: CalendarItem[]) => {
     const pending = list
       .filter((i) => !i.item_completed)
       .sort((a, b) => (a.priority_number ?? 0) - (b.priority_number ?? 0));
+
     const completed = list
       .filter((i) => i.item_completed)
       .sort(
@@ -29,8 +21,23 @@ export function useCalendarItems(selectedDate: string | null, userId: string | n
           new Date(b.realization_date ?? 0).getTime() -
           new Date(a.realization_date ?? 0).getTime()
       );
+
     return [...pending, ...completed];
   };
+
+  const loadItems = async () => {
+    if (!selectedDate || !userId) {
+      setItems([]);
+      return;
+    }
+
+    const data = await getItemsByDate(selectedDate, userId);
+    setItems(sortByPriority(data));
+  };
+
+  useEffect(() => {
+    loadItems();
+  }, [selectedDate, userId]);
 
   const handleItemUpdated = (updatedItem: Item) => {
     setItems((prev) =>
@@ -56,7 +63,14 @@ export function useCalendarItems(selectedDate: string | null, userId: string | n
     item_completed: item.item_completed,
     realization_date: item.realization_date ?? undefined,
     box_related: item.BOX.id,
+    subarea_box: item.subarea_box,
   });
 
-  return { items, handleItemUpdated, handleItemDeleted, normalizeItem };
+  return {
+    items,
+    reloadItems: loadItems,
+    handleItemUpdated,
+    handleItemDeleted,
+    normalizeItem,
+  };
 }
