@@ -1,7 +1,8 @@
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import { RootStackParamList, Item } from "../src/navigation/types";
+import { RootStackParamList } from "../src/navigation/types";
 import { View, Text, FlatList, StyleSheet, SafeAreaView, TouchableOpacity, LayoutAnimation } from "react-native";
-import { Box } from "../src/types";
+import { Box } from "../src/types/Box";
+import { Item } from "../src/types/Item";
 import { Ionicons } from "@expo/vector-icons";
 import { useEffect, useState } from "react";
 import getItems from "../src/services/items/getItems";
@@ -84,7 +85,7 @@ export default function BoxDetailScreen({ route, navigation }: Props) {
   }, [currentBox.deadline_date]);
 
   const handleBoxUpdated = (updatedBox: Box) => {
-    setCurrentBox((prev) => ({
+    setCurrentBox((prev: Box) => ({
       ...prev,
       box_title: updatedBox.box_title,
       box_description: updatedBox.box_description,

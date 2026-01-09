@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { SafeAreaView, View, Text, ScrollView, KeyboardAvoidingView, Platform, Modal, FlatList, TouchableOpacity, StyleSheet } from "react-native";
 import { RootStackParamList } from "../src/navigation/types";
-import { Box } from "../src/types";
+import { Box } from "../src/types/Box";
 import getArea, { Area } from "../src/services/areas/getArea";
 import getSubarea, { Subarea } from "../src/services/areas/getSubarea";
 import getBoxes from "../src/services/boxes/getBoxes";

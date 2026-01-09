@@ -1,4 +1,4 @@
-import { Box } from "../types";
+import { Box } from "../types/Box";
 
 export type RootStackParamList = {
   Login: undefined;
@@ -9,16 +9,5 @@ export type RootStackParamList = {
   Boxes: undefined;
   BoxDetailScreen: { box: Box };
   Settings: undefined;
+  Calendar: undefined;
 };
-
-export interface Item {
-  id: number;
-  item_title: string;
-  item_description?: string;
-  priority_number?: number;
-  realization_date?: string;
-  subarea_box?: number;
-  box_related?: number;
-  item_completed?: boolean;
-  completed_date?: string;
-}

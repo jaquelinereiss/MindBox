@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { View, Text, StyleSheet, TouchableOpacity, Alert } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { Item } from "../src/navigation/types";
+import { Item } from "../src/types/Item";
 import completeItem from "../src/services/items/completeItem";
 import OptionsModal from "../components/OptionsModal";
 import ItemEditModal from "../components/ItemEditModal";

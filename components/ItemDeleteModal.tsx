@@ -2,7 +2,7 @@ import React from "react";
 import { Modal, View, Text, TouchableOpacity, StyleSheet } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import deleteItem from "../src/services/items/deleteItem";
-import { Item } from "../src/navigation/types";
+import { Item } from "../src/types/Item";
 import { useToast } from "./ToastContext";
 
 interface ItemDeleteModalProps {
