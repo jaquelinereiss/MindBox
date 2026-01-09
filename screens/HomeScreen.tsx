@@ -84,6 +84,7 @@ export default function HomeScreen({ navigate }: HomeScreenProps) {
             month={weekData.month}
             days={weekData.days}
             activeIndex={weekData.todayIndex}
+            onPress={() => navigate("Calendar")}
           />
         )}
 

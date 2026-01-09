@@ -1,40 +1,41 @@
 import React from "react";
-import { View, Text, StyleSheet } from "react-native";
+import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 
 interface WeeklyCalendarProps {
   month: string;
   days: string[];
   activeIndex?: number;
+  onPress?: () => void;
 }
 
 export default function WeeklyCalendar({
   month,
   days,
   activeIndex = 0,
+  onPress,
 }: WeeklyCalendarProps) {
   return (
-    <View style={styles.container}>
-      <Text style={styles.sectionMonth}>{month}</Text>
+    <TouchableOpacity activeOpacity={0.8} onPress={onPress}>
+      <View style={styles.container}>
+        <Text style={styles.sectionMonth}>{month}</Text>
 
-      <View style={styles.weekContainer}>
-        {days.map((day, index) => {
-          const isActive = index === activeIndex;
-          return (
-            <View
-              key={day}
-              style={[styles.dayBubble, isActive && styles.dayBubbleActive]}
-            >
-              <Text style={[styles.dayText, isActive && styles.dayTextActive]}>
-                {day.split(" ")[0]}
-              </Text>
-              <Text style={[styles.dayNumber, isActive && styles.dayNumberActive]}>
-                {day.split(" ")[1]}
-              </Text>
-            </View>
-          );
-        })}
+        <View style={styles.weekContainer}>
+          {days.map((day, index) => {
+            const isActive = index === activeIndex;
+            return (
+              <View key={day} style={[styles.dayBubble, isActive && styles.dayBubbleActive]}>
+                <Text style={[styles.dayText, isActive && styles.dayTextActive]}>
+                  {day.split(" ")[0]}
+                </Text>
+                <Text style={[styles.dayNumber, isActive && styles.dayNumberActive]}>
+                  {day.split(" ")[1]}
+                </Text>
+              </View>
+            );
+          })}
+        </View>
       </View>
-    </View>
+    </TouchableOpacity>
   );
 }
 
@@ -43,11 +44,11 @@ const styles = StyleSheet.create({
     marginBottom: 5
   },
   sectionMonth: {
-    fontSize: 15, 
-    fontWeight: "bold", 
-    color: "#034078", 
-    marginLeft: 30, 
-    marginTop: 15 
+    fontSize: 15,
+    fontWeight: "bold",
+    color: "#034078",
+    marginLeft: 30,
+    marginTop: 15
   },
   weekContainer: {
     width: "85%",
@@ -55,7 +56,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     marginHorizontal: 15,
-    marginTop: 5,
+    marginTop: 5
   },
   dayBubble: {
     width: 45,
