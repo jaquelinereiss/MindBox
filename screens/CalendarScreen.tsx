@@ -1,4 +1,4 @@
-import React from "react";
+import { useState }  from "react";
 import { View, Text, TouchableOpacity, StyleSheet, FlatList, LayoutAnimation, } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useAuthUser } from "../src/hooks/auth/useAuthUser";
@@ -7,10 +7,12 @@ import { useNotifications } from "../src/hooks/notifications/useNotifications";
 import { useCalendarMonth } from "../src/hooks/calendar/useCalendarMonth";
 import { useCalendarItems } from "../src/hooks/calendar/useCalendarItems";
 import ItemCard from "../components/ItemCard";
+import AddItemModal from "../components/AddItemModal";
 
 export default function CalendarScreen({ navigation }: any) {
   const userId = useAuthUser();
   const notifications = useNotifications(userId);
+  const [addItemVisible, setAddItemVisible] = useState(false);
 
   const {
     currentDate,
@@ -21,7 +23,7 @@ export default function CalendarScreen({ navigation }: any) {
     handleNextMonth,
   } = useCalendarMonth();
 
-  const { items, handleItemUpdated, handleItemDeleted, normalizeItem } =
+  const { items, reloadItems, handleItemUpdated, handleItemDeleted, normalizeItem } =
     useCalendarItems(selectedDate, userId);
 
   const today = `${new Date().getFullYear()}-${String(
@@ -45,7 +47,10 @@ export default function CalendarScreen({ navigation }: any) {
       </View>
 
       <View style={styles.containerCalendar}>
-        <TouchableOpacity style={styles.addButton}>
+        <TouchableOpacity
+          style={styles.addButton}
+          onPress={() => setAddItemVisible(true)}
+        >
           <Ionicons name="add" size={28} color="#034078" />
         </TouchableOpacity>
 
@@ -142,6 +147,15 @@ export default function CalendarScreen({ navigation }: any) {
           }
         />
       </View>
+      <AddItemModal
+        visible={addItemVisible}
+        onClose={() => setAddItemVisible(false)}
+        boxId={undefined}
+        onItemCreated={() => {
+          reloadItems();
+          setAddItemVisible(false);
+        }}
+      />
     </View>
   );
 }
