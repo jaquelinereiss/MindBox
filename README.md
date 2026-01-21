@@ -69,7 +69,7 @@ A arquitetura do MindBox é pensada para crescer com o projeto:
 
 ## 👩‍💻 Autora
 
-Desenvolvido por **[Jaqueline Reis](https://github.com/jaquelinereiss)**  
+Desenvolvido por **[Jaqueline Reis](https://github.com/jaquelinereiss)**  - desenvolvedora full-stack responsável pela concepção do produto, desenvolvimento do aplicativo mobile em React Native, construção da API em Node.js/Express, integração com banco de dados e autenticação via Supabase, além da definição da arquitetura e aplicação de boas práticas de código.
 
 
 ## Preview
