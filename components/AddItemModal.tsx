@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, TextInput, TouchableOpacity, ScrollView, StyleSheet, Dimensions, KeyboardAvoidingView, Platform } from "react-native";
+import { View, Text, TextInput, TouchableOpacity, ScrollView, StyleSheet, Dimensions, KeyboardAvoidingView, Platform, Modal } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import insertItem from "../src/services/items/insertItem";
 import getBoxById from "../src/services/boxes/getBoxById";
@@ -43,7 +43,7 @@ export default function AddItemModal({
   const [selectedBoxId, setSelectedBoxId] = useState<number | undefined>(boxId);
   const [boxOptions, setBoxOptions] = useState<Box[]>([]);
   const [boxPickerVisible, setBoxPickerVisible] = useState(false);
-  
+
   const isBoxSelected = !!(boxId || selectedBoxId);
   const { showToast } = useToast();
 
@@ -52,10 +52,7 @@ export default function AddItemModal({
     if (numberOnly.length <= 2) return numberOnly;
     if (numberOnly.length <= 4)
       return `${numberOnly.substring(0, 2)}/${numberOnly.substring(2, 4)}`;
-    return `${numberOnly.substring(0, 2)}/${numberOnly.substring(
-      2,
-      4
-    )}/${numberOnly.substring(4, 8)}`;
+      return `${numberOnly.substring(0, 2)}/${numberOnly.substring(2,4)}/${numberOnly.substring(4, 8)}`;
   }
 
   function formatDeadlineToTimestamptz(input: string) {
@@ -175,7 +172,7 @@ export default function AddItemModal({
         priorityNumber,
         formattedDate,
         finalBoxId!,
-        selectedSubarea!
+        selectedSubarea!,
       );
 
       showToast("Item criado com sucesso!");
@@ -190,193 +187,213 @@ export default function AddItemModal({
   if (!visible) return null;
 
   return (
-    <KeyboardAvoidingView
-      style={{ flex: 1 }}
-      behavior={Platform.OS === "ios" ? "padding" : "height"}
-      keyboardVerticalOffset={menuHeight + 20}
+    <Modal
+      visible={visible}
+      animationType="slide"
+      transparent
+      onRequestClose={handleClose}
     >
-      <View style={styles.overlay}>
-        <View
-          style={[styles.modal, { bottom: 50, height: screenHeight * 0.8 }]}
-        >
-          <ScrollView
-            contentContainerStyle={{
-              flexGrow: 1,
-              justifyContent: "space-between",
-              paddingBottom: 20,
-            }}
-            keyboardShouldPersistTaps="handled"
-          >
-            <View style={styles.header}>
-              <Text style={styles.title}>Adicionar Item</Text>
-              <TouchableOpacity onPress={handleClose}>
-                <Ionicons name="close" size={24} color="#333" />
-              </TouchableOpacity>
-            </View>
+      <KeyboardAvoidingView
+        style={{ flex: 1 }}
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        keyboardVerticalOffset={menuHeight - 80}
+      >
+        <View style={styles.overlay}>
+          <View style={[styles.modal, { maxHeight: screenHeight * 0.8 }]}>
+            <ScrollView
+              contentContainerStyle={{
+                flexGrow: 1,
+                justifyContent: "flex-start",
+                paddingBottom: 20,
+              }}
+              keyboardShouldPersistTaps="handled"
+            >
+              <View style={styles.header}>
+                <Text style={styles.title}>Adicionar Item</Text>
+                <TouchableOpacity onPress={handleClose}>
+                  <Ionicons name="close" size={24} color="#333" />
+                </TouchableOpacity>
+              </View>
 
-            <Text style={styles.label}>Box</Text>
-            {boxId ? (
+              <Text style={styles.label}>Box</Text>
+              {boxId ? (
+                <TextInput
+                  style={[
+                    styles.input,
+                    { backgroundColor: "#eee", color: "#333" },
+                  ]}
+                  value={boxName}
+                  editable={false}
+                />
+              ) : (
+                <>
+                  <TouchableOpacity
+                    style={styles.pickerBtn}
+                    onPress={() => setBoxPickerVisible(!boxPickerVisible)}
+                  >
+                    <Text style={styles.pickerBtnText}>
+                      {selectedBoxId
+                        ? boxOptions.find((b) => b.id === selectedBoxId)
+                            ?.box_title
+                        : "Escolha um box da lista"}
+                    </Text>
+                    <Ionicons name="chevron-down" size={18} color="#0b2545" />
+                  </TouchableOpacity>
+
+                  {boxPickerVisible && (
+                    <View style={styles.dropdownContainer}>
+                      {boxOptions.map((box) => (
+                        <TouchableOpacity
+                          key={box.id}
+                          style={styles.dropdownItem}
+                          onPress={async () => {
+                            setSelectedBoxId(box.id);
+                            setBoxName(box.box_title);
+                            setBoxPickerVisible(false);
+                            setLoadingSubareas(true);
+                            try {
+                              const subs = await getSubarea(box.box_area);
+                              setSubareaOptions(subs);
+                              setSelectedSubarea(undefined);
+                            } finally {
+                              setLoadingSubareas(false);
+                            }
+                          }}
+                        >
+                          <Text style={styles.dropdownItemText}>
+                            {box.box_title}
+                          </Text>
+                        </TouchableOpacity>
+                      ))}
+                    </View>
+                  )}
+                </>
+              )}
+              {boxError ? (
+                <Text style={styles.errorText}>{boxError}</Text>
+              ) : null}
+
+              <Text style={styles.label}>Título</Text>
               <TextInput
-                style={[
-                  styles.input,
-                  { backgroundColor: "#eee", color: "#333" },
-                ]}
-                value={boxName}
-                editable={false}
+                style={styles.input}
+                placeholder="Informe um nome para o item"
+                value={title}
+                onChangeText={setTitle}
+                maxLength={50}
+                multiline
               />
-            ) : (
-              <>
+              {titleError ? (
+                <Text style={styles.errorText}>{titleError}</Text>
+              ) : null}
+
+              <Text style={styles.label}>Descrição</Text>
+              <TextInput
+                style={[styles.input, { height: 80 }]}
+                placeholder="Conte mais sobre esse item (opcional)"
+                value={description}
+                onChangeText={setDescription}
+                maxLength={100}
+                multiline
+              />
+
+              <Text style={styles.label}>Prioridade</Text>
+              <TextInput
+                style={styles.input}
+                placeholder="Defina uma prioridade: 1 a 4 (opcional)"
+                keyboardType="numeric"
+                value={priority}
+                onChangeText={(text) =>
+                  setPriority(text.replace(/[^0-9]/g, ""))
+                }
+                maxLength={1}
+              />
+              {priorityError ? (
+                <Text style={styles.errorText}>{priorityError}</Text>
+              ) : null}
+
+              <Text style={styles.label}>Data de realização</Text>
+              <TextInput
+                style={styles.input}
+                placeholder="Indique a data prevista para realização"
+                value={realizationDate}
+                onChangeText={(text) =>
+                  setRealizationDate(formatDateInput(text))
+                }
+                keyboardType="number-pad"
+                maxLength={10}
+              />
+              {dateError ? (
+                <Text style={styles.errorText}>{dateError}</Text>
+              ) : null}
+
+              <Text style={styles.label}>Subárea</Text>
+              <View style={{ marginBottom: 10 }}>
                 <TouchableOpacity
-                  style={styles.pickerBtn}
-                  onPress={() => setBoxPickerVisible(!boxPickerVisible)}
+                  style={[
+                    styles.pickerBtn,
+                    !isBoxSelected && { backgroundColor: "#eee" },
+                  ]}
+                  onPress={() => setPickerVisible(!pickerVisible)}
+                  disabled={loadingSubareas || subareaOptions.length === 0}
                 >
                   <Text style={styles.pickerBtnText}>
-                    {selectedBoxId ? boxOptions.find((b) => b.id === selectedBoxId) ?.box_title: "Escolha um box da lista"}
+                    {!isBoxSelected
+                      ? "Escolha um box primeiro"
+                      : loadingSubareas
+                        ? "Carregando subáreas..."
+                        : selectedSubarea
+                          ? subareaOptions.find((s) => s.id === selectedSubarea)
+                              ?.subarea_name
+                          : "Escolha uma subárea da lista"}
                   </Text>
-                  <Ionicons name="chevron-down" size={18} color="#0b2545" />
+                  <Ionicons
+                    name={pickerVisible ? "chevron-up" : "chevron-down"}
+                    size={18}
+                    color="#0b2545"
+                  />
                 </TouchableOpacity>
 
-                {boxPickerVisible && (
-                  <View style={styles.dropdownContainer}>
-                    {boxOptions.map((box) => (
-                      <TouchableOpacity
-                        key={box.id}
-                        style={styles.dropdownItem}
-                        onPress={async () => {
-                          setSelectedBoxId(box.id);
-                          setBoxName(box.box_title);
-                          setBoxPickerVisible(false);
-                          setLoadingSubareas(true);
-                          try {
-                            const subs = await getSubarea(box.box_area);
-                            setSubareaOptions(subs);
-                            setSelectedSubarea(undefined);
-                          } finally {
-                            setLoadingSubareas(false);
-                          }
-                        }}
-                      >
-                        <Text style={styles.dropdownItemText}>
-                          {box.box_title}
-                        </Text>
-                      </TouchableOpacity>
-                    ))}
-                  </View>
-                )}
-              </>
-            )}
-            {boxError ? <Text style={styles.errorText}>{boxError}</Text> : null}
+                {pickerVisible &&
+                  !loadingSubareas &&
+                  subareaOptions.length > 0 && (
+                    <View style={styles.dropdownContainer}>
+                      {subareaOptions.map((item) => (
+                        <TouchableOpacity
+                          key={item.id}
+                          style={styles.dropdownItem}
+                          onPress={() => {
+                            setSelectedSubarea(item.id);
+                            setPickerVisible(false);
+                          }}
+                        >
+                          <Text style={styles.dropdownItemText}>
+                            {item.subarea_name}
+                          </Text>
+                        </TouchableOpacity>
+                      ))}
+                    </View>
+                  )}
+                {subareaError ? (
+                  <Text style={styles.errorText}>{subareaError}</Text>
+                ) : null}
+              </View>
 
-            <Text style={styles.label}>Título</Text>
-            <TextInput
-              style={styles.input}
-              placeholder="Informe um nome para o item"
-              value={title}
-              onChangeText={setTitle}
-              maxLength={50}
-              multiline
-            />
-            {titleError ? (
-              <Text style={styles.errorText}>{titleError}</Text>
-            ) : null}
-
-            <Text style={styles.label}>Descrição</Text>
-            <TextInput
-              style={[styles.input, { height: 80 }]}
-              placeholder="Conte mais sobre esse item (opcional)"
-              value={description}
-              onChangeText={setDescription}
-              maxLength={100}
-              multiline
-            />
-
-            <Text style={styles.label}>Prioridade</Text>
-            <TextInput
-              style={styles.input}
-              placeholder="Defina uma prioridade: 1 a 4 (opcional)"
-              keyboardType="numeric"
-              value={priority}
-              onChangeText={(text) => setPriority(text.replace(/[^0-9]/g, ""))}
-              maxLength={1}
-            />
-            {priorityError ? (
-              <Text style={styles.errorText}>{priorityError}</Text>
-            ) : null}
-
-            <Text style={styles.label}>Data de realização</Text>
-            <TextInput
-              style={styles.input}
-              placeholder="Indique a data prevista para realização"
-              value={realizationDate}
-              onChangeText={(text) => setRealizationDate(formatDateInput(text))}
-              keyboardType="number-pad"
-              maxLength={10}
-            />
-            {dateError ? (
-              <Text style={styles.errorText}>{dateError}</Text>
-            ) : null}
-
-            <Text style={styles.label}>Subárea</Text>
-            <View style={{ marginBottom: 10 }}>
-              <TouchableOpacity
-                style={[
-                  styles.pickerBtn,
-                  !isBoxSelected && { backgroundColor: "#eee" },
-                ]}
-                onPress={() => setPickerVisible(!pickerVisible)}
-                disabled={loadingSubareas || subareaOptions.length === 0}
-              >
-                <Text style={styles.pickerBtnText}>
-                  {!isBoxSelected
-                  ? "Escolha um box primeiro" : loadingSubareas
-                  ? "Carregando subáreas..." : selectedSubarea
-                  ? subareaOptions.find((s) => s.id === selectedSubarea)?.subarea_name
-                  : "Escolha uma subárea da lista"}
-                </Text>
-                <Ionicons
-                  name={pickerVisible ? "chevron-up" : "chevron-down"}
-                  size={18}
-                  color="#0b2545"
-                />
-              </TouchableOpacity>
-
-              {pickerVisible &&
-                !loadingSubareas &&
-                subareaOptions.length > 0 && (
-                  <View style={styles.dropdownContainer}>
-                    {subareaOptions.map((item) => (
-                      <TouchableOpacity
-                        key={item.id}
-                        style={styles.dropdownItem}
-                        onPress={() => {
-                          setSelectedSubarea(item.id);
-                          setPickerVisible(false);
-                        }}
-                      >
-                        <Text style={styles.dropdownItemText}>
-                          {item.subarea_name}
-                        </Text>
-                      </TouchableOpacity>
-                    ))}
-                  </View>
-                )}
-              {subareaError ? (
-                <Text style={styles.errorText}>{subareaError}</Text>
-              ) : null}
-            </View>
-
-            <View style={styles.buttonsContainer}>
-              <TouchableOpacity style={styles.saveBtn} onPress={handleSave}>
-                <Text style={styles.saveText}>Salvar</Text>
-              </TouchableOpacity>
-              <TouchableOpacity style={styles.cancelBtn} onPress={handleClose}>
-                <Text style={styles.cancelText}>Cancelar</Text>
-              </TouchableOpacity>
-            </View>
-          </ScrollView>
+              <View style={styles.buttonsContainer}>
+                <TouchableOpacity style={styles.saveBtn} onPress={handleSave}>
+                  <Text style={styles.saveText}>Salvar</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={styles.cancelBtn}
+                  onPress={handleClose}
+                >
+                  <Text style={styles.cancelText}>Cancelar</Text>
+                </TouchableOpacity>
+              </View>
+            </ScrollView>
+          </View>
         </View>
-      </View>
-    </KeyboardAvoidingView>
+      </KeyboardAvoidingView>
+    </Modal>
   );
 }
 
@@ -397,9 +414,9 @@ const styles = StyleSheet.create({
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
     padding: 20,
-    paddingBottom: 50,
+    paddingBottom: 5,
     elevation: 60,
-    height: screenHeight * 0.8
+    maxHeight: screenHeight * 0.8
   },
   header: {
     flexDirection: "row",
