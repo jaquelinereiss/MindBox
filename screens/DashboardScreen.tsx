@@ -188,7 +188,7 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     paddingHorizontal: 20,
-    paddingBottom: 150
+    paddingBottom: 50
   },
   chartContainer: {
     alignItems: "center",
@@ -248,7 +248,7 @@ const styles = StyleSheet.create({
     borderRadius: 18,
     padding: 20,
     elevation: 3,
-    marginBottom: 25
+    marginBottom: 5
   },
   sectionTitle: {
     fontSize: 18,
