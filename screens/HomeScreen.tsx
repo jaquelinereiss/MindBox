@@ -94,6 +94,7 @@ export default function HomeScreen({ navigate }: HomeScreenProps) {
           expanded={expanded}
           onShowRemaining={handleToggleItems}
           onSeeMore={() => navigate("Calendar")}
+          onPress={() => navigate("Calendar")}
         />
 
         <DashboardCard

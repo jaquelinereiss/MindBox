@@ -11,6 +11,7 @@ interface TodayItemsProps {
   remaining: number;
   expanded: boolean;
   onSeeMore?: () => void;
+  onPress: () => void;
   onShowRemaining?: () => void;
 }
 
@@ -18,7 +19,8 @@ export default function TodayItems({
   items, 
   remaining, 
   expanded,
-  onSeeMore, 
+  onSeeMore,
+  onPress,
   onShowRemaining 
 }: TodayItemsProps) {
   return (
@@ -34,13 +36,17 @@ export default function TodayItems({
 
       {items.length > 0 ? (
         items.map((item, index) => (
-          <View key={index} style={styles.itemLine}>
-            <Text style={styles.itemTitle}>Item: {item.title}</Text>
-            <Text style={styles.itemSubtitle}>Box: {item.subtitle}</Text>
-          </View>
+          <TouchableOpacity onPress={onPress}>
+            <View key={index} style={styles.itemLine}>
+              <Text style={styles.itemTitle}>Item: {item.title}</Text>
+              <Text style={styles.itemSubtitle}>Box: {item.subtitle}</Text>
+            </View>
+          </TouchableOpacity>
         ))
       ) : (
-        <Text style={styles.noItems}>Agenda livre! Nenhum item encontrado para hoje.</Text>
+        <TouchableOpacity onPress={onPress}>
+          <Text style={styles.noItems}>Agenda livre! Nenhum item encontrado para hoje.</Text>
+        </TouchableOpacity>
       )}
 
       {onShowRemaining && (
