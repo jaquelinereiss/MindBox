@@ -8,7 +8,7 @@ export type Notification = {
   read: boolean;
 };
 
-export function useNotifications(userId: string | null) {
+export function useNotifications(userId: string | null, overdueItemsLength: number) {
   const [notifications, setNotifications] = useState<Notification[]>([]);
 
   useEffect(() => {
@@ -37,7 +37,7 @@ export function useNotifications(userId: string | null) {
           {
             id: 'overdue-1',
             type: 'overdue',
-            message: 'Ei, você possui itens atrasados precisando da sua atenção.',
+            message: 'Ei, você possui itens em atraso precisando da sua atenção.',
             read: false,
           },
         ]);
@@ -47,7 +47,7 @@ export function useNotifications(userId: string | null) {
     }
 
     fetchNotifications();
-  }, [userId]);
+  }, [userId, overdueItemsLength]);
 
   return notifications;
 }
