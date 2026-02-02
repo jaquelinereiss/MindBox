@@ -1,5 +1,5 @@
-import { useState }  from "react";
-import { View, Text, TouchableOpacity, StyleSheet, FlatList, LayoutAnimation, } from "react-native";
+import { useState } from "react";
+import { View, Text, TouchableOpacity, StyleSheet, FlatList, LayoutAnimation } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useAuthUser } from "../src/hooks/auth/useAuthUser";
 import NotificationBell from "../components/NotificationBell";
@@ -8,10 +8,11 @@ import { useCalendarMonth } from "../src/hooks/calendar/useCalendarMonth";
 import { useCalendarItems } from "../src/hooks/calendar/useCalendarItems";
 import ItemCard from "../components/ItemCard";
 import AddItemModal from "../components/AddItemModal";
+import { useOverdueItems } from "../src/hooks/calendar/useOverdueItems";
+import OverdueItemsSection from "../components/OverdueItemsSection";
 
 export default function CalendarScreen({ navigation }: any) {
   const userId = useAuthUser();
-  const notifications = useNotifications(userId);
   const [addItemVisible, setAddItemVisible] = useState(false);
 
   const {
@@ -23,14 +24,24 @@ export default function CalendarScreen({ navigation }: any) {
     handleNextMonth,
   } = useCalendarMonth();
 
-  const { items, reloadItems, handleItemUpdated, handleItemDeleted, normalizeItem } =
-    useCalendarItems(selectedDate, userId);
+  const { items, normalizeItem, reloadItems } = useCalendarItems(
+    selectedDate,
+    userId,
+  );
 
   const today = `${new Date().getFullYear()}-${String(
-    new Date().getMonth() + 1
+    new Date().getMonth() + 1,
   ).padStart(2, "0")}-${String(new Date().getDate()).padStart(2, "0")}`;
 
   const daysOfWeek = ["D", "S", "T", "Q", "Q", "S", "S"];
+
+  const [expandedOverdue, setExpandedOverdue] = useState(false);
+  const { overdueItems, reloadOverdueItems } = useOverdueItems(userId);
+
+  const refreshCalendarData = () => {
+    reloadItems();
+    reloadOverdueItems();
+  };
 
   return (
     <View style={styles.container}>
@@ -42,7 +53,7 @@ export default function CalendarScreen({ navigation }: any) {
         <Text style={styles.headerTitle}>Calendário</Text>
 
         <View style={{ flexDirection: "row", justifyContent: "flex-end" }}>
-          <NotificationBell notifications={notifications} />
+          <NotificationBell notifications={useNotifications(userId, overdueItems.length)} />
         </View>
       </View>
 
@@ -92,7 +103,7 @@ export default function CalendarScreen({ navigation }: any) {
                   onPress={() => {
                     if (!day.date) return;
                     LayoutAnimation.configureNext(
-                      LayoutAnimation.Presets.easeInEaseOut
+                      LayoutAnimation.Presets.easeInEaseOut,
                     );
                     setSelectedDate(day.date);
                   }}
@@ -129,17 +140,29 @@ export default function CalendarScreen({ navigation }: any) {
           renderItem={({ item }) => (
             <ItemCard
               item={item}
-              onItemUpdated={handleItemUpdated}
-              onDeleteSuccess={handleItemDeleted}
+              onItemUpdated={refreshCalendarData}
+              onDeleteSuccess={refreshCalendarData}
               context="calendar"
             />
           )}
+
+          ListHeaderComponent={
+              <OverdueItemsSection
+                overdueItems={overdueItems}
+                expanded={expandedOverdue}
+                onToggleExpand={() => setExpandedOverdue((prev) => !prev)}
+                onItemUpdated={refreshCalendarData}
+                onItemDeleted={refreshCalendarData}
+              />
+          }
+
           showsVerticalScrollIndicator={false}
           contentContainerStyle={{
             paddingHorizontal: 20,
             paddingTop: 20,
             paddingBottom: 120,
           }}
+          
           ListEmptyComponent={
             <Text style={styles.noItems}>
               Nenhum item foi encontrado para esta data.
@@ -152,7 +175,7 @@ export default function CalendarScreen({ navigation }: any) {
         onClose={() => setAddItemVisible(false)}
         boxId={undefined}
         onItemCreated={() => {
-          reloadItems();
+          refreshCalendarData();
           setAddItemVisible(false);
         }}
       />
@@ -161,9 +184,9 @@ export default function CalendarScreen({ navigation }: any) {
 }
 
 const styles = StyleSheet.create({
-  container: { 
-    flex: 1, 
-    backgroundColor: "#134074" 
+  container: {
+    flex: 1,
+    backgroundColor: "#134074",
   },
   header: {
     flexDirection: "row",
@@ -173,12 +196,12 @@ const styles = StyleSheet.create({
     paddingBottom: 30,
     paddingTop: 60,
     marginBottom: 40,
-    backgroundColor: "#134074"
+    backgroundColor: "#134074",
   },
   headerTitle: {
     fontSize: 20,
     fontWeight: "700",
-    color: "#fff"
+    color: "#fff",
   },
   addButton: {
     alignSelf: "center",
@@ -186,45 +209,45 @@ const styles = StyleSheet.create({
     padding: 10,
     borderRadius: 25,
     elevation: 3,
-    backgroundColor: "#ffffff"
+    backgroundColor: "#ffffff",
   },
   containerCalendar: {
     flex: 1,
     borderTopLeftRadius: 40,
     borderTopEndRadius: 40,
-    backgroundColor: "#fff"
+    backgroundColor: "#fff",
   },
-  calendarContainer: { 
-    paddingTop: 5, 
-    paddingHorizontal: 20 
+  calendarContainer: {
+    paddingTop: 5,
+    paddingHorizontal: 20,
   },
   monthNavigation: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: 18
+    marginBottom: 18,
   },
-  monthTitle: { 
-    fontSize: 16, 
-    fontWeight: "bold", 
-    color: "#034078" 
+  monthTitle: {
+    fontSize: 16,
+    fontWeight: "bold",
+    color: "#034078",
   },
   weekDays: {
     flexDirection: "row",
     justifyContent: "space-around",
-    marginBottom: 5
+    marginBottom: 5,
   },
   weekDayText: {
     width: "14.28%",
     textAlign: "center",
     fontWeight: "700",
-    color: "#6e7a8a"
+    color: "#6e7a8a",
   },
   daysGrid: {
     flexDirection: "row",
     flexWrap: "wrap",
     alignSelf: "flex-start",
-    marginBottom: 20
+    marginBottom: 20,
   },
   dayBox: {
     width: "14.28%",
@@ -233,53 +256,53 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     borderRadius: 12,
     borderWidth: 1,
-    borderColor: "transparent"
+    borderColor: "transparent",
   },
-  todayDay: { 
-    borderColor: "#034078" 
+  todayDay: {
+    borderColor: "#034078",
   },
-  selectedDay: { 
-    backgroundColor: "#8da9c4" 
+  selectedDay: {
+    backgroundColor: "#8da9c4",
   },
-  sundayText: { 
-    fontWeight: "600", 
-    color: "#b23a48" 
+  sundayText: {
+    fontWeight: "600",
+    color: "#b23a48",
   },
   dayText: {
     fontSize: 14,
     fontWeight: "500",
     textAlign: "center",
     lineHeight: 20,
-    color: "#034078"
+    color: "#034078",
   },
-  selectedDayText: { 
-    fontWeight: "700", 
-    color: "#fff" 
+  selectedDayText: {
+    fontWeight: "700",
+    color: "#fff",
   },
-  emptyDay: { 
-    backgroundColor: "transparent" 
+  emptyDay: {
+    backgroundColor: "transparent",
   },
-  itemsContainer: { 
-    alignItems: "center", 
-    paddingHorizontal: 10 
+  itemsContainer: {
+    alignItems: "center",
+    paddingHorizontal: 10,
   },
   separator: {
     height: 0.8,
     width: "50%",
     alignSelf: "center",
     marginBottom: 6,
-    backgroundColor: "#ccd3da"
+    backgroundColor: "#ccd3da",
   },
   sectionTitle: {
     fontWeight: "bold",
     fontSize: 18,
     margin: 5,
-    color: "#034078"
+    color: "#034078",
   },
   noItems: {
     textAlign: "center",
     fontStyle: "italic",
     marginTop: 20,
-    color: "#666"
+    color: "#666",
   },
 });
