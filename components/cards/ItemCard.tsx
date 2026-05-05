@@ -1,11 +1,11 @@
 import React, { useState } from "react";
 import { View, Text, StyleSheet, TouchableOpacity, Alert } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { Item } from "../src/types/Item";
-import completeItem from "../src/services/items/completeItem";
-import OptionsModal from "../components/OptionsModal";
-import ItemEditModal from "../components/ItemEditModal";
-import ItemDeleteModal from "../components/ItemDeleteModal";
+import { Item } from "../../src/types/Item";
+import completeItem from "../../src/services/items/completeItem";
+import OptionsModal from "../../components/modals/OptionsModal";
+import ItemEditModal from "../../components/modals/ItemEditModal";
+import ItemDeleteModal from "../../components/modals/ItemDeleteModal";
 
 interface ItemCardProps {
   item: Item;

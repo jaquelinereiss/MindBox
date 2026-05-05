@@ -6,13 +6,13 @@ import { Item } from "../src/types/Item";
 import { Ionicons } from "@expo/vector-icons";
 import { useEffect, useState } from "react";
 import getItems from "../src/services/items/getItems";
-import ItemCard from "../components/ItemCard";
-import OptionsModal from "../components/OptionsModal";
-import BoxEditModal from "../components/BoxEditModal";
-import BoxDeleteModal from "../components/BoxDeleteModal";
-import { useToast } from "../components/ToastContext";
-import AddItemButton from "../components/AddItemButton"; 
-import AddItemModal from "../components/AddItemModal"; 
+import ItemCard from "../components/cards/ItemCard";
+import OptionsModal from "../components/modals/OptionsModal";
+import BoxEditModal from "../components/modals/BoxEditModal";
+import BoxDeleteModal from "../components/modals/BoxDeleteModal";
+import { useToast } from "../components/feedback/ToastContext";
+import AddItemButton from "../components/features/items/AddItemButton"; 
+import AddItemModal from "../components/modals/AddItemModal"; 
 
 type Props = NativeStackScreenProps<RootStackParamList, "BoxDetailScreen">;
 

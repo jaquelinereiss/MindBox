@@ -1,6 +1,6 @@
 import React from "react";
 import { View, Text, StyleSheet } from "react-native";
-import AddButton from "./AddButton";
+import AddButton from "../ui/AddButton";
 
 type HeaderProps = {
   onAdd: () => void;

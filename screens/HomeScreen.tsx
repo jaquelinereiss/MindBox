@@ -5,11 +5,11 @@ import { supabase } from "../src/lib/supabaseClient";
 import { getDashboardData } from "../src/services/dashboard/getDashboardData";
 import { getCurrentWeek, WeekData } from "../src/services/calendar/calendarService";
 import { getTodayItems } from "../src/services/items/getTodayItems";
-import Header from "../components/Header";
-import WeeklyCalendar from "../components/WeeklyCalendar";
-import TodayItems from "../components/TodayItems";
-import DashboardCard from "../components/DashboardCard";
-import ActionCard from "../components/ActionCard";
+import Header from "../components/layout/Header";
+import WeeklyCalendar from "../components/features/calendar/WeeklyCalendar";
+import TodayItems from "../components/features/items/TodayItems";
+import DashboardCard from "../components/cards/DashboardCard";
+import ActionCard from "../components/cards/ActionCard";
 
 interface HomeScreenProps {
   navigate: (screen: keyof RootStackParamList, params?: any) => void;

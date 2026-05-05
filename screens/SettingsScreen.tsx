@@ -2,11 +2,11 @@ import React, { useState, useEffect } from "react";
 import { SafeAreaView, View, Text, StyleSheet, TouchableOpacity, Modal, TextInput } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useUserProfile } from "../src/hooks/user/useUserProfile";
-import { useToast } from "../components/ToastContext";
+import { useToast } from "../components/feedback/ToastContext";
 import { supabase } from "../src/lib/supabaseClient";
-import { BottomSheet } from "../components/BottomSheet";
-import { Button } from "../components/Button";
-import { Input } from "../components/Input";
+import { BottomSheet } from "../components/ui/BottomSheet";
+import { Button } from "../components/ui/Button";
+import { Input } from "../components/ui/Input";
 
 type Props = {
   onLogout: () => void;

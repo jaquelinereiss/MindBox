@@ -1,9 +1,9 @@
 import { Modal, View, Text, TextInput, TouchableOpacity, StyleSheet } from "react-native";
 import { useEffect, useState } from "react";
 import { Ionicons } from "@expo/vector-icons";
-import { Box } from "../src/types/Box";
-import updateBox from "../src/services/boxes/updateBox";
-import { useToast } from "../components/ToastContext";
+import { Box } from "../../src/types/Box";
+import updateBox from "../../src/services/boxes/updateBox";
+import { useToast } from "../feedback/ToastContext";
 
 interface BoxEditModalProps {
   visible: boolean;
