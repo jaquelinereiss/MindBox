@@ -3,17 +3,17 @@ import { View, StyleSheet } from "react-native";
 import { NavigationContainer, NavigationContainerRef } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { supabase } from "./src/lib/supabaseClient";
-import LoginScreen from "./screens/LoginScreen";
-import RegisterScreen from "./screens/RegisterScreen";
-import HomeScreen from "./screens/HomeScreen";
-import AddScreen from "./screens/AddScreen";
-import BoxesScreen from "./screens/BoxesScreen";
-import BoxDetailScreen from "./screens/BoxDetailScreen";
-import SettingsScreen from "./screens/SettingsScreen";
-import DashboardScreen from "./screens/DashboardScreen";
-import Menu from "./components/features/navigation/Menu";
-import { ToastProvider } from "./components/feedback/ToastContext";
-import CalendarScreen from "./screens/CalendarScreen";
+import LoginScreen from "./src/screens/auth/LoginScreen";
+import RegisterScreen from "./src/screens/auth/RegisterScreen";
+import HomeScreen from "./src/screens/home/HomeScreen";
+import AddScreen from "./src/screens/add/AddScreen";
+import BoxesScreen from "./src/screens/boxes/BoxesScreen";
+import BoxDetailScreen from "./src/screens/boxes/BoxDetailScreen";
+import SettingsScreen from "./src/screens/settings/SettingsScreen";
+import DashboardScreen from "./src/screens/dashboard/DashboardScreen";
+import Menu from "./src/components/features/navigation/Menu";
+import { ToastProvider } from "./src/components/feedback/ToastContext";
+import CalendarScreen from "./src/screens/calendar/CalendarScreen";
 
 export type RootStackParamList = {
   Login: undefined;

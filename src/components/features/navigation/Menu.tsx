@@ -1,7 +1,7 @@
 import React from "react";
 import { View, TouchableOpacity, StyleSheet } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { RootStackParamList } from "../../../src/navigation/types";
+import { RootStackParamList } from "../../../navigation/types";
 
 interface MenuProps {
   currentScreen: keyof RootStackParamList;

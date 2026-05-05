@@ -1,15 +1,15 @@
 import React, { useEffect, useState } from "react";
 import { SafeAreaView, ScrollView, View, Text, StyleSheet } from "react-native";
-import { RootStackParamList } from "../App";
-import { supabase } from "../src/lib/supabaseClient";
-import { getDashboardData } from "../src/services/dashboard/getDashboardData";
-import { getCurrentWeek, WeekData } from "../src/services/calendar/calendarService";
-import { getTodayItems } from "../src/services/items/getTodayItems";
-import Header from "../components/layout/Header";
-import WeeklyCalendar from "../components/features/calendar/WeeklyCalendar";
-import TodayItems from "../components/features/items/TodayItems";
-import DashboardCard from "../components/cards/DashboardCard";
-import ActionCard from "../components/cards/ActionCard";
+import { RootStackParamList } from "../../../App";
+import { supabase } from "../../lib/supabaseClient";
+import { getDashboardData } from "../../services/dashboard/getDashboardData";
+import { getCurrentWeek, WeekData } from "../../services/calendar/calendarService";
+import { getTodayItems } from "../../services/items/getTodayItems";
+import Header from "../../components/layout/Header";
+import WeeklyCalendar from "../../components/features/calendar/WeeklyCalendar";
+import TodayItems from "../../components/features/items/TodayItems";
+import DashboardCard from "../../components/cards/DashboardCard";
+import ActionCard from "../../components/cards/ActionCard";
 
 interface HomeScreenProps {
   navigate: (screen: keyof RootStackParamList, params?: any) => void;

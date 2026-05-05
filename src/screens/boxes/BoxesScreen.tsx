@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from "react";
 import { SafeAreaView, FlatList, StyleSheet, TextInput, View, Text } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import BoxCard from "../components/cards/BoxCard";
-import AddButton from "../components/ui/AddButton";
-import { Box } from "../src/types/Box";
-import getBoxes from "../src/services/boxes/getBoxes";
-import { RootStackParamList } from "../src/navigation/types";
+import BoxCard from "../../components/cards/BoxCard";
+import AddButton from "../../components/ui/AddButton";
+import { Box } from "../../types/Box";
+import getBoxes from "../../services/boxes/getBoxes";
+import { RootStackParamList } from "../../navigation/types";
 
 interface BoxesScreenProps {
   navigate: (screen: keyof RootStackParamList, params?: any) => void;
