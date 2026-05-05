@@ -1,18 +1,18 @@
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import { RootStackParamList } from "../src/navigation/types";
+import { RootStackParamList } from "../../navigation/types";
 import { View, Text, FlatList, StyleSheet, SafeAreaView, TouchableOpacity, LayoutAnimation } from "react-native";
-import { Box } from "../src/types/Box";
-import { Item } from "../src/types/Item";
+import { Box } from "../../types/Box";
+import { Item } from "../../types/Item";
 import { Ionicons } from "@expo/vector-icons";
 import { useEffect, useState } from "react";
-import getItems from "../src/services/items/getItems";
-import ItemCard from "../components/cards/ItemCard";
-import OptionsModal from "../components/modals/OptionsModal";
-import BoxEditModal from "../components/modals/BoxEditModal";
-import BoxDeleteModal from "../components/modals/BoxDeleteModal";
-import { useToast } from "../components/feedback/ToastContext";
-import AddItemButton from "../components/features/items/AddItemButton"; 
-import AddItemModal from "../components/modals/AddItemModal"; 
+import getItems from "../../services/items/getItems";
+import ItemCard from "../../components/cards/ItemCard";
+import OptionsModal from "../../components/modals/OptionsModal";
+import BoxEditModal from "../../components/modals/BoxEditModal";
+import BoxDeleteModal from "../../components/modals/BoxDeleteModal";
+import { useToast } from "../../components/feedback/ToastContext";
+import AddItemButton from "../../components/features/items/AddItemButton"; 
+import AddItemModal from "../../components/modals/AddItemModal"; 
 
 type Props = NativeStackScreenProps<RootStackParamList, "BoxDetailScreen">;
 

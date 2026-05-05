@@ -1,15 +1,15 @@
 import React, { useEffect, useState } from "react";
 import { SafeAreaView, View, Text, ScrollView, KeyboardAvoidingView, Platform, Modal, FlatList, TouchableOpacity, StyleSheet } from "react-native";
-import { RootStackParamList } from "../src/navigation/types";
-import { Box } from "../src/types/Box";
-import getArea, { Area } from "../src/services/areas/getArea";
-import getSubarea, { Subarea } from "../src/services/areas/getSubarea";
-import getBoxes from "../src/services/boxes/getBoxes";
-import insertBox from "../src/services/boxes/insertBox";
-import insertItem from "../src/services/items/insertItem";
-import BoxForm from "../components/forms/BoxForm";
-import ItemForm from "../components/forms/ItemForm";
-import { useToast } from "../components/feedback/ToastContext";
+import { RootStackParamList } from "../../navigation/types";
+import { Box } from "../../types/Box";
+import getArea, { Area } from "../../services/areas/getArea";
+import getSubarea, { Subarea } from "../../services/areas/getSubarea";
+import getBoxes from "../../services/boxes/getBoxes";
+import insertBox from "../../services/boxes/insertBox";
+import insertItem from "../../services/items/insertItem";
+import BoxForm from "../../components/forms/BoxForm";
+import ItemForm from "../../components/forms/ItemForm";
+import { useToast } from "../../components/feedback/ToastContext";
 
 interface AddScreenProps {
   navigate: (screen: keyof RootStackParamList, params?: any) => void;

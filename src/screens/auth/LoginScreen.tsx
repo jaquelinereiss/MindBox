@@ -2,8 +2,8 @@ import React, { useState } from "react";
 import { View, Text, TextInput, TouchableOpacity, StyleSheet } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import { RootStackParamList } from "../src/navigation/types";
-import { supabase } from "../src/lib/supabaseClient";
+import { RootStackParamList } from "../../navigation/types";
+import { supabase } from "../../lib/supabaseClient";
 
 type Props = NativeStackScreenProps<RootStackParamList, "Login"> & {
   onLoginSuccess: () => void;

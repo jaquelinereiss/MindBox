@@ -3,9 +3,9 @@ import { SafeAreaView, View, Text, StyleSheet, ScrollView, TouchableOpacity, Dim
 import { Ionicons } from "@expo/vector-icons";
 import { ProgressChart } from "react-native-chart-kit";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import { RootStackParamList } from "../src/navigation/types";
-import { getDashboardData } from "../src/services/dashboard/getDashboardData";
-import { supabase } from "../src/lib/supabaseClient";
+import { RootStackParamList } from "../../navigation/types";
+import { getDashboardData } from "../../services/dashboard/getDashboardData";
+import { supabase } from "../../lib/supabaseClient";
 
 const screenWidth = Dimensions.get("window").width;
 

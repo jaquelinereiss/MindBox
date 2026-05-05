@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from "react";
 import { View, Text, TextInput, TouchableOpacity, ScrollView, StyleSheet, Dimensions, KeyboardAvoidingView, Platform, Modal } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import insertItem from "../../src/services/items/insertItem";
-import getBoxById from "../../src/services/boxes/getBoxById";
-import getSubarea, { Subarea } from "../../src/services/areas/getSubarea";
+import insertItem from "../../services/items/insertItem";
+import getBoxById from "../../services/boxes/getBoxById";
+import getSubarea, { Subarea } from "../../services/areas/getSubarea";
 import { useToast } from "../feedback/ToastContext";
-import getBoxes from "../../src/services/boxes/getBoxes";
-import { Box } from "../../src/types/Box";
+import getBoxes from "../../services/boxes/getBoxes";
+import { Box } from "../../types/Box";
 
 interface AddItemModalProps {
   visible: boolean;
