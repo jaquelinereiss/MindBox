@@ -7,9 +7,9 @@ import getSubarea, { Subarea } from "../src/services/areas/getSubarea";
 import getBoxes from "../src/services/boxes/getBoxes";
 import insertBox from "../src/services/boxes/insertBox";
 import insertItem from "../src/services/items/insertItem";
-import BoxForm from "../components/BoxForm";
-import ItemForm from "../components/ItemForm";
-import { useToast } from "../components/ToastContext";
+import BoxForm from "../components/forms/BoxForm";
+import ItemForm from "../components/forms/ItemForm";
+import { useToast } from "../components/feedback/ToastContext";
 
 interface AddScreenProps {
   navigate: (screen: keyof RootStackParamList, params?: any) => void;

@@ -2,14 +2,14 @@ import { useState } from "react";
 import { View, Text, TouchableOpacity, StyleSheet, FlatList, LayoutAnimation } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useAuthUser } from "../src/hooks/auth/useAuthUser";
-import NotificationBell from "../components/NotificationBell";
+import NotificationBell from "../components/features/notifications/NotificationBell";
 import { useNotifications } from "../src/hooks/notifications/useNotifications";
 import { useCalendarMonth } from "../src/hooks/calendar/useCalendarMonth";
 import { useCalendarItems } from "../src/hooks/calendar/useCalendarItems";
-import ItemCard from "../components/ItemCard";
-import AddItemModal from "../components/AddItemModal";
+import ItemCard from "../components/cards/ItemCard";
+import AddItemModal from "../components/modals/AddItemModal";
 import { useOverdueItems } from "../src/hooks/calendar/useOverdueItems";
-import OverdueItemsSection from "../components/OverdueItemsSection";
+import OverdueItemsSection from "../components/features/items/OverdueItemsSection";
 
 export default function CalendarScreen({ navigation }: any) {
   const userId = useAuthUser();

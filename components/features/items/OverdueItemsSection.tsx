@@ -1,7 +1,7 @@
 import { View, Text, TouchableOpacity, StyleSheet, LayoutAnimation } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import ItemCard from "./ItemCard";
-import { Item } from "../src/types/Item";
+import ItemCard from "./../../cards/ItemCard";
+import { Item } from "../../../src/types/Item";
 
 type Props = {
   overdueItems: Item[];

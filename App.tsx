@@ -11,8 +11,8 @@ import BoxesScreen from "./screens/BoxesScreen";
 import BoxDetailScreen from "./screens/BoxDetailScreen";
 import SettingsScreen from "./screens/SettingsScreen";
 import DashboardScreen from "./screens/DashboardScreen";
-import Menu from "./components/Menu";
-import { ToastProvider } from "./components/ToastContext";
+import Menu from "./components/features/navigation/Menu";
+import { ToastProvider } from "./components/feedback/ToastContext";
 import CalendarScreen from "./screens/CalendarScreen";
 
 export type RootStackParamList = {
