@@ -4,6 +4,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { useUserProfile } from "../../hooks/user/useUserProfile";
 import { useToast } from "../../components/feedback/ToastContext";
 import { supabase } from "../../lib/supabaseClient";
+import { CenterSheet } from "../../components/ui/CenterSheet";
 import { BottomSheet } from "../../components/ui/BottomSheet";
 import { Button } from "../../components/ui/Button";
 import { Input } from "../../components/ui/Input";
@@ -175,39 +176,6 @@ export default function SettingsScreen({ onLogout }: Props) {
           </View>
         </View>
 
-        <Modal
-          visible={modalVisible}
-          transparent
-          animationType="fade"
-          onRequestClose={() => setModalVisible(false)}
-        >
-          <View style={styles.overlay}>
-            <View style={styles.modalContainer}>
-              <Ionicons name="alert-circle-outline" size={34} color="#034078" />
-
-              <Text style={styles.modalTitle}>Ei...vai sair agora?</Text>
-
-              <Text style={styles.modalSubtitle}>
-                Suas coisas ficam bem guardadas esperando você voltar.
-              </Text>
-
-              <View style={styles.modalButtons}>
-                <Button
-                  title="Sair"
-                  variant="secondary"
-                  onPress={handleConfirmLogout}
-                />
-
-                <Button
-                  title="Cancelar"
-                  variant="tertiary"
-                  onPress={() => setModalVisible(false)}
-                />
-              </View>
-            </View>
-          </View>
-        </Modal>
-
         <BottomSheet
           visible={nameModalVisible}
           onClose={() => setNameModalVisible(false)}
@@ -308,6 +276,31 @@ export default function SettingsScreen({ onLogout }: Props) {
             />
           </View>
         </BottomSheet>
+
+        <CenterSheet
+          visible={modalVisible}
+          onClose={() => setModalVisible(false)}
+        >
+          <Ionicons name="alert-circle-outline" size={34} color="#034078" />
+
+          <Text style={styles.modalTitle}>Ei...vai sair agora?</Text>
+          <Text style={styles.modalSubtitle}>
+            Suas coisas ficam bem guardadas esperando você voltar.
+          </Text>
+
+          <View style={styles.modalButtons}>
+            <Button
+              title="Sair"
+              variant="secondary"
+              onPress={handleConfirmLogout}
+            />
+            <Button
+              title="Cancelar"
+              variant="tertiary"
+              onPress={() => setModalVisible(false)}
+            />
+          </View>
+        </CenterSheet>
       </View>
     </SafeAreaView>
   );
@@ -336,44 +329,6 @@ const styles = StyleSheet.create({
     textAlign: "center",
     paddingHorizontal: 2,
     marginBottom: 8,
-  },
-  overlay: {
-    flex: 1,
-    backgroundColor: "rgba(0,0,0,0.45)",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  modalContainer: {
-    backgroundColor: "#fff",
-    width: "85%",
-    borderRadius: 20,
-    padding: 25,
-    alignItems: "center",
-    shadowColor: "#000",
-    shadowOpacity: 0.25,
-    shadowOffset: { width: 0, height: 3 },
-    shadowRadius: 6,
-    elevation: 8,
-  },
-  modalTitle: {
-    fontSize: 20,
-    fontWeight: "700",
-    color: "#034078",
-    margin: 5,
-    textAlign: "center",
-  },
-  modalSubtitle: {
-    fontSize: 14,
-    color: "#555",
-    textAlign: "center",
-    marginBottom: 25,
-    lineHeight: 20,
-  },
-  modalButtons: {
-    flexDirection: "row",
-    justifyContent: "center",
-    alignItems: "center",
-    gap: 5,
   },
   card: {
     position: "absolute",
@@ -447,7 +402,27 @@ const styles = StyleSheet.create({
     color: "#034078",
     fontWeight: "500",
   },
+  modalTitle: {
+    fontSize: 20,
+    fontWeight: "700",
+    color: "#034078",
+    margin: 5,
+    textAlign: "center",
+  },
+  modalSubtitle: {
+    fontSize: 14,
+    color: "#555",
+    textAlign: "center",
+    marginBottom: 25,
+    lineHeight: 20,
+  },
   modalForm: {
     marginBottom: 20,
+  },
+  modalButtons: {
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+    gap: 5,
   },
 });
