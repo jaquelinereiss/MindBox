@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { SafeAreaView, View, Text, StyleSheet, TouchableOpacity, Modal, TextInput } from "react-native";
+import { SafeAreaView, View, Text, StyleSheet, TouchableOpacity, Modal } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useUserProfile } from "../../hooks/user/useUserProfile";
 import { useToast } from "../../components/feedback/ToastContext";
@@ -14,9 +14,10 @@ type Props = {
 
 export default function SettingsScreen({ onLogout }: Props) {
   const [modalVisible, setModalVisible] = useState(false);
-  const [isEditingName, setIsEditingName] = useState(false);
-  const [tempName, setTempName] = useState("");
   const { showToast } = useToast();
+  const [nameModalVisible, setNameModalVisible] = useState(false);
+  const [tempName, setTempName] = useState("");
+  const [loadingName, setLoadingName] = useState(false);
   const { profile, email, loadProfile, updateName } = useUserProfile();
   const [passwordModalVisible, setPasswordModalVisible] = useState(false);
   const [currentPassword, setCurrentPassword] = useState("");
@@ -30,26 +31,29 @@ export default function SettingsScreen({ onLogout }: Props) {
 
   const startEditing = () => {
     setTempName(profile?.name || "");
-    setIsEditingName(true);
-  };
-
-  const cancelEditing = () => {
-    setIsEditingName(false);
-    setTempName("");
+    setNameModalVisible(true);
   };
 
   const saveName = async () => {
-    if (!tempName.trim()) { showToast("Por favor, digite um nome válido.");
+    if (!tempName.trim()) {
+      showToast("Por favor, digite um nome válido.");
       return;
     }
 
     try {
+      setLoadingName(true);
+
       await updateName(tempName);
-      setIsEditingName(false);
+
       showToast("Nome de perfil atualizado com sucesso!");
+
+      setNameModalVisible(false);
+      setTempName("");
     } catch (error) {
       console.error(error);
       showToast("Ops! Não foi possível atualizar o nome.");
+    } finally {
+      setLoadingName(false);
     }
   };
 
@@ -93,6 +97,7 @@ export default function SettingsScreen({ onLogout }: Props) {
 
       if (updateError) {
         showToast("Erro ao atualizar a senha.");
+        return;
       }
 
       showToast("Senha atualizada com sucesso!");
@@ -129,38 +134,13 @@ export default function SettingsScreen({ onLogout }: Props) {
             <View style={styles.rowBetween}>
               <View style={styles.infoItem}>
                 <Ionicons name="person-outline" size={20} color="#034078" />
-
-                {isEditingName ? (
-                  <TextInput
-                    placeholder="Digite seu nome"
-                    maxLength={20}
-                    value={tempName}
-                    onChangeText={setTempName}
-                    style={styles.input}
-                    autoFocus
-                  />
-                ) : (
-                  <Text style={styles.infoText}>
-                    {profile?.name || "Aguarde..."}
-                  </Text>
-                )}
+                <Text style={styles.infoText}>
+                  {profile?.name || "Aguarde..."}
+                </Text>
               </View>
-
-              {isEditingName ? (
-                <View style={{ flexDirection: "row" }}>
-                  <TouchableOpacity onPress={saveName}>
-                    <Ionicons name="checkmark-outline" size={22} color="#034078" />
-                  </TouchableOpacity>
-
-                  <TouchableOpacity onPress={cancelEditing} style={{ marginLeft: 10 }}>
-                    <Ionicons name="close-outline" size={22} color="#555" />
-                  </TouchableOpacity>
-                </View>
-              ) : (
-                <TouchableOpacity onPress={startEditing}>
-                  <Ionicons name="create-outline" size={20} color="#034078" />
-                </TouchableOpacity>
-              )}
+              <TouchableOpacity onPress={startEditing}>
+                <Ionicons name="create-outline" size={20} color="#034078" />
+              </TouchableOpacity>
             </View>
 
             <View style={styles.infoItem}>
@@ -174,7 +154,12 @@ export default function SettingsScreen({ onLogout }: Props) {
           <View style={styles.infoBox}>
             <TouchableOpacity
               style={styles.infoItem}
-              onPress={() => setPasswordModalVisible(true)}
+              onPress={() => {
+                setPasswordModalVisible(true);
+                setCurrentPassword("");
+                setNewPassword("");
+                setConfirmPassword("");
+              }}
             >
               <Ionicons name="lock-closed-outline" size={20} color="#034078" />
               <Text style={styles.actionText}>Alterar senha</Text>
@@ -224,6 +209,49 @@ export default function SettingsScreen({ onLogout }: Props) {
         </Modal>
 
         <BottomSheet
+          visible={nameModalVisible}
+          onClose={() => setNameModalVisible(false)}
+        >
+          <Ionicons
+            name="person-circle-outline"
+            size={40}
+            color="#034078"
+            style={{ textAlign: "center" }}
+          />
+          <Text style={styles.modalTitle}>Novo nome de usuário</Text>
+          <Text style={styles.modalSubtitle}>
+            Seu perfil, do seu jeito. Escolha como deseja ser chamado.
+          </Text>
+
+          <View style={styles.modalForm}>
+            <Input
+              placeholder="Digite seu nome aqui"
+              value={tempName}
+              onChangeText={setTempName}
+              icon="person-outline"
+            />
+          </View>
+
+          <View style={styles.modalButtons}>
+            <Button
+              title="Salvar"
+              variant="secondary"
+              onPress={saveName}
+              disabled={loadingName}
+            />
+
+            <Button
+              title="Cancelar"
+              variant="tertiary"
+              onPress={() => {
+                setNameModalVisible(false);
+                setTempName("");
+              }}
+            />
+          </View>
+        </BottomSheet>
+
+        <BottomSheet
           visible={passwordModalVisible}
           onClose={() => setPasswordModalVisible(false)}
         >
@@ -237,8 +265,7 @@ export default function SettingsScreen({ onLogout }: Props) {
           <Text style={styles.modalTitle}>Alterar senha</Text>
 
           <Text style={styles.modalSubtitle}>
-            Crie uma nova senha forte e fácil de lembrar. Você usará essa senha
-            no próximo acesso.
+            Crie uma nova senha forte e fácil de lembrar. Você usará essa senha no próximo acesso.
           </Text>
 
           <View style={styles.modalForm}>
@@ -249,7 +276,7 @@ export default function SettingsScreen({ onLogout }: Props) {
               icon="key-outline"
               secure
             />
-            
+
             <Input
               placeholder="Digite sua nova senha"
               value={newPassword}
@@ -336,10 +363,11 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
   modalSubtitle: {
-    fontSize: 15,
+    fontSize: 14,
     color: "#555",
     textAlign: "center",
     marginBottom: 25,
+    lineHeight: 20,
   },
   modalButtons: {
     flexDirection: "row",
@@ -408,14 +436,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     width: "100%",
   },
-  input: {
-    marginLeft: 10,
-    fontSize: 14,
-    color: "#555",
-    borderBottomWidth: 1,
-    borderBottomColor: "#034078",
-    minWidth: 200,
-  },
   actionText: {
     marginLeft: 10,
     fontSize: 15,
@@ -428,6 +448,6 @@ const styles = StyleSheet.create({
     fontWeight: "500",
   },
   modalForm: {
-    marginBottom: 20
-  }
+    marginBottom: 20,
+  },
 });
