@@ -4,7 +4,7 @@ import { Pressable, Text, StyleSheet } from "react-native";
 type Props = {
   title: string;
   onPress: () => void;
-  variant?: "primary" | "secondary" | "tertiary";
+  variant?: "primary" | "secondary" | "tertiary" | "quaternary";
   loading?: boolean;
   disabled?: boolean;
 };
@@ -25,6 +25,7 @@ export function Button({
         variant === "primary" && styles.primary,
         variant === "secondary" && styles.secondary,
         variant === "tertiary" && styles.tertiary,
+        variant === "quaternary" && styles.quaternary,
         pressed && !disabled && !loading && { opacity: 0.7 },
         (disabled || loading) && { opacity: 0.5 },
       ]}
@@ -35,6 +36,7 @@ export function Button({
           variant === "primary" && styles.textPrimary,
           variant === "secondary" && styles.textSecondary,
           variant === "tertiary" && styles.textTertiary,
+          variant === "quaternary" && styles.textQuaternary,
         ]}
       >
         {loading ? "Carregando..." : title}
@@ -60,6 +62,10 @@ const styles = StyleSheet.create({
   tertiary: {
     backgroundColor: "transparent"
   },
+  quaternary: {
+    borderWidth: 1,
+    borderColor: "#034078",
+  },
   text: {
     fontWeight: "600",
     fontSize: 16
@@ -71,6 +77,9 @@ const styles = StyleSheet.create({
     color: "#034078"
   },
   textTertiary: {
+    color: "#034078"
+  },
+  textQuaternary: {
     color: "#034078"
   }
 });
