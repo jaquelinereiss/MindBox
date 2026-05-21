@@ -1,9 +1,8 @@
 import React, { useState, useEffect } from "react";
-import { SafeAreaView, View, Text, StyleSheet, TouchableOpacity, Modal } from "react-native";
+import { SafeAreaView, View, Text, StyleSheet, TouchableOpacity, Image } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { useUserProfile } from "../../hooks/user/useUserProfile";
+import { useProfile } from "../../hooks/user/useProfile";
 import { useToast } from "../../components/feedback/ToastContext";
-import { supabase } from "../../lib/supabaseClient";
 import { CenterSheet } from "../../components/ui/CenterSheet";
 import { BottomSheet } from "../../components/ui/BottomSheet";
 import { Button } from "../../components/ui/Button";
@@ -14,12 +13,23 @@ type Props = {
 };
 
 export default function SettingsScreen({ onLogout }: Props) {
-  const [modalVisible, setModalVisible] = useState(false);
+  const {
+    profile,
+    email,
+    loadProfile,
+    updateName,
+    updateAvatar,
+    removeAvatar,
+    updatePassword,
+  } = useProfile();
+
   const { showToast } = useToast();
+
+  const [modalVisible, setModalVisible] = useState(false);
   const [nameModalVisible, setNameModalVisible] = useState(false);
   const [tempName, setTempName] = useState("");
   const [loadingName, setLoadingName] = useState(false);
-  const { profile, email, loadProfile, updateName } = useUserProfile();
+  const [photoModalVisible, setPhotoModalVisible] = useState(false);
   const [passwordModalVisible, setPasswordModalVisible] = useState(false);
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
@@ -29,6 +39,26 @@ export default function SettingsScreen({ onLogout }: Props) {
   useEffect(() => {
     loadProfile();
   }, []);
+
+  const handleChangePhoto = async () => {
+    const result = await updateAvatar();
+
+    if (!result.success) {
+      if (result.type === "cancelled") return;
+      showToast(result.message);
+      return;
+    }
+
+    await loadProfile();
+    showToast("Foto de perfil atualizada com sucesso!");
+  };
+
+  const handleRemovePhoto = async () => {
+    await removeAvatar();
+
+    await loadProfile();
+    showToast("Foto de perfil removida com sucesso.");
+  };
 
   const startEditing = () => {
     setTempName(profile?.name || "");
@@ -46,21 +76,15 @@ export default function SettingsScreen({ onLogout }: Props) {
 
       await updateName(tempName);
 
-      showToast("Nome de perfil atualizado com sucesso!");
+      showToast("Seu nome de perfil foi atualizado com sucesso!");
 
       setNameModalVisible(false);
       setTempName("");
-    } catch (error) {
-      console.error(error);
-      showToast("Ops! Não foi possível atualizar o nome.");
+    } catch (err) {
+      showToast("Erro ao atualizar o nome de perfil.");
     } finally {
       setLoadingName(false);
     }
-  };
-
-  const handleConfirmLogout = () => {
-    setModalVisible(false);
-    onLogout();
   };
 
   const handleChangePassword = async () => {
@@ -82,36 +106,24 @@ export default function SettingsScreen({ onLogout }: Props) {
     try {
       setLoadingPassword(true);
 
-      const { error: logoutError } = await supabase.auth.signInWithPassword({
-        email: email,
-        password: currentPassword,
-      });
-
-      if (logoutError) {
-        showToast("Senha atual incorreta.");
-        return;
-      }
-
-      const { error: updateError } = await supabase.auth.updateUser({
-        password: newPassword,
-      });
-
-      if (updateError) {
-        showToast("Erro ao atualizar a senha.");
-        return;
-      }
+      await updatePassword(currentPassword, newPassword);
 
       showToast("Senha atualizada com sucesso!");
+
       setPasswordModalVisible(false);
       setCurrentPassword("");
       setNewPassword("");
       setConfirmPassword("");
-    } catch (error) {
-      console.error(error);
-      showToast("Ops! Não foi possível alterar a senha.");
+    } catch (err: any) {
+      showToast(err.message || "Erro ao atualizar senha.");
     } finally {
       setLoadingPassword(false);
     }
+  };
+
+  const handleConfirmLogout = () => {
+    setModalVisible(false);
+    onLogout();
   };
 
   return (
@@ -122,9 +134,16 @@ export default function SettingsScreen({ onLogout }: Props) {
 
         <View style={styles.card}>
           <View style={styles.avatarContainer}>
-            <TouchableOpacity>
+            <TouchableOpacity onPress={() => setPhotoModalVisible(true)}>
               <View style={styles.avatar}>
-                <Ionicons name="person" size={40} color="#ccc" />
+                {profile?.avatar_url ? (
+                  <Image
+                    source={{ uri: profile.avatar_url }}
+                    style={styles.avatarImage}
+                  />
+                ) : (
+                  <Ionicons name="person" size={40} color="#ccc" />
+                )}
               </View>
             </TouchableOpacity>
           </View>
@@ -175,6 +194,53 @@ export default function SettingsScreen({ onLogout }: Props) {
             </TouchableOpacity>
           </View>
         </View>
+
+        <BottomSheet
+          visible={photoModalVisible}
+          onClose={() => setPhotoModalVisible(false)}
+        >
+          <Ionicons
+            name="camera-outline"
+            size={34}
+            color="#034078"
+            style={{ textAlign: "center" }}
+          />
+
+          <Text style={styles.modalTitle}>
+            {profile?.avatar_url ? "Gerencie sua foto de perfil" : "Seu perfil com a sua cara"}
+          </Text>
+
+          <Text style={styles.modalSubtitle}>
+            {profile?.avatar_url ? "Escolha se deseja alterar ou remover sua foto atual." : "Adicione uma foto para personalizar seu perfil."}
+          </Text>
+
+          <View style={styles.modalButtonsColumn}>
+            <Button
+              title={
+                profile?.avatar_url ? "Alterar foto de perfil" : "Adicionar foto de perfil"
+              }
+              variant="quaternary"
+              onPress={async () => {
+                setPhotoModalVisible(false);
+                await handleChangePhoto();
+              }}
+            />
+
+            {profile?.avatar_url?.trim() && (
+              <Button
+                title="Remover foto de perfil"
+                variant="quaternary"
+                onPress={handleRemovePhoto}
+              />
+            )}
+
+            <Button
+              title="Cancelar"
+              variant="tertiary"
+              onPress={() => setPhotoModalVisible(false)}
+            />
+          </View>
+        </BottomSheet>
 
         <BottomSheet
           visible={nameModalVisible}
@@ -356,6 +422,11 @@ const styles = StyleSheet.create({
     borderWidth: 3,
     borderColor: "#fff",
   },
+  avatarImage: {
+    width: "100%",
+    height: "100%",
+    borderRadius: 50,
+  },
   sectionTitle: {
     alignSelf: "flex-start",
     marginTop: 25,
@@ -424,5 +495,9 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     gap: 5,
+  },
+  modalButtonsColumn: {
+    width: "100%",
+    gap: 10,
   },
 });
