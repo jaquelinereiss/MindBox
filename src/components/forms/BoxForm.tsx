@@ -1,6 +1,9 @@
-import React from "react";
-import { View, TextInput, TouchableOpacity, Text, StyleSheet } from "react-native";
+import React, { useState } from "react";
+import { View, TouchableOpacity, Text, StyleSheet } from "react-native";
+import DateTimePickerModal from "react-native-modal-datetime-picker";
 import { Ionicons } from "@expo/vector-icons";
+import { Input } from "../../components/ui/Input";
+import { Button } from "../../components/ui/Button";
 
 interface BoxFormProps {
   boxTitle: string;
@@ -25,88 +28,108 @@ export default function BoxForm({
   setBoxDescription,
   setBoxDeadline,
   openAreaPicker,
-  handleCreateBox
+  handleCreateBox,
 }: BoxFormProps) {
+  const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
+
+  const handleConfirmDate = (date: Date) => {
+    const formatted = date.toLocaleDateString("pt-BR");
+
+    setBoxDeadline(formatted);
+
+    setDatePickerVisibility(false);
+  };
+
   return (
     <View>
-      <TextInput
+      <Text style={styles.label}>Título*</Text>
+      <Input
         style={styles.input}
-        placeholder="Informe um título bem legal aqui"
+        placeholder="Como essa box vai se chamar?"
         value={boxTitle}
         onChangeText={setBoxTitle}
-        placeholderTextColor="#bfcad5"
         maxLength={60}
         multiline
+        showCounter
       />
-      <TextInput
+
+      <Text style={styles.label}>Descrição*</Text>
+      <Input
         style={styles.input}
-        placeholder="Descreva sua box em poucas palavras"
+        placeholder="O que você deseja organizar aqui?"
         value={boxDescription}
         onChangeText={setBoxDescription}
-        placeholderTextColor="#bfcad5"
         maxLength={120}
         multiline
+        showCounter
       />
-      <TextInput
+
+      <Text style={styles.label}>Prazo</Text>
+      <Input
         style={styles.input}
-        placeholder="Defina um prazo (opcional)"
+        placeholder="Adicione uma data de conclusão"
         value={boxDeadline}
         onChangeText={setBoxDeadline}
-        placeholderTextColor="#bfcad5"
+        icon="calendar-outline"
+        iconPosition="right"
+        onPressIcon={() => setDatePickerVisibility(true)}
         keyboardType="number-pad"
         maxLength={10}
       />
+      <DateTimePickerModal
+        isVisible={isDatePickerVisible}
+        mode="date"
+        onConfirm={handleConfirmDate}
+        onCancel={() => setDatePickerVisibility(false)}
+      />
+
+      <Text style={styles.label}>Área*</Text>
       <TouchableOpacity style={styles.pickerBtn} onPress={openAreaPicker}>
         <Text style={styles.pickerBtnText}>
-          {boxArea ? boxArea : "Área (escolha uma opção da lista)"}
+          {boxArea ? boxArea : "Escolher uma opção da lista"}
         </Text>
-        <Ionicons name="chevron-down" size={18} color="#0b2545" />
+        <Ionicons name="chevron-down" size={18} color="#999" />
       </TouchableOpacity>
+
       {errorBox ? <Text style={styles.errorText}>{errorBox}</Text> : null}
-      <TouchableOpacity style={styles.submitButton} onPress={handleCreateBox}>
-        <Text style={styles.submitButtonText}>Cadastrar box</Text>
-      </TouchableOpacity>
+
+      <Button title="Cadastrar" variant="primary" onPress={handleCreateBox} />
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  input: { 
-    backgroundColor: "#fff", 
-    borderRadius: 8, 
-    padding: 15, 
-    marginBottom: 15, 
-    fontSize: 15 
-},
-  pickerBtn: { 
-    backgroundColor: "#fff", 
-    borderRadius: 8, 
-    padding: 15, 
-    marginBottom: 12, 
-    flexDirection: "row", 
-    justifyContent: "space-between", 
-    alignItems: "center" 
-},
-  pickerBtnText: { 
-    color: "#0b2545", 
-    fontSize: 14 
-},
-  submitButton: { 
-    backgroundColor: "#8da9c4", 
-    borderRadius: 80, 
-    paddingVertical: 12, 
-    marginTop: 15, 
-    alignItems: "center" 
-},
-  submitButtonText: { 
-    color: "#0b2545", 
-    fontWeight: "bold", 
-    fontSize: 16 
-},
-  errorText: { 
-    fontSize: 14, 
-    marginBottom: 8, 
-    textAlign: "center", 
-    color: "#ff9013" 
-},
+  input: {
+    backgroundColor: "#fff",
+    borderRadius: 8,
+    padding: 15,
+    marginBottom: 15,
+    fontSize: 15,
+  },
+  pickerBtn: {
+    borderWidth: 1,
+    borderColor: "#ccc",
+    borderRadius: 8,
+    padding: 15,
+    marginBottom: 30,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+  pickerBtnText: {
+    color: "#999",
+    fontSize: 14,
+  },
+  label: {
+    fontSize: 14,
+    color: "#134074",
+    fontWeight: "500",
+    marginBottom: 2,
+  },
+  errorText: {
+    fontSize: 14,
+    marginBottom: 8,
+    textAlign: "center",
+    color: "#c1121f",
+  },
 });
