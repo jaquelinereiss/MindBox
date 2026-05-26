@@ -1,9 +1,9 @@
 import React, { useState } from "react";
-import { View, TouchableOpacity, Text, StyleSheet } from "react-native";
+import { View, Text, StyleSheet } from "react-native";
 import DateTimePickerModal from "react-native-modal-datetime-picker";
-import { Ionicons } from "@expo/vector-icons";
 import { Input } from "../../components/ui/Input";
 import { Button } from "../../components/ui/Button";
+import { SelectField } from "../ui/SelectField";
 
 interface ItemFormProps {
   itemTitle: string;
@@ -52,9 +52,10 @@ export default function ItemForm({
 
   return (
     <View>
-      <Text style={styles.label}>Título*</Text>
       <Input
         style={styles.input}
+        label="Título"
+        required
         placeholder="O que precisa ser feito?"
         value={itemTitle}
         onChangeText={setItemTitle}
@@ -63,9 +64,9 @@ export default function ItemForm({
         showCounter
       />
 
-      <Text style={styles.label}>Descrição</Text>
       <Input
         style={styles.input}
+        label="Descrição"
         placeholder="Conte mais sobre esse item"
         value={itemDescription}
         onChangeText={setItemDescription}
@@ -73,9 +74,10 @@ export default function ItemForm({
         multiline
         showCounter
       />
-      <Text style={styles.label}>Prioridade</Text>
+
       <Input
         style={styles.input}
+        label="Prioridade"
         placeholder="Escolha uma prioridade de 1 a 4"
         value={itemPriority}
         onChangeText={(text) => {
@@ -86,9 +88,10 @@ export default function ItemForm({
         keyboardType="numeric"
       />
 
-      <Text style={styles.label}>Prazo*</Text>
       <Input
         style={styles.input}
+        label="Prazo"
+        required
         placeholder="Quando esse item deve ser realizado?"
         value={boxDeadline}
         onChangeText={setBoxDeadline}
@@ -98,6 +101,7 @@ export default function ItemForm({
         keyboardType="number-pad"
         maxLength={10}
       />
+
       <DateTimePickerModal
         isVisible={isDatePickerVisible}
         mode="date"
@@ -105,22 +109,22 @@ export default function ItemForm({
         onCancel={() => setDatePickerVisibility(false)}
       />
 
-      <Text style={styles.label}>Box*</Text>
-      <TouchableOpacity style={styles.pickerBtn} onPress={openBoxForItemModal}>
-        <Text style={styles.pickerBtnText}>
-          {itemBox ? itemBox : "Escolher uma box para adicionar o item"}
-        </Text>
-        <Ionicons name="chevron-down" size={18} color="#034078" />
-      </TouchableOpacity>
+      <SelectField
+        label="Box"
+        required
+        value={itemBox ?? undefined}
+        placeholder="Escolher uma opção da lista"
+        onPress={openBoxForItemModal}
+      />
 
-      {subareaOptions.length > 0 && <Text style={styles.label}>Subárea*</Text>}
       {subareaOptions.length > 0 && (
-        <TouchableOpacity style={styles.pickerBtn} onPress={openSubareaModal}>
-          <Text style={styles.pickerBtnText}>
-            {itemSubarea ? itemSubarea : "Escolher uma opção da lista"}
-          </Text>
-          <Ionicons name="chevron-down" size={18} color="#034078" />
-        </TouchableOpacity>
+        <SelectField
+          label="Subárea"
+          required
+          value={itemSubarea ?? undefined}
+          placeholder="Escolher uma opção da lista"
+          onPress={openSubareaModal}
+        />
       )}
 
       {errorItem ? <Text style={styles.errorText}>{errorItem}</Text> : null}
@@ -137,26 +141,6 @@ const styles = StyleSheet.create({
     padding: 15,
     marginBottom: 15,
     fontSize: 15,
-  },
-  pickerBtn: {
-    borderWidth: 1,
-    borderColor: "#ccc",
-    borderRadius: 8,
-    padding: 15,
-    marginBottom: 12,
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-  },
-  pickerBtnText: {
-    color: "#999",
-    fontSize: 14,
-  },
-  label: {
-    fontSize: 14,
-    color: "#134074",
-    fontWeight: "500",
-    marginBottom: 2,
   },
   errorText: {
     fontSize: 14,
