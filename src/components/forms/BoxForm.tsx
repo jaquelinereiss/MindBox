@@ -14,7 +14,7 @@ interface BoxFormProps {
   setBoxTitle: (val: string) => void;
   setBoxDescription: (val: string) => void;
   setBoxDeadline: (val: string) => void;
-  openAreaPicker: () => void;
+  openAreaModal: () => void;
   handleCreateBox: () => void;
 }
 
@@ -27,7 +27,7 @@ export default function BoxForm({
   setBoxTitle,
   setBoxDescription,
   setBoxDeadline,
-  openAreaPicker,
+  openAreaModal,
   handleCreateBox,
 }: BoxFormProps) {
   const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
@@ -84,11 +84,11 @@ export default function BoxForm({
       />
 
       <Text style={styles.label}>Área*</Text>
-      <TouchableOpacity style={styles.pickerBtn} onPress={openAreaPicker}>
+      <TouchableOpacity style={styles.pickerBtn} onPress={openAreaModal}>
         <Text style={styles.pickerBtnText}>
           {boxArea ? boxArea : "Escolher uma opção da lista"}
         </Text>
-        <Ionicons name="chevron-down" size={18} color="#999" />
+        <Ionicons name="chevron-down" size={18} color="#034078" />
       </TouchableOpacity>
 
       {errorBox ? <Text style={styles.errorText}>{errorBox}</Text> : null}

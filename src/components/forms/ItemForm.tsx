@@ -18,8 +18,8 @@ interface ItemFormProps {
   setItemDescription: (val: string) => void;
   setItemPriority: (val: string) => void;
   setBoxDeadline: (val: string) => void;
-  openBoxPickerForItem: () => void;
-  openSubareaPicker: () => void;
+  openBoxForItemModal: () => void;
+  openSubareaModal: () => void;
   handleAddItem: () => void;
 }
 
@@ -36,8 +36,8 @@ export default function ItemForm({
   setItemDescription,
   setItemPriority,
   setBoxDeadline,
-  openBoxPickerForItem,
-  openSubareaPicker,
+  openBoxForItemModal,
+  openSubareaModal,
   handleAddItem,
 }: ItemFormProps) {
   const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
@@ -106,20 +106,20 @@ export default function ItemForm({
       />
 
       <Text style={styles.label}>Box*</Text>
-      <TouchableOpacity style={styles.pickerBtn} onPress={openBoxPickerForItem}>
+      <TouchableOpacity style={styles.pickerBtn} onPress={openBoxForItemModal}>
         <Text style={styles.pickerBtnText}>
           {itemBox ? itemBox : "Escolher uma box para adicionar o item"}
         </Text>
-        <Ionicons name="chevron-down" size={18} color="#0b2545" />
+        <Ionicons name="chevron-down" size={18} color="#034078" />
       </TouchableOpacity>
 
       {subareaOptions.length > 0 && <Text style={styles.label}>Subárea*</Text>}
       {subareaOptions.length > 0 && (
-        <TouchableOpacity style={styles.pickerBtn} onPress={openSubareaPicker}>
+        <TouchableOpacity style={styles.pickerBtn} onPress={openSubareaModal}>
           <Text style={styles.pickerBtnText}>
             {itemSubarea ? itemSubarea : "Escolher uma opção da lista"}
           </Text>
-          <Ionicons name="chevron-down" size={18} color="#0b2545" />
+          <Ionicons name="chevron-down" size={18} color="#034078" />
         </TouchableOpacity>
       )}
 
