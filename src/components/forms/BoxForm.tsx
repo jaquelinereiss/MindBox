@@ -61,7 +61,7 @@ export default function BoxForm({
         placeholder="O que você deseja organizar aqui?"
         value={boxDescription}
         onChangeText={setBoxDescription}
-        maxLength={120}
+        maxLength={300}
         multiline
         showCounter
       />

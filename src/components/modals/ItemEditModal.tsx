@@ -190,12 +190,12 @@ export default function ItemEditModal({
             placeholder="Descrição (opcional)"
             value={description}
             onChangeText={setDescription}
-            maxLength={100}
+            maxLength={200}
             multiline
           />
           <View style={styles.row}>
             <View />
-            <Text style={styles.counterText}>{description.length}/100</Text>
+            <Text style={styles.counterText}>{description.length}/200</Text>
           </View>
 
           <Text style={styles.label}>Prioridade</Text>
