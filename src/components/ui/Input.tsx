@@ -3,6 +3,8 @@ import { View, Text, TextInput, TouchableOpacity, StyleSheet } from "react-nativ
 import { Ionicons } from "@expo/vector-icons";
 
 type Props = {
+  label?: string;
+  required?: boolean;
   placeholder?: string;
   value: string;
   onChangeText: (text: string) => void;
@@ -19,6 +21,8 @@ type Props = {
 };
 
 export function Input({
+  label,
+  required,
   placeholder,
   value,
   onChangeText,
@@ -41,6 +45,13 @@ export function Input({
 
   return (
     <View>
+      {label ? (
+        <Text style={styles.label}>
+          {label}
+          {required && <Text style={styles.required}> *</Text>}
+        </Text>
+      ) : null}
+      
       <View style={[styles.container, style]}>
         {icon && iconPosition === "left" && (
           <Ionicons
@@ -107,6 +118,15 @@ export function Input({
 }
 
 const styles = StyleSheet.create({
+  label: {
+    fontSize: 14,
+    color: "#134074",
+    fontWeight: "500",
+    marginBottom: 2,
+  },
+  required: {
+    color: "#134074"
+  },
   container: {
     flexDirection: "row",
     alignItems: "center",

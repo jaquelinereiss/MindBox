@@ -1,9 +1,9 @@
 import React, { useState } from "react";
-import { View, TouchableOpacity, Text, StyleSheet } from "react-native";
+import { View, Text, StyleSheet } from "react-native";
 import DateTimePickerModal from "react-native-modal-datetime-picker";
-import { Ionicons } from "@expo/vector-icons";
 import { Input } from "../../components/ui/Input";
 import { Button } from "../../components/ui/Button";
+import { SelectField } from "../ui/SelectField";
 
 interface BoxFormProps {
   boxTitle: string;
@@ -42,9 +42,10 @@ export default function BoxForm({
 
   return (
     <View>
-      <Text style={styles.label}>Título*</Text>
       <Input
         style={styles.input}
+        label="Título"
+        required
         placeholder="Como essa box vai se chamar?"
         value={boxTitle}
         onChangeText={setBoxTitle}
@@ -53,9 +54,10 @@ export default function BoxForm({
         showCounter
       />
 
-      <Text style={styles.label}>Descrição*</Text>
       <Input
         style={styles.input}
+        label="Descrição"
+        required
         placeholder="O que você deseja organizar aqui?"
         value={boxDescription}
         onChangeText={setBoxDescription}
@@ -64,9 +66,9 @@ export default function BoxForm({
         showCounter
       />
 
-      <Text style={styles.label}>Prazo</Text>
       <Input
         style={styles.input}
+        label="Prazo"
         placeholder="Adicione uma data de conclusão"
         value={boxDeadline}
         onChangeText={setBoxDeadline}
@@ -76,6 +78,7 @@ export default function BoxForm({
         keyboardType="number-pad"
         maxLength={10}
       />
+      
       <DateTimePickerModal
         isVisible={isDatePickerVisible}
         mode="date"
@@ -83,13 +86,13 @@ export default function BoxForm({
         onCancel={() => setDatePickerVisibility(false)}
       />
 
-      <Text style={styles.label}>Área*</Text>
-      <TouchableOpacity style={styles.pickerBtn} onPress={openAreaModal}>
-        <Text style={styles.pickerBtnText}>
-          {boxArea ? boxArea : "Escolher uma opção da lista"}
-        </Text>
-        <Ionicons name="chevron-down" size={18} color="#034078" />
-      </TouchableOpacity>
+      <SelectField
+        label="Área"
+        required
+        value={boxArea ?? undefined}
+        placeholder="Escolher uma opção da lista"
+        onPress={openAreaModal}
+      />
 
       {errorBox ? <Text style={styles.errorText}>{errorBox}</Text> : null}
 
@@ -105,26 +108,6 @@ const styles = StyleSheet.create({
     padding: 15,
     marginBottom: 15,
     fontSize: 15,
-  },
-  pickerBtn: {
-    borderWidth: 1,
-    borderColor: "#ccc",
-    borderRadius: 8,
-    padding: 15,
-    marginBottom: 30,
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-  },
-  pickerBtnText: {
-    color: "#999",
-    fontSize: 14,
-  },
-  label: {
-    fontSize: 14,
-    color: "#134074",
-    fontWeight: "500",
-    marginBottom: 2,
   },
   errorText: {
     fontSize: 14,

@@ -259,6 +259,8 @@ export default function SettingsScreen({ onLogout }: Props) {
 
           <View style={styles.modalForm}>
             <Input
+              label="Nome de usuário"
+              required
               placeholder="Digite seu nome aqui"
               value={tempName}
               onChangeText={setTempName}
@@ -304,6 +306,8 @@ export default function SettingsScreen({ onLogout }: Props) {
 
           <View style={styles.modalForm}>
             <Input
+              label="Senha atual"
+              required
               placeholder="Digite sua senha atual"
               value={currentPassword}
               onChangeText={setCurrentPassword}
@@ -312,13 +316,18 @@ export default function SettingsScreen({ onLogout }: Props) {
             />
 
             <Input
+              label="Nova senha"
+              required
               placeholder="Digite sua nova senha"
               value={newPassword}
               onChangeText={setNewPassword}
               icon="lock-open-outline"
               secure
             />
+
             <Input
+              label="Confirmar nova senha"
+              required
               placeholder="Confirme sua nova senha"
               value={confirmPassword}
               onChangeText={setConfirmPassword}
