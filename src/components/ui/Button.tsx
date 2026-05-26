@@ -51,7 +51,9 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     borderRadius: 10,
     alignItems: "center",
-    marginHorizontal: 5
+    marginTop: 5,
+    marginHorizontal: 5,
+    marginBottom: 5,
   },
   primary: {
     backgroundColor: "#034078"

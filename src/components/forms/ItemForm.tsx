@@ -1,6 +1,9 @@
-import React from "react";
-import { View, TextInput, TouchableOpacity, Text, StyleSheet } from "react-native";
+import React, { useState } from "react";
+import { View, TouchableOpacity, Text, StyleSheet } from "react-native";
+import DateTimePickerModal from "react-native-modal-datetime-picker";
 import { Ionicons } from "@expo/vector-icons";
+import { Input } from "../../components/ui/Input";
+import { Button } from "../../components/ui/Button";
 
 interface ItemFormProps {
   itemTitle: string;
@@ -35,107 +38,130 @@ export default function ItemForm({
   setBoxDeadline,
   openBoxPickerForItem,
   openSubareaPicker,
-  handleAddItem
+  handleAddItem,
 }: ItemFormProps) {
+  const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
+
+  const handleConfirmDate = (date: Date) => {
+    const formatted = date.toLocaleDateString("pt-BR");
+
+    setBoxDeadline(formatted);
+
+    setDatePickerVisibility(false);
+  };
+
   return (
     <View>
-      <TextInput
+      <Text style={styles.label}>Título*</Text>
+      <Input
         style={styles.input}
-        placeholder="Informe um nome para o item"
+        placeholder="O que precisa ser feito?"
         value={itemTitle}
         onChangeText={setItemTitle}
-        placeholderTextColor="#bfcad5"
         maxLength={50}
         multiline
+        showCounter
       />
-      <TextInput
+
+      <Text style={styles.label}>Descrição</Text>
+      <Input
         style={styles.input}
-        placeholder="Conte mais sobre esse item (opcional)"
+        placeholder="Conte mais sobre esse item"
         value={itemDescription}
         onChangeText={setItemDescription}
-        placeholderTextColor="#bfcad5"
         maxLength={100}
         multiline
+        showCounter
       />
-      <TextInput
+      <Text style={styles.label}>Prioridade</Text>
+      <Input
         style={styles.input}
-        placeholder="Defina uma prioridade: 1 a 4 (opcional)"
+        placeholder="Escolha uma prioridade de 1 a 4"
         value={itemPriority}
         onChangeText={(text) => {
           const numeric = text.replace(/[^0-9]/g, "");
-          if (numeric === "" || /^[1-4]$/.test(numeric)) setItemPriority(numeric);
+          if (numeric === "" || /^[1-4]$/.test(numeric))
+            setItemPriority(numeric);
         }}
         keyboardType="numeric"
-        placeholderTextColor="#bfcad5"
       />
-      <TextInput
+
+      <Text style={styles.label}>Prazo*</Text>
+      <Input
         style={styles.input}
-        placeholder="Indique a data de realização"
+        placeholder="Quando esse item deve ser realizado?"
         value={boxDeadline}
         onChangeText={setBoxDeadline}
-        placeholderTextColor="#bfcad5"
+        icon="calendar-outline"
+        iconPosition="right"
+        onPressIcon={() => setDatePickerVisibility(true)}
         keyboardType="number-pad"
         maxLength={10}
       />
+      <DateTimePickerModal
+        isVisible={isDatePickerVisible}
+        mode="date"
+        onConfirm={handleConfirmDate}
+        onCancel={() => setDatePickerVisibility(false)}
+      />
+
+      <Text style={styles.label}>Box*</Text>
       <TouchableOpacity style={styles.pickerBtn} onPress={openBoxPickerForItem}>
         <Text style={styles.pickerBtnText}>
-          {itemBox ? itemBox : "Box (escolha uma opção da lista)"}
+          {itemBox ? itemBox : "Escolher uma box para adicionar o item"}
         </Text>
         <Ionicons name="chevron-down" size={18} color="#0b2545" />
       </TouchableOpacity>
+
+      {subareaOptions.length > 0 && <Text style={styles.label}>Subárea*</Text>}
       {subareaOptions.length > 0 && (
         <TouchableOpacity style={styles.pickerBtn} onPress={openSubareaPicker}>
           <Text style={styles.pickerBtnText}>
-            {itemSubarea ? itemSubarea : "Subárea (escolha uma opção da lista)"}
+            {itemSubarea ? itemSubarea : "Escolher uma opção da lista"}
           </Text>
           <Ionicons name="chevron-down" size={18} color="#0b2545" />
         </TouchableOpacity>
       )}
+
       {errorItem ? <Text style={styles.errorText}>{errorItem}</Text> : null}
-      <TouchableOpacity style={styles.submitButton} onPress={handleAddItem}>
-        <Text style={styles.submitButtonText}>Adicionar item</Text>
-      </TouchableOpacity>
+
+      <Button title="Adicionar" variant="primary" onPress={handleAddItem} />
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  input: { 
-    backgroundColor: "#fff", 
-    borderRadius: 8, 
-    padding: 15, 
-    marginBottom: 15, 
-    fontSize: 15 
+  input: {
+    backgroundColor: "#fff",
+    borderRadius: 8,
+    padding: 15,
+    marginBottom: 15,
+    fontSize: 15,
   },
-  pickerBtn: { 
-    backgroundColor: "#fff", 
-    borderRadius: 8, 
-    padding: 15, 
-    marginBottom: 12, 
-    flexDirection: "row", 
-    justifyContent: "space-between", 
-    alignItems: "center" 
+  pickerBtn: {
+    borderWidth: 1,
+    borderColor: "#ccc",
+    borderRadius: 8,
+    padding: 15,
+    marginBottom: 12,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
   },
-  pickerBtnText: { 
-    color: "#0b2545", 
-    fontSize: 14 
+  pickerBtnText: {
+    color: "#999",
+    fontSize: 14,
   },
-  submitButton: {
-    backgroundColor: "#8da9c4", 
-    borderRadius: 80, 
-    paddingVertical: 12, 
-    marginTop: 15, 
-    alignItems: "center" 
+  label: {
+    fontSize: 14,
+    color: "#134074",
+    fontWeight: "500",
+    marginBottom: 2,
   },
-  submitButtonText: { 
-    color: "#0b2545", 
-    fontWeight: "bold", 
-    fontSize: 16 
-  },
-  errorText: { 
-    fontSize: 14, 
-    marginBottom: 8, 
-    textAlign: "center", 
-    color: "#ff9013" 
+  errorText: {
+    fontSize: 14,
+    marginBottom: 8,
+    textAlign: "center",
+    color: "#c1121f",
   },
 });
