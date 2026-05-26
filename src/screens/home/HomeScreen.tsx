@@ -107,10 +107,11 @@ export default function HomeScreen({ navigate }: HomeScreenProps) {
 
         <Text style={styles.sectionMore}>Confira mais opções:</Text>
         <View style={styles.moreList}>
-          <ActionCard iconName="flag-outline" title="Metas" subtitle="seus planos mais ambiciosos" />
-          <ActionCard iconName="star-outline" title="Favoritos" subtitle="onde ficam suas preciosidades" />
-          <ActionCard iconName="alarm-outline" title="Lembretes" subtitle="confiar apenas na memória é arriscado" />
-          <ActionCard iconName="help-circle-outline" title="Ajuda" subtitle="tem dúvidas? vem comigo!" />
+          <ActionCard iconName="checkbox-outline" title="Checklist" subtitle="organize suas tarefas do dia a dia" />
+          <ActionCard iconName="alarm-outline" title="Lembretes" subtitle="não dependa apenas da memória" />
+          <ActionCard iconName="flag-outline" title="Metas" subtitle="planeje seus próximos passos" />
+          <ActionCard iconName="star-outline" title="Favoritos" subtitle="guarde o que é importante" />
+          <ActionCard iconName="help-circle-outline" title="Ajuda" subtitle="estou aqui para te ajudar" />
         </View>
       </ScrollView>
     </SafeAreaView>
