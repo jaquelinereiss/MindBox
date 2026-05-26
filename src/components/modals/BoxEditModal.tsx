@@ -145,12 +145,12 @@ export default function BoxEditModal({ visible, onClose, box, onSave }: BoxEditM
             placeholder="Escreva uma descrição"
             value={description}
             onChangeText={setDescription}
-            maxLength={120}
+            maxLength={300}
             multiline
           />
           <View style={styles.row}>
             {descriptionError ? <Text style={styles.errorText}>{descriptionError}</Text> : <View />}
-            <Text style={styles.counterText}>{description.length}/120</Text>
+            <Text style={styles.counterText}>{description.length}/300</Text>
           </View>
 
           <Text style={styles.label}>Prazo</Text>

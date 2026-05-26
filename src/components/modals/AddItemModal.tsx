@@ -292,7 +292,7 @@ export default function AddItemModal({
                 placeholder="Conte mais sobre esse item (opcional)"
                 value={description}
                 onChangeText={setDescription}
-                maxLength={100}
+                maxLength={200}
                 multiline
               />
 

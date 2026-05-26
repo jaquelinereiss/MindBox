@@ -70,7 +70,7 @@ export default function ItemForm({
         placeholder="Conte mais sobre esse item"
         value={itemDescription}
         onChangeText={setItemDescription}
-        maxLength={100}
+        maxLength={200}
         multiline
         showCounter
       />
